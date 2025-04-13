@@ -23,49 +23,24 @@
                     <Label text="Sigma Kasyno" styleClass="title"/>
 
                     <TabPane styleClass="auth-tabs">
-                        <Tab text="Login">
+                        <Tab text="Logowanie">
                             <VBox spacing="15" styleClass="form-container">
-                                <TextField fx:id="loginUsername" promptText="Username"/>
-                                <PasswordField fx:id="loginPassword" promptText="Password"/>
-                                <Button text="Sign In" onAction="#handleLogin" styleClass="auth-button"/>
+                                <TextField fx:id="loginUsername" promptText="Nazwa Użytkownika"/>
+                                <PasswordField fx:id="loginPassword" promptText="Hasło"/>
+                                <Button text="Zaloguj się" onAction="#handleLogin" styleClass="auth-button"/>
                                 <Label fx:id="loginError" styleClass="error-label"/>
                             </VBox>
                         </Tab>
-                        <Tab text="Register">
+                        <Tab text="Rejestracja">
                             <VBox spacing="15" styleClass="form-container">
-                                <TextField fx:id="registerUsername" promptText="Username"/>
-                                <PasswordField fx:id="registerPassword" promptText="Password"/>
-                                <PasswordField fx:id="registerConfirm" promptText="Confirm Password"/>
-                                <Button text="Create Account" onAction="#handleRegister" styleClass="auth-button"/>
+                                <TextField fx:id="registerUsername" promptText="Nazwa Użytkownika"/>
+                                <PasswordField fx:id="registerPassword" promptText="Hasło"/>
+                                <PasswordField fx:id="registerConfirm" promptText="Potwierdź hasło"/>
+                                <Button text="Utwórz konto" onAction="#handleRegister" styleClass="auth-button"/>
                                 <Label fx:id="registerError" styleClass="error-label"/>
                             </VBox>
                         </Tab>
                     </TabPane>
-                </VBox>
-
-                <!-- Wybór gry (widoczny po zalogowaniu) -->
-                <VBox fx:id="gamesContainer" alignment="CENTER" spacing="20" visible="false">
-                    <Label text="Choose Your Game" styleClass="subtitle"/>
-                    <HBox spacing="30" alignment="CENTER">
-                        <VBox alignment="CENTER" spacing="10" styleClass="game-option" onMouseClicked="#selectSlots">
-                            <ImageView fitWidth="100" fitHeight="100">
-                                <Image url="@../assets/slots_icon.png"/>
-                            </ImageView>
-                            <Label text="Slots"/>
-                        </VBox>
-                        <VBox alignment="CENTER" spacing="10" styleClass="game-option" onMouseClicked="#selectBlackjack">
-                            <ImageView fitWidth="100" fitHeight="100">
-                                <Image url="@../assets/blackjack_icon.png"/>
-                            </ImageView>
-                            <Label text="Blackjack"/>
-                        </VBox>
-                        <VBox alignment="CENTER" spacing="10" styleClass="game-option" onMouseClicked="#selectPoker">
-                            <ImageView fitWidth="100" fitHeight="100">
-                                <Image url="@../assets/poker_icon.png"/>
-                            </ImageView>
-                            <Label text="Poker"/>
-                        </VBox>
-                    </HBox>
                 </VBox>
             </VBox>
         </StackPane>

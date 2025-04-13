@@ -1,23 +1,20 @@
 package com.casino.java_online_casino.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class AuthController {
-    // Elementy logowania
     @FXML private TextField loginUsername;
     @FXML private PasswordField loginPassword;
     @FXML private Label loginError;
-
-    // Elementy rejestracji
     @FXML private TextField registerUsername;
     @FXML private PasswordField registerPassword;
     @FXML private PasswordField registerConfirm;
     @FXML private Label registerError;
-
-    // Kontener gier
-    @FXML private VBox gamesContainer;
 
     @FXML
     private void handleLogin() {
@@ -25,16 +22,30 @@ public class AuthController {
         String password = loginPassword.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            loginError.setText("Please fill all fields");
+            loginError.setText("Proszę wypełnić wszystkie pola");
             return;
         }
 
         // Tymczasowa symulacja logowania
         if (username.equals("admin") && password.equals("admin")) {
-            loginError.setText("");
-            showGames();
+            try {
+                // Ładowanie dashboardu
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/dashboard.fxml"));
+                Parent root = loader.load();
+
+                // Przekazanie danych użytkownika
+                DashboardController controller = loader.getController();
+                controller.initialize(username);
+
+                // Zmiana sceny
+                Stage stage = (Stage) loginUsername.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Sigma Kasyno - Panel Użytkownika");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
-            loginError.setText("Invalid credentials");
+            loginError.setText("Błędne dane logowania");
         }
     }
 
@@ -45,41 +56,20 @@ public class AuthController {
         String confirm = registerConfirm.getText();
 
         if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-            registerError.setText("Please fill all fields");
+            registerError.setText("Proszę wypełnić wszystkie pola");
             return;
         }
 
         if (!password.equals(confirm)) {
-            registerError.setText("Passwords don't match");
+            registerError.setText("Hasła nie pasują do siebie");
             return;
         }
 
         // Tymczasowa symulacja rejestracji
-        registerError.setText("Registration successful! Please login.");
+        registerError.setText("Rejestracja zakończona sukcesem!");
         registerUsername.setText("");
         registerPassword.setText("");
         registerConfirm.setText("");
     }
 
-    private void showGames() {
-        gamesContainer.setVisible(true);
-    }
-
-    @FXML
-    private void selectSlots() {
-        System.out.println("Slots selected");
-        // Tutaj przejście do gry
-    }
-
-    @FXML
-    private void selectBlackjack() {
-        System.out.println("Blackjack selected");
-        // Tutaj przejście do gry
-    }
-
-    @FXML
-    private void selectPoker() {
-        System.out.println("Poker selected");
-        // Tutaj przejście do gry
-    }
 }

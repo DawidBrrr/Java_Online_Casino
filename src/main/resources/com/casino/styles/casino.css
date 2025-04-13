@@ -96,3 +96,102 @@
     -fx-text-fill: #e74c3c;
     -fx-font-size: 12px;
 }
+.header {
+    -fx-padding: 15;
+    -fx-background-color: #2c3e50;
+}
+
+/* Przycisk wylogowania */
+.logout-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+}
+
+.logout-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Panel profilu */
+.profile-box {
+    -fx-background-color: rgba(44, 62, 80, 0.8);
+    -fx-padding: 30;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
+}
+
+.username {
+    -fx-font-size: 24px;
+    -fx-text-fill: #f1c40f;
+    -fx-font-weight: bold;
+}
+
+.balance-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #ecf0f1;
+}
+
+.balance-value {
+    -fx-font-size: 24px;
+    -fx-text-fill: #2ecc71;
+    -fx-font-weight: bold;
+}
+
+/* Przyciski depozytu/wypłaty */
+.money-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 15;
+}
+
+.money-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Karty gier */
+.game-card {
+    -fx-background-color: rgba(52, 73, 94, 0.7);
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+    -fx-spacing: 5;
+}
+
+.game-card:hover {
+    -fx-background-color: rgba(41, 128, 185, 0.7);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.game-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ecf0f1;
+}
+
+.game-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #bdc3c7;
+    -fx-font-style: italic;
+}
+
+/* Stopka */
+.footer {
+    -fx-padding: 10;
+    -fx-background-color: #2c3e50;
+}
+
+.footer-text {
+    -fx-text-fill: #bdc3c7;
+    -fx-font-size: 12px;
+}
+
+.section-title {
+    -fx-font-size: 28px;
+    -fx-text-fill: #f1c40f;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 0, 0);
+}

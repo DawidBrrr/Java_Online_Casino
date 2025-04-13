@@ -14,7 +14,7 @@ public class Main extends Application {
         Scene scene = new Scene(root, 800, 600);
         scene.getStylesheets().add(getClass().getResource("/com/casino/styles/casino.css").toExternalForm());
 
-        primaryStage.setTitle("Sigma Kasyno - Login");
+        primaryStage.setTitle("Sigma Kasyno - Logowanie");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
