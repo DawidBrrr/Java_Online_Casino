@@ -11,6 +11,9 @@ module com.casino.java_online_casino {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
 
+    opens com.casino.java_online_casino.controllers to javafx.fxml;
     opens com.casino.java_online_casino to javafx.fxml;
+
     exports com.casino.java_online_casino;
+    exports com.casino.java_online_casino.controllers;
 }
