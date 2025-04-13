@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.casino.java_online_casino.controllers.AuthController"
+            stylesheets="@../styles/casino.css">
+
+    <center>
+        <StackPane>
+            <!-- Tło -->
+            <ImageView fitWidth="800" fitHeight="600" preserveRatio="false">
+                <Image url="@../assets/casino_bg.png"/>
+            </ImageView>
+
+            <!-- Główny kontener formularza -->
+            <VBox alignment="CENTER" spacing="30">
+                <VBox alignment="CENTER" spacing="20" styleClass="auth-box">
+                    <Label text="Sigma Kasyno" styleClass="title"/>
+
+                    <TabPane styleClass="auth-tabs">
+                        <Tab text="Logowanie">
+                            <VBox spacing="15" styleClass="form-container">
+                                <TextField fx:id="loginUsername" promptText="Nazwa Użytkownika"/>
+                                <PasswordField fx:id="loginPassword" promptText="Hasło"/>
+                                <Button text="Zaloguj się" onAction="#handleLogin" styleClass="auth-button"/>
+                                <Label fx:id="loginError" styleClass="error-label"/>
+                            </VBox>
+                        </Tab>
+                        <Tab text="Rejestracja">
+                            <VBox spacing="15" styleClass="form-container">
+                                <TextField fx:id="registerUsername" promptText="Nazwa Użytkownika"/>
+                                <PasswordField fx:id="registerPassword" promptText="Hasło"/>
+                                <PasswordField fx:id="registerConfirm" promptText="Potwierdź hasło"/>
+                                <Button text="Utwórz konto" onAction="#handleRegister" styleClass="auth-button"/>
+                                <Label fx:id="registerError" styleClass="error-label"/>
+                            </VBox>
+                        </Tab>
+                    </TabPane>
+                </VBox>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>
