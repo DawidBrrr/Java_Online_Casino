@@ -12,15 +12,16 @@ public class DashboardController {
     @FXML private Label balanceLabel;
 
     private String currentUser;
-    private double balance = 1000.0; // Tymczasowe - później z serwera
+    private static double balance = 1000.0; // Tymczasowe - później z serwera
 
     public void initialize(String username) {
         this.currentUser = username;
         usernameLabel.setText("Witaj, " + username + "!");
         updateBalance();
+        // Jak będzie serwer to się z serwera bdz brać i bdz lepiej chodzić
     }
 
-    private void updateBalance() {
+    void updateBalance() {
         balanceLabel.setText(String.format("$%.2f", balance));
     }
 
@@ -56,8 +57,18 @@ public class DashboardController {
 
     @FXML
     private void playSlots() {
-        System.out.println("Starting Slots game...");
-        // Tutaj przejście do gry
+        try {
+            // Ładowanie FXML dla gry w sloty
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/slots.fxml"));
+            Parent root = loader.load();
+
+            // Pobranie aktualnej sceny i ustawienie jej na nową
+            Stage stage = (Stage) usernameLabel.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Sigma Kasyno - Gra w Sloty");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -70,5 +81,13 @@ public class DashboardController {
     private void playPoker() {
         System.out.println("Starting Poker game...");
         // Tutaj przejście do gry
+    }
+
+    public static int getBalance() {
+        return (int) balance;
+    }
+
+    public static void setBalance(double newBalance) {
+        balance = newBalance;
     }
 }

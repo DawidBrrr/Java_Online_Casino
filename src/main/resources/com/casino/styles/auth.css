@@ -1,0 +1,125 @@
+/* Ustawienia ogólne */
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: transparent;
+}
+
+/* Styl dla głównego boxa autoryzacji */
+.auth-box {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-radius: 15;
+    -fx-padding: 30;
+    -fx-effect: dropshadow(gaussian, #000000AA, 10, 0.5, 0, 2);
+}
+
+/* Tytuł kasyna */
+.title {
+    -fx-text-fill: #FFD700; /* złoty kolor */
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
+/* Styl dla TabPane */
+.auth-tabs {
+    -fx-tab-min-width: 120;
+    -fx-tab-max-width: 120;
+    -fx-tab-min-height: 40;
+    -fx-background-color: transparent;
+}
+
+.auth-tabs .tab-header-area {
+    -fx-background-color: transparent;
+}
+
+.auth-tabs .tab {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10 10 0 0;
+    -fx-padding: 10 20 10 20;
+}
+
+.auth-tabs .tab:selected {
+    -fx-background-color: #FFD700;
+    -fx-text-base-color: black;
+}
+
+/* Styl dla formularzy */
+.form-container {
+    -fx-alignment: center;
+}
+
+/* Pola tekstowe i hasła */
+.text-field, .password-field {
+    -fx-background-radius: 10;
+    -fx-background-color: rgba(255, 255, 255, 0.8);
+    -fx-prompt-text-fill: #555;
+    -fx-text-fill: #000;
+    -fx-font-size: 14px;
+}
+
+/* Przyciski */
+.auth-button {
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 20;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 10 20 10 20;
+    -fx-effect: dropshadow(gaussian, #00000055, 5, 0.5, 0, 2);
+    -fx-cursor: hand;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.auth-button:hover {
+    -fx-background-color: linear-gradient(to right, #FFA500, #FFD700);
+}
+
+/* Błędy */
+.error-label {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
+}
+.auth-button:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+}
+/* Styl dla TabPane */
+.auth-tabs {
+    -fx-tab-min-width: 120;
+    -fx-tab-max-width: 120;
+    -fx-tab-min-height: 40;
+    -fx-background-color: transparent;
+}
+
+.auth-tabs .tab-header-area {
+    -fx-background-color: transparent;
+}
+
+.auth-tabs .tab {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10 10 0 0;
+    -fx-padding: 10 20 10 20;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.auth-tabs .tab:selected {
+    -fx-background-color: #FFD700;
+    -fx-text-base-color: black;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.auth-tabs .tab:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+}
+
+.auth-tabs .tab-header-background {
+    -fx-background-color: transparent;
+}

@@ -1,197 +1,120 @@
+/* Ogólne */
 .root {
-    -fx-font-family: 'Arial';
-}
-
-/* Tytuł */
-.title {
-    -fx-font-size: 32px;
-    -fx-text-fill: #f1c40f;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
-}
-
-.subtitle {
-    -fx-font-size: 24px;
-    -fx-text-fill: #ecf0f1;
-    -fx-font-weight: bold;
-}
-
-/* Kontener formularza */
-.auth-box {
-    -fx-background-color: rgba(44, 62, 80, 0.9);
-    -fx-padding: 30;
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
-}
-
-/* Zakładki */
-.auth-tabs {
-    -fx-background-color: transparent;
-    -fx-tab-min-width: 120px;
-}
-
-.auth-tabs .tab-header-area .tab-header-background {
-    -fx-background-color: transparent;
-}
-
-.auth-tabs .tab {
-    -fx-background-color: #2c3e50;
-    -fx-text-fill: #ecf0f1;
-    -fx-font-weight: bold;
-}
-
-.auth-tabs .tab:selected {
-    -fx-background-color: #3498db;
-}
-
-/* Formularz */
-.form-container {
-    -fx-padding: 20;
-    -fx-min-width: 300px;
-}
-
-.text-field, .password-field {
-    -fx-background-color: #ecf0f1;
-    -fx-background-radius: 5;
-    -fx-padding: 8;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
     -fx-font-size: 14px;
+    -fx-background-color: linear-gradient(to bottom, #0f0f0f, #1a1a1a);
+}
+
+/* Nagłówek */
+.header {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-padding: 15;
+}
+
+.title {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
 }
 
 /* Przyciski */
-.auth-button {
-    -fx-background-color: #27ae60;
-    -fx-text-fill: white;
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FFD700;
+    -fx-border-color: #FFD700;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
     -fx-font-weight: bold;
-    -fx-font-size: 14px;
-    -fx-padding: 10 20;
-    -fx-background-radius: 5;
-}
-
-.auth-button:hover {
-    -fx-background-color: #2ecc71;
-}
-
-/* Opcje gier */
-.game-option {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
-    -fx-padding: 20;
-    -fx-background-radius: 10;
     -fx-cursor: hand;
 }
 
-.game-option:hover {
-    -fx-background-color: rgba(41, 128, 185, 0.7);
-    -fx-scale-x: 1.05;
-    -fx-scale-y: 1.05;
-}
-
-.game-option .label {
-    -fx-text-fill: #ecf0f1;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-}
-
-/* Komunikaty błędów */
-.error-label {
-    -fx-text-fill: #e74c3c;
-    -fx-font-size: 12px;
-}
-.header {
-    -fx-padding: 15;
-    -fx-background-color: #2c3e50;
-}
-
-/* Przycisk wylogowania */
-.logout-button {
-    -fx-background-color: #e74c3c;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-padding: 8 15;
-}
-
 .logout-button:hover {
-    -fx-background-color: #c0392b;
+    -fx-background-color: #FFD700;
+    -fx-text-fill: black;
 }
 
-/* Panel profilu */
+/* Panel użytkownika */
 .profile-box {
-    -fx-background-color: rgba(44, 62, 80, 0.8);
-    -fx-padding: 30;
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 0);
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, #00000088, 10, 0.5, 0, 2);
 }
 
 .username {
-    -fx-font-size: 24px;
-    -fx-text-fill: #f1c40f;
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
 }
 
 .balance-label {
-    -fx-font-size: 18px;
-    -fx-text-fill: #ecf0f1;
+    -fx-text-fill: #CCCCCC;
+    -fx-font-size: 16px;
 }
 
 .balance-value {
-    -fx-font-size: 24px;
-    -fx-text-fill: #2ecc71;
+    -fx-text-fill: #00FF00;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
 
-/* Przyciski depozytu/wypłaty */
+/* Przyciski pieniędzy */
 .money-button {
-    -fx-background-color: #3498db;
-    -fx-text-fill: white;
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 20;
+    -fx-text-fill: black;
     -fx-font-weight: bold;
-    -fx-padding: 8 15;
+    -fx-padding: 10 20;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
 }
 
 .money-button:hover {
-    -fx-background-color: #2980b9;
+    -fx-background-color: linear-gradient(to right, #FFA500, #FFD700);
+}
+
+/* Sekcja gier */
+.section-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
 }
 
 /* Karty gier */
 .game-card {
-    -fx-background-color: rgba(52, 73, 94, 0.7);
-    -fx-padding: 20;
-    -fx-background-radius: 10;
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 15;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, #00000055, 5, 0.3, 0, 2);
     -fx-cursor: hand;
-    -fx-alignment: CENTER;
-    -fx-spacing: 5;
+    -fx-transition: all 0.3s ease;
 }
 
 .game-card:hover {
-    -fx-background-color: rgba(41, 128, 185, 0.7);
+    -fx-background-color: rgba(255, 215, 0, 0.2);
     -fx-scale-x: 1.05;
     -fx-scale-y: 1.05;
 }
 
 .game-title {
+    -fx-text-fill: #FFD700;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #ecf0f1;
 }
 
 .game-description {
-    -fx-font-size: 14px;
-    -fx-text-fill: #bdc3c7;
-    -fx-font-style: italic;
+    -fx-text-fill: #CCCCCC;
+    -fx-font-size: 12px;
 }
 
 /* Stopka */
 .footer {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
     -fx-padding: 10;
-    -fx-background-color: #2c3e50;
 }
 
 .footer-text {
-    -fx-text-fill: #bdc3c7;
+    -fx-text-fill: #666666;
     -fx-font-size: 12px;
-}
-
-.section-title {
-    -fx-font-size: 28px;
-    -fx-text-fill: #f1c40f;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 5, 0, 0, 0);
 }

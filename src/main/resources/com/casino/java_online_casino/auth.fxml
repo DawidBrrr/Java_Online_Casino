@@ -8,7 +8,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.casino.java_online_casino.controllers.AuthController"
-            stylesheets="@../styles/casino.css">
+            stylesheets="@../styles/auth.css">
 
     <center>
         <StackPane>
@@ -23,7 +23,7 @@
                     <Label text="Sigma Kasyno" styleClass="title"/>
 
                     <TabPane styleClass="auth-tabs">
-                        <Tab text="Logowanie">
+                        <Tab text="Logowanie" closable="false">
                             <VBox spacing="15" styleClass="form-container">
                                 <TextField fx:id="loginUsername" promptText="Nazwa Użytkownika"/>
                                 <PasswordField fx:id="loginPassword" promptText="Hasło"/>
@@ -31,7 +31,7 @@
                                 <Label fx:id="loginError" styleClass="error-label"/>
                             </VBox>
                         </Tab>
-                        <Tab text="Rejestracja">
+                        <Tab text="Rejestracja" closable="false">
                             <VBox spacing="15" styleClass="form-container">
                                 <TextField fx:id="registerUsername" promptText="Nazwa Użytkownika"/>
                                 <PasswordField fx:id="registerPassword" promptText="Hasło"/>
