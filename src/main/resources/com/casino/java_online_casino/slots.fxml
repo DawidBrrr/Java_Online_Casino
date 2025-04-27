@@ -1,14 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="$CONTROLLER_NAME$"
-            prefHeight="400.0" prefWidth="600.0" >
+<!-- slots.fxml -->
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.casino.java_online_casino.controllers.SlotsController"
+            stylesheets="@../styles/slots.css">
 
-</AnchorPane>
+    <top>
+        <HBox styleClass="header" alignment="CENTER">
+            <Label text="Sigma Kasyno - Slots" styleClass="title"/>
+            <Button text="Powrót" onAction="#handleBack" styleClass="back-button"/>
+        </HBox>
+    </top>
+
+    <center>
+        <StackPane>
+            <!-- Główna warstwa interaktywna -->
+            <VBox alignment="CENTER" spacing="30" mouseTransparent="false">
+                <!-- Sekcja balansu -->
+                <VBox alignment="CENTER">
+                    <Label text="Balans:" styleClass="balance-label"/>
+                    <Label fx:id="balanceLabel" styleClass="balance-value"/>
+                </VBox>
+
+                <!-- Maszyna do gier -->
+                <HBox fx:id="slotsContainer" alignment="CENTER" spacing="30">
+                    <ImageView fx:id="slot1" styleClass="slot-icon" fitWidth="150" fitHeight="150"/>
+                    <ImageView fx:id="slot2" styleClass="slot-icon" fitWidth="150" fitHeight="150"/>
+                    <ImageView fx:id="slot3" styleClass="slot-icon" fitWidth="150" fitHeight="150"/>
+                </HBox>
+
+                <!-- Panel sterowania -->
+                <VBox alignment="CENTER" spacing="15">
+                    <Button text="Zagraj!" onAction="#spinSlots" styleClass="auth-button"/>
+                    <Label fx:id="resultLabel" styleClass="result-label"/>
+                </VBox>
+            </VBox>
+
+            <!-- Warstwa efektów (nieblokująca interakcji) -->
+            <StackPane fx:id="effectsPane" mouseTransparent="true"/>
+        </StackPane>
+    </center>
+
+</BorderPane>
