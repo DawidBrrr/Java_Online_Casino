@@ -36,7 +36,7 @@
 
                 <!-- Panel sterowania -->
                 <VBox alignment="CENTER" spacing="15">
-                    <Button text="Zagraj!" onAction="#spinSlots" styleClass="auth-button"/>
+                    <Button fx:id="playButton" text="Zagraj!" onAction="#spinSlots" styleClass="auth-button"/>
                     <Label fx:id="resultLabel" styleClass="result-label"/>
                 </VBox>
             </VBox>

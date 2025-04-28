@@ -2,10 +2,12 @@ package com.casino.java_online_casino.controllers;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
@@ -27,6 +29,8 @@ public class SlotsController {
     @FXML private ImageView winEffectImage;
     @FXML private HBox slotsContainer;
     @FXML private StackPane effectsPane;
+    @FXML private Button playButton;
+
 
 
     private final Map<List<String>, WinCondition> winConditions = Map.of(
@@ -106,21 +110,47 @@ public class SlotsController {
 
     @FXML
     private void spinSlots() {
-        balance -= 50; // Koszt zakładu
-        updateBalance();
         if (isSpinning) return;
         isSpinning = true;
+        playButton.setDisable(true);
+
+        if (balance < 50) {
+            resultLabel.setText("Za mało środków!");
+            isSpinning = false;
+            playButton.setDisable(false);
+            return;
+        }
+
+        balance -= 50;
+        updateBalance();
         resultLabel.setText("");
 
-        // Losowanie wyników
+        // Losowanie symboli
         Image[] results = {
                 symbols[random.nextInt(symbols.length)],
                 symbols[random.nextInt(symbols.length)],
                 symbols[random.nextInt(symbols.length)]
         };
 
-        // Animacja 3D
-        animateSpin(results);
+        // Tworzenie taska
+        Task<Void> spinTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                Platform.runLater(() -> animateSpin(results));
+                Thread.sleep(SPIN_DURATION + 500); // Poczekaj aż animacje się zakończą (spin + efekty)
+                return null;
+            }
+        };
+
+        // Po zakończeniu taska
+        spinTask.setOnSucceeded(event -> {
+            isSpinning = false;
+            playButton.setDisable(false);
+        });
+
+        Thread spinThread = new Thread(spinTask);
+        spinThread.setDaemon(true);
+        spinThread.start();
     }
 
     private void animateSpin(Image[] results) {
@@ -160,23 +190,14 @@ public class SlotsController {
                 new SequentialTransition(
                         new PauseTransition(Duration.millis(SPIN_DURATION)),
                         new Timeline(
-                                new KeyFrame(Duration.millis(100), e -> isSpinning = false)
+                                new KeyFrame(Duration.millis(100), e -> {
+                                    playButton.setDisable(false);
+                                })
                         )
                 )
         );
 
         parallelTransition.play();
-    }
-
-    private void updateSlotImages() {
-        slot1.setImage(getRandomImage());
-        slot2.setImage(getRandomImage());
-        slot3.setImage(getRandomImage());
-    }
-
-    private Image getRandomImage() {
-        String icon = icons[random.nextInt(icons.length)];
-        return new Image(getClass().getResourceAsStream("/com/casino/assets/" + icon));
     }
 
     private void checkResult(Image[] results) {
@@ -260,26 +281,6 @@ public class SlotsController {
         } catch (Exception e) {
             resultLabel.setText("wygrana $" + condition.payout);
         }
-    }
-
-    private String getSymbolName(ImageView imageView) {
-        if (imageView == null || imageView.getImage() == null) {
-            return "";
-        }
-
-        String url = imageView.getImage().getUrl();
-        if (url == null) {
-            return "";
-        }
-
-        int lastSlash = url.lastIndexOf("/");
-        int lastDot = url.lastIndexOf(".");
-
-        if (lastSlash == -1 || lastDot == -1 || lastSlash >= lastDot) {
-            return "";
-        }
-
-        return url.substring(lastSlash + 1, lastDot);
     }
 
     @FXML
