@@ -35,6 +35,9 @@
 //
 //                    // Odbiór i deszyfracja klucza AES
 //                    receiveAESKey();
+
+
+
 //
 //                    // Komunikacja z klientem
 //                    handleCommunication();
