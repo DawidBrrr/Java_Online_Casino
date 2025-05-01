@@ -10,6 +10,9 @@ module com.casino.java_online_casino {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires jdk.httpserver;
+    requires jjwt.api;
+    requires com.google.gson;
 
     opens com.casino.java_online_casino.controllers to javafx.fxml;
     opens com.casino.java_online_casino to javafx.fxml;
