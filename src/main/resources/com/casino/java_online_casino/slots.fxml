@@ -7,7 +7,7 @@
 <!-- slots.fxml -->
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.casino.java_online_casino.controllers.SlotsController"
+            fx:controller="com.casino.java_online_casino.games.slots.controller.SlotsController"
             stylesheets="@../styles/slots.css">
 
     <top>

@@ -21,7 +21,7 @@ public class DashboardController {
         // Jak będzie serwer to się z serwera bdz brać i bdz lepiej chodzić
     }
 
-    void updateBalance() {
+    public void updateBalance() {
         balanceLabel.setText(String.format("$%.2f", balance));
     }
 

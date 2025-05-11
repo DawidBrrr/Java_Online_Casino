@@ -1,5 +1,6 @@
-package com.casino.java_online_casino.controllers;
+package com.casino.java_online_casino.games.slots.controller;
 
+import com.casino.java_online_casino.controllers.DashboardController;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -332,7 +333,7 @@ public class SlotsController {
     }
 
     @FXML
-    private void handleBack() {
+    public void handleBack() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/dashboard.fxml"));
             Parent root = loader.load();

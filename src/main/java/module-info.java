@@ -21,4 +21,6 @@ module com.casino.java_online_casino {
     exports com.casino.java_online_casino;
     exports com.casino.java_online_casino.controllers;
     exports com.casino.java_online_casino.User;
+    exports com.casino.java_online_casino.games.slots.controller;
+    opens com.casino.java_online_casino.games.slots.controller to javafx.fxml;
 }
