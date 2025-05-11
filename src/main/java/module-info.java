@@ -16,7 +16,9 @@ module com.casino.java_online_casino {
 
     opens com.casino.java_online_casino.controllers to javafx.fxml;
     opens com.casino.java_online_casino to javafx.fxml;
+    opens com.casino.java_online_casino.User to com.google.gson;
 
     exports com.casino.java_online_casino;
     exports com.casino.java_online_casino.controllers;
+    exports com.casino.java_online_casino.User;
 }

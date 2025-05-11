@@ -1,91 +1,192 @@
 package com.casino.java_online_casino.Connection.Tokens;
 
 import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
+import java.util.Base64;
 
-
+/**
+ * KeyManager zarządza kluczami ECDH i AES.
+ * Pozwala na generowanie kluczy EC, wyliczanie wspólnego sekretu,
+ * oraz szyfrowanie/deszyfrowanie wiadomości w Base64.
+ */
 public class KeyManager {
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
-    private SecretKey secretKey;
+    private static final String EC_CURVE = "secp256r1";
+    private static final String ECDH_ALGO = "ECDH";
+    private static final String AES_ALGO = "AES";
+    private static final String AES_CIPHER = "AES/GCM/NoPadding";
+    private static final int GCM_IV_LENGTH = 12;
+    private static final int GCM_TAG_LENGTH = 128;
+    private static final int AES_KEY_SIZE_BITS = 256;
 
-    private Cipher rsaEncrypt;
-    private Cipher rsaDecrypt;
+    private final KeyPair ecKeyPair;
+    private PublicKey foreignPublicKey;
+    private SecretKey aesKey;
     private Cipher aesEncrypt;
     private Cipher aesDecrypt;
 
+
     public KeyManager() {
-        initRSA();
+        this.ecKeyPair = generateEcKeyPair();
     }
 
-    public void initAES(SecretKey secretKey) {
-        this.secretKey = secretKey;
+    private KeyPair generateEcKeyPair() {
         try {
-            aesEncrypt = Cipher.getInstance("AES");
-            aesEncrypt.init(Cipher.ENCRYPT_MODE, secretKey);
-
-            aesDecrypt = Cipher.getInstance("AES");
-            aesDecrypt.init(Cipher.DECRYPT_MODE, secretKey);
+            KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
+            gen.initialize(new ECGenParameterSpec(EC_CURVE));
+            return gen.generateKeyPair();
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException("Błąd inicjalizacji AES: " + e.getMessage(), e);
+            throw new IllegalStateException("Nie można wygenerować kluczy EC", e);
         }
     }
 
-    public void generateAESKey() {
-        try {
-            KeyGenerator generator = KeyGenerator.getInstance("AES");
-            generator.init(256);
-            initAES(generator.generateKey());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Brak algorytmu AES: " + e.getMessage(), e);
+    /**
+     * Wylicza wspólny sekret ECDH i inicjalizuje AES/GCM.
+     */
+    public boolean setForeignPublicKey(PublicKey publicKey){
+        if(this.foreignPublicKey == null){
+            this.foreignPublicKey = publicKey;
+            return true;
         }
+        return false;
     }
-
-    private void initRSA() {
+    public void deriveSharedSecret() {
         try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(2048); // lepsze bezpieczeństwo niż 1024
-            KeyPair keyPair = generator.generateKeyPair();
+            KeyAgreement ka = KeyAgreement.getInstance(ECDH_ALGO);
+            ka.init(ecKeyPair.getPrivate());
+            ka.doPhase(foreignPublicKey, true);
+            byte[] secret = ka.generateSecret();
 
-            this.publicKey = keyPair.getPublic();
-            this.privateKey = keyPair.getPrivate();
+            byte[] keyBytes = MessageDigest.getInstance("SHA-256").digest(secret);
+            aesKey = new SecretKeySpec(keyBytes, 0, AES_KEY_SIZE_BITS / 8, AES_ALGO);
 
-            rsaEncrypt = Cipher.getInstance("RSA");
-            rsaEncrypt.init(Cipher.ENCRYPT_MODE, publicKey);
-
-            rsaDecrypt = Cipher.getInstance("RSA");
-            rsaDecrypt.init(Cipher.DECRYPT_MODE, privateKey);
+            aesEncrypt = Cipher.getInstance(AES_CIPHER);
+            aesDecrypt = Cipher.getInstance(AES_CIPHER);
         } catch (GeneralSecurityException e) {
-            throw new RuntimeException("Błąd inicjalizacji RSA: " + e.getMessage(), e);
+            throw new IllegalStateException("Błąd inicjalizacji ECDH/AES", e);
         }
     }
 
-    public byte[] encryptRSA(byte[] data) throws GeneralSecurityException {
-        return rsaEncrypt.doFinal(data);
+    private void ensureAesReady() {
+        if (aesKey == null || aesEncrypt == null || aesDecrypt == null) {
+            throw new IllegalStateException("AES nie został zainicjalizowany");
+        }
     }
 
-    public byte[] decryptRSA(byte[] data) throws GeneralSecurityException {
-        return rsaDecrypt.doFinal(data);
+    /**
+     * Szyfruje tekst i zwraca Base64.
+     */
+    public String encryptAes(String plaintext) {
+        ensureAesReady();
+        try {
+            byte[] iv = SecureRandom.getInstanceStrong().generateSeed(GCM_IV_LENGTH);
+            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+            aesEncrypt.init(Cipher.ENCRYPT_MODE, aesKey, spec);
+
+            byte[] cipherText = aesEncrypt.doFinal(plaintext.getBytes());
+            byte[] out = new byte[iv.length + cipherText.length];
+            System.arraycopy(iv, 0, out, 0, iv.length);
+            System.arraycopy(cipherText, 0, out, iv.length, cipherText.length);
+
+            return Base64.getEncoder().encodeToString(out);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Błąd szyfrowania AES", e);
+        }
     }
 
-    public byte[] encryptAES(String data) throws GeneralSecurityException {
-        return aesEncrypt.doFinal(data.getBytes());
+    /**
+     * Deszyfruje Base64 i zwraca plaintext.
+     */
+    public String decryptAes(String base64Data) {
+        ensureAesReady();
+        try {
+            byte[] data = Base64.getDecoder().decode(base64Data);
+
+            byte[] iv = new byte[GCM_IV_LENGTH];
+            System.arraycopy(data, 0, iv, 0, iv.length);
+
+            byte[] cipherText = new byte[data.length - iv.length];
+            System.arraycopy(data, iv.length, cipherText, 0, cipherText.length);
+
+            GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+            aesDecrypt.init(Cipher.DECRYPT_MODE, aesKey, spec);
+
+            byte[] plain = aesDecrypt.doFinal(cipherText);
+            return new String(plain);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Błąd deszyfrowania AES", e);
+        }
     }
 
-    public String decryptAES(byte[] encryptedData) throws GeneralSecurityException {
-        byte[] decrypted = aesDecrypt.doFinal(encryptedData);
-        return new String(decrypted);
+    /**
+     * Zwraca publiczny klucz EC (ECDH + ES256 w JWT).
+     */
+    public PublicKey getEcPublicKey() {
+        return ecKeyPair.getPublic();
     }
 
-    public PrivateKey getPrivateKey() {
-        return privateKey;
+    public PrivateKey getEcPrivateKey() {
+        return ecKeyPair.getPrivate();
+    }
+    public SecretKey getAesKey(){
+        return aesKey;
+    }
+        /**
+     * Zwraca publiczny klucz w Base64 do transmisji.
+     */
+    public String exportEcPublicKey() {
+        return Base64.getEncoder().encodeToString(ecKeyPair.getPublic().getEncoded());
     }
 
-    public PublicKey getPublicKey() {
-        return publicKey;
+    /**
+     * Importuje cudzy publiczny klucz EC z Base64.
+     */
+    public PublicKey importEcPublicKey(String base64PublicKey) {
+        try {
+            byte[] decoded = Base64.getDecoder().decode(base64PublicKey);
+            KeyFactory factory = KeyFactory.getInstance("EC");
+            return factory.generatePublic(new java.security.spec.X509EncodedKeySpec(decoded));
+        } catch (GeneralSecurityException e) {
+            throw new IllegalArgumentException("Nie można zaimportować klucza publicznego EC", e);
+        }
     }
 
-    public SecretKey getSecretKey() {
-        return secretKey;
+    /**
+     * Ustawia cudzy klucz EC z postaci Base64 i wylicza wspólny sekret.
+     */
+    public void establishSharedSecretFromBase64(String base64ForeignKey) {
+        PublicKey foreignKey = importEcPublicKey(base64ForeignKey);
+        if (!setForeignPublicKey(foreignKey)) {
+            throw new IllegalStateException("Klucz publiczny został już ustawiony");
+        }
+        deriveSharedSecret();
     }
+
+    /**
+     * Eksportuje aktualny klucz AES w Base64 (np. do przywrócenia sesji).
+     */
+    public String exportAesKey() {
+        if (aesKey == null) throw new IllegalStateException("AES nie jest gotowy");
+        return Base64.getEncoder().encodeToString(aesKey.getEncoded());
+    }
+
+    /**
+     * Importuje klucz AES z Base64.
+     */
+    public void importAesKey(String base64Key) {
+        byte[] decoded = Base64.getDecoder().decode(base64Key);
+        this.aesKey = new SecretKeySpec(decoded, AES_ALGO);
+
+        try {
+            this.aesEncrypt = Cipher.getInstance(AES_CIPHER);
+            this.aesDecrypt = Cipher.getInstance(AES_CIPHER);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Błąd przy inicjalizacji AES po imporcie", e);
+        }
+    }
+
+
+
 }

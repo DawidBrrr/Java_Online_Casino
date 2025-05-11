@@ -1,109 +1,63 @@
 package com.casino.java_online_casino.Connection.Client;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import com.casino.java_online_casino.Connection.Tokens.KeyManager;
+
+import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.security.NoSuchAlgorithmException;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.util.Properties;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
 
 public class SecureClient {
-    private PublicKey serverPublicKey;
-    private SecretKey secretKey;
-    Properties config;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
-    private Socket socket;
+    private final String host;
+    private final int port;
+    private final KeyManager keyManager;
 
-    //Właściwości połączenia
-    int serverPort;
-    String serverHost;
+    public SecureClient(String host, int port) {
+        this.host = host;
+        this.port = port;
+        this.keyManager = new KeyManager();
+    }
 
+    public void start() throws IOException {
+        try (Socket socket = new Socket(host, port);
+             DataInputStream in = new DataInputStream(socket.getInputStream());
+             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+             BufferedReader console = new BufferedReader(new InputStreamReader(System.in))
+        ) {
+            // 1. Odbieramy publiczny klucz serwera
+            String serverPub = in.readUTF();
+            byte[] serverPubBytes = Base64.getDecoder().decode(serverPub);
+            PublicKey serverKey = KeyFactory.getInstance("EC")
+                .generatePublic(new X509EncodedKeySpec(serverPubBytes));
+            keyManager.setForeignPublicKey(serverKey);
+            // 2. Wysyłamy nasz EC publiczny klucz
+            String clientPub = Base64.getEncoder().encodeToString(
+                keyManager.getEcPublicKey().getEncoded()
+            );
+            out.writeUTF(clientPub);
 
-    public SecureClient() throws NoSuchAlgorithmException, IOException {
-        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-        keyGen.init(256);
-        secretKey = keyGen.generateKey();
-        if(!initProperties()){
-            throw new IOException();
+            // 3. Derive shared secret
+            keyManager.deriveSharedSecret();
+            System.out.println("Wspólny klucz AES wyliczony");
+
+            // 4. Wysyłanie zaszyfrowanych wiadomości
+            System.out.println("Wpisz wiadomość (exit aby zakończyć):");
+            String line;
+            while ((line = console.readLine()) != null) {
+                String encrypted = keyManager.encryptAes(line);
+                out.writeUTF(encrypted);
+                if (line.equalsIgnoreCase("exit")) break;
+            }
+        } catch (GeneralSecurityException e) {
+            throw new IOException("Błąd inicjalizacji kluczy", e);
         }
     }
 
-    public boolean initProperties() {
-        String path = "src/main/resources/connection.properties";
-        config = new Properties();
-        try {
-            config.load(Files.newInputStream(Path.of(path), StandardOpenOption.READ));
-            serverHost = config.getProperty("serverName");
-            serverPort = Integer.parseInt(config.getProperty("serverPort"));
-        } catch (IOException e) {
-            return false;
-        }
-        return true;
-    }
-
-    public void connect() throws Exception {
-        socket = new Socket(serverHost, serverPort);
-        System.out.println("Połączono z serwerem");
-
-        out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
-
-        serverPublicKey = (PublicKey) in.readObject();
-        System.out.println("Otrzymano klucz publiczny serwera");
-
-        // Szyfrowanie i wysłanie klucza AES
-        byte[] encryptedAESKey = encryptRSA(secretKey.getEncoded(), serverPublicKey);
-        out.writeObject(encryptedAESKey);
-        out.flush();
-        System.out.println("Klucz AES wysłany do serwera");
-    }
-
-    private byte[] encryptRSA(byte[] data, PublicKey key) throws Exception {
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(data);
-    }
-
-    private byte[] encryptAES(String data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        return cipher.doFinal(data.getBytes());
-    }
-
-    private String decryptAES(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-        return new String(cipher.doFinal(data));
-    }
-
-    public void sendMessage(String message) throws Exception {
-        if (out == null) return;
-        byte[] encryptedMessage = encryptAES(message);
-        out.writeObject(encryptedMessage);
-        out.flush();
-    }
-
-    public String receiveMessage() throws Exception {
-        if (in == null) return null;
-        byte[] encryptedMessage = (byte[]) in.readObject();
-        return decryptAES(encryptedMessage);
-    }
-
-    public static void main(String[] args) throws Exception {
-        SecureClient client = new SecureClient();
-        client.connect();
-
-        // Przykładowa komunikacja
-        client.sendMessage("Witaj, serwerze!");
-        String response = client.receiveMessage();
-        System.out.println("Odpowiedź serwera: " + response);
+    public static void main(String[] args) throws IOException {
+        new SecureClient("localhost",12345).start();
     }
 }
