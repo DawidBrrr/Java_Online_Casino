@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.ImageView;
@@ -30,15 +31,16 @@ public class SlotsController {
     @FXML private HBox slotsContainer;
     @FXML private StackPane effectsPane;
     @FXML private Button playButton;
+    @FXML private ComboBox<Integer> betComboBox;
 
 
 
     private final Map<List<String>, WinCondition> winConditions = Map.of(
-            List.of("seven.png", "seven.png", "seven.png"), new WinCondition(1000, "jackpot.png", 3),
-            List.of("orange.png", "orange.png", "orange.png"), new WinCondition(300, "big_win.png", 2),
-            List.of("lemon.png", "lemon.png", "lemon.png"), new WinCondition(150, "small_win.png", 1),
-            List.of("cherry.png", "cherry.png", "any"), new WinCondition(50, "mini_win.png", 0),
-            List.of("seven.png", "seven.png", "any"), new WinCondition(100, "small_win.png", 0),
+            List.of("seven.png", "seven.png", "seven.png"), new WinCondition(20, "jackpot.png", 3),
+            List.of("orange.png", "orange.png", "orange.png"), new WinCondition(8, "big_win.png", 2),
+            List.of("lemon.png", "lemon.png", "lemon.png"), new WinCondition(5, "small_win.png", 1),
+            List.of("cherry.png", "cherry.png", "any"), new WinCondition(1, "mini_win.png", 0),
+            List.of("seven.png", "seven.png", "any"), new WinCondition(2, "small_win.png", 0),
             List.of("any", "any", "any"), new WinCondition(0, "lose.png", -1) // Domyślna przegrana
     );
 
@@ -51,6 +53,8 @@ public class SlotsController {
     private final int FRAMES_PER_SECOND = 60;
     private final int SPIN_DURATION = 2000; // 2 sekundy
     private RotateTransition[] rotateTransitions;
+
+    private int currentBet = 50;
 
     private static class WinCondition {
         double payout;
@@ -66,6 +70,10 @@ public class SlotsController {
 
     @FXML
     public void initialize() {
+        // Ustawienia ComboBox
+        betComboBox.getItems().addAll(10,20,50, 100, 200, 500, 1000);
+        betComboBox.setValue(50);
+        betComboBox.setOnAction(e -> currentBet = betComboBox.getValue());
         // Preload images
         symbols = new Image[] {
                 loadImage("cherry.png"),
@@ -114,14 +122,14 @@ public class SlotsController {
         isSpinning = true;
         playButton.setDisable(true);
 
-        if (balance < 50) {
+        if (balance < currentBet) {
             resultLabel.setText("Za mało środków!");
             isSpinning = false;
             playButton.setDisable(false);
             return;
         }
 
-        balance -= 50;
+        balance -= currentBet;
         updateBalance();
         resultLabel.setText("");
 
@@ -154,50 +162,88 @@ public class SlotsController {
     }
 
     private void animateSpin(Image[] results) {
-        // Efekt rozmycia
-        GaussianBlur blur = new GaussianBlur(0);
-        slot1.setEffect(blur);
-        slot2.setEffect(blur);
-        slot3.setEffect(blur);
+        playButton.setDisable(true);
+        ImageView[] slots = {slot1, slot2, slot3};
 
-        // Animacja obrotu
-        for (RotateTransition rt : rotateTransitions) {
-            rt.playFromStart();
+        // Reset wszystkich slotów
+        for (ImageView slot : slots) {
+            slot.setEffect(new GaussianBlur(0));
+            slot.setScaleX(1.0);
+            slot.setScaleY(1.0);
         }
 
-        // Animacja rozmycia
-        Timeline blurAnimation = new Timeline(
-                new KeyFrame(Duration.ZERO, new KeyValue(blur.radiusProperty(), 0)),
-                new KeyFrame(Duration.millis(500), new KeyValue(blur.radiusProperty(), 15)),
-                new KeyFrame(Duration.millis(SPIN_DURATION), new KeyValue(blur.radiusProperty(), 0))
-        );
+        ParallelTransition allSpinsParallel = new ParallelTransition();
 
-        // Główna animacja slotów
-        Timeline spinTimeline = new Timeline();
-        spinTimeline.getKeyFrames().addAll(
-                new KeyFrame(Duration.millis(SPIN_DURATION), e -> {
-                    slot1.setImage(results[0]);
-                    slot2.setImage(results[1]);
-                    slot3.setImage(results[2]);
-                    checkResult(results);
-                })
-        );
+        // Tworzenie animacji dla każdego slotu
+        for (int i = 0; i < 3; i++) {
+            final int slotIndex = i;
+            Timeline spinTimeline = createSpinningAnimation(slots[i], results[i], SPIN_DURATION + (i * 1000));
 
-        // Synchroniczne zakończenie
-        ParallelTransition parallelTransition = new ParallelTransition(
-                spinTimeline,
-                blurAnimation,
-                new SequentialTransition(
-                        new PauseTransition(Duration.millis(SPIN_DURATION)),
-                        new Timeline(
-                                new KeyFrame(Duration.millis(100), e -> {
-                                    playButton.setDisable(false);
-                                })
-                        )
+            // Animacja obrotu
+            RotateTransition rotate = new RotateTransition(Duration.millis(SPIN_DURATION + (i * 1000)), slots[i]);
+            rotate.setByAngle(360 * 8);
+            rotate.setInterpolator(Interpolator.EASE_OUT);
+
+            // Sekwencja skalowania
+            SequentialTransition scaleSequence = new SequentialTransition();
+
+            // Skalowanie w górę
+            ScaleTransition scaleUp = new ScaleTransition(Duration.millis(200), slots[i]);
+            scaleUp.setToX(1.2);
+            scaleUp.setToY(1.2);
+
+            // Skalowanie w dół
+            ScaleTransition scaleDown = new ScaleTransition(Duration.millis(200), slots[i]);
+            scaleDown.setToX(1.0);
+            scaleDown.setToY(1.0);
+
+            scaleSequence.getChildren().addAll(scaleUp, scaleDown);
+            scaleSequence.setCycleCount(3);
+
+            // Łączymy animacje dla pojedynczego slotu
+            ParallelTransition slotAnimation = new ParallelTransition(
+                    rotate,
+                    scaleSequence,
+                    spinTimeline
+            );
+
+            allSpinsParallel.getChildren().add(slotAnimation);
+        }
+
+        allSpinsParallel.setOnFinished(e -> {
+            checkResult(results);
+            playButton.setDisable(false);
+            // Reset skali wszystkich slotów
+            for (ImageView slot : slots) {
+                slot.setScaleX(1.0);
+                slot.setScaleY(1.0);
+            }
+        });
+
+        allSpinsParallel.play();
+    }
+    private Timeline createSpinningAnimation(ImageView slot, Image finalImage, double duration) {
+        Timeline timeline = new Timeline();
+
+        // Szybkie zmiany obrazków podczas kręcenia
+        for (int i = 0; i < 20; i++) {
+            timeline.getKeyFrames().add(
+                    new KeyFrame(
+                            Duration.millis((duration / 20.0) * i),
+                            event -> slot.setImage(symbols[random.nextInt(symbols.length)])
+                    )
+            );
+        }
+
+        // Końcowy obrazek
+        timeline.getKeyFrames().add(
+                new KeyFrame(
+                        Duration.millis(duration),
+                        event -> slot.setImage(finalImage)
                 )
         );
 
-        parallelTransition.play();
+        return timeline;
     }
 
     private void checkResult(Image[] results) {
@@ -209,6 +255,8 @@ public class SlotsController {
 
         winConditions.forEach((pattern, condition) -> {
             if (matchesPattern(symbols, pattern)) {
+                // Dostosuj wypłatę do aktualnej stawki
+                condition.payout = currentBet * condition.payout;
                 matchedConditions.add(condition);
             }
         });
