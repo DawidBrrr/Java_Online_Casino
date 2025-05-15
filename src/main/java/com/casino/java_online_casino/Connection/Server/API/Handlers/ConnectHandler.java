@@ -8,6 +8,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+
 @Experimental
 public class ConnectHandler implements HttpHandler {
 
@@ -19,8 +21,7 @@ public class ConnectHandler implements HttpHandler {
             exchange.sendResponseHeaders(405, -1); // Method Not Allowed
             return;
         }
-
-        JsonObject req = JsonUtil.parseJson(exchange.getRequestBody());
+        JsonObject req = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
         String gameId = req.get("gameId").getAsString();
         String userId = req.get("userId").getAsString();
 

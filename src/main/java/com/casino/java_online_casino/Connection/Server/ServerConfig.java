@@ -12,10 +12,10 @@ public class ServerConfig {
     private static final String GAME_SERVER_PORT = "serverPort";
     private static final String API_SERVER_HOST = "ApiHost";
     private static final String API_SERVER_PORT = "ApiPort";
-    private static final String CONFIG_PATH = "src/main/resources/server_connections_config.properties";
+    private static final String CONFIG_PATH = "src/main/resources/com/casino/Connection/server_connections_config.properties";
     private static final  Properties properties = new Properties();
     static {
-        try(InputStream inputStream = Files.newInputStream( Path.of(CONFIG_PATH))) {
+        try(InputStream inputStream = Files.newInputStream(Path.of(CONFIG_PATH))) {
             properties.load(inputStream);
         }catch (IOException e) {
             throw new RuntimeException("Problem z ładowaniem konfiguracji servera");

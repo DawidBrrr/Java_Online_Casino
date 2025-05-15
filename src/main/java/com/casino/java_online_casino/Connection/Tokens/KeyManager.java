@@ -45,6 +45,9 @@ public class KeyManager {
     /**
      * Wylicza wspólny sekret ECDH i inicjalizuje AES/GCM.
      */
+    public PublicKey getForeignPublicKey(){
+        return foreignPublicKey;
+    }
     public boolean setForeignPublicKey(PublicKey publicKey){
         if(this.foreignPublicKey == null){
             this.foreignPublicKey = publicKey;
@@ -156,7 +159,7 @@ public class KeyManager {
     /**
      * Ustawia cudzy klucz EC z postaci Base64 i wylicza wspólny sekret.
      */
-    public void establishSharedSecretFromBase64(String base64ForeignKey) {
+    public void importForeignKey(String base64ForeignKey) {
         PublicKey foreignKey = importEcPublicKey(base64ForeignKey);
         if (!setForeignPublicKey(foreignKey)) {
             throw new IllegalStateException("Klucz publiczny został już ustawiony");

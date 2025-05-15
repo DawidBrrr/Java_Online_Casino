@@ -20,7 +20,7 @@ public class ReconnectHandler implements HttpHandler {
             return;
         }
 
-        JsonObject req = JsonUtil.parseJson(exchange.getRequestBody());
+        JsonObject req = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
         String userId = req.get("userId").getAsString();
 
         JsonObject res = new JsonObject();

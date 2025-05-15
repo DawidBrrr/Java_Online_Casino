@@ -31,6 +31,7 @@ public class ApiServer {
             server.createContext("/reconnect", new ReconnectHandler());
             server.createContext("/user", new UserHandler());
             server.createContext("/stat", new StatHandler());
+            server.createContext("/key", new KeyHandler());
 
             // Dynamiczne zarządzanie wątkami (bez limitu)
             server.setExecutor(Executors.newCachedThreadPool());
@@ -42,6 +43,10 @@ public class ApiServer {
             isActive = false;
             throw new RuntimeException("Błąd startu servera");
         }
+    }
+
+    public static void main(String[] args) {
+        start();
     }
 
 }

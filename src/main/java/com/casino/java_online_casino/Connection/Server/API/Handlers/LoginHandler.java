@@ -7,8 +7,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+
 @Experimental
 public class LoginHandler implements HttpHandler {
     @Override
@@ -18,7 +17,7 @@ public class LoginHandler implements HttpHandler {
             return;
         }
 
-        JsonObject requestJson = JsonUtil.parseJson(exchange.getRequestBody());
+        JsonObject requestJson = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
 
         String login = requestJson.get("username").getAsString();
         String password = requestJson.get("password").getAsString();
