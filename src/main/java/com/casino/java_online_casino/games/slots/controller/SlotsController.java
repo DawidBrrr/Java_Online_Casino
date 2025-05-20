@@ -256,8 +256,6 @@ public class SlotsController {
 
         winConditions.forEach((pattern, condition) -> {
             if (matchesPattern(symbols, pattern)) {
-                // Dostosuj wypłatę do aktualnej stawki
-                condition.payout = currentBet * condition.payout;
                 matchedConditions.add(condition);
             }
         });
@@ -266,7 +264,7 @@ public class SlotsController {
                 .max(Comparator.comparingInt(c -> c.priority))
                 .orElse(winConditions.get(List.of("any", "any", "any")));
 
-        balance += bestWin.payout;
+        balance += (bestWin.payout * currentBet);
         Platform.runLater(() -> showWinEffect(bestWin));
         updateBalance();
     }
@@ -325,10 +323,10 @@ public class SlotsController {
             );
             sequence.play();
 
-            resultLabel.setText("WYGRANA! $" + condition.payout);
+            resultLabel.setText("WYGRANA! $" + (condition.payout * currentBet));
 
         } catch (Exception e) {
-            resultLabel.setText("wygrana $" + condition.payout);
+            resultLabel.setText("wygrana $" + (condition.payout * currentBet));
         }
     }
 
