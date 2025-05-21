@@ -142,6 +142,8 @@ public class KeyExchangeClient {
 
                     JsonObject loginResponse = JsonParser.parseString(decryptedResponse).getAsJsonObject();
                     String status = loginResponse.get("status").getAsString();
+                    String token = loginResponse.get("token").getAsString();
+                    System.out.println("[DEBUG] Token auth "+ token);
 
                     if ("ok".equalsIgnoreCase(status)) {
                         System.out.println("✅ Logowanie powiodło się.");
@@ -168,6 +170,82 @@ public class KeyExchangeClient {
             return false;
         }
     }
+    public boolean register(String firstName, String lastName, String email, String password, String birthDate) {
+        try {
+            if (keyManager.getAesKey() == null) {
+                System.err.println("❌ Brak ustalonego klucza AES. Najpierw wykonaj wymianę kluczy.");
+                return false;
+            }
+
+            JsonObject registerJson = new JsonObject();
+            registerJson.addProperty("first_name", firstName);
+            registerJson.addProperty("last_name", lastName);
+            registerJson.addProperty("email", email);
+            registerJson.addProperty("password", password);
+            registerJson.addProperty("birth_date", birthDate);
+
+            String registerJsonString = registerJson.toString();
+            System.out.println("[DEBUG] Dane rejestracji JSON: " + registerJsonString);
+
+            String encryptedRegisterBase64 = keyManager.encryptAes(registerJsonString);
+
+            JsonObject requestJson = new JsonObject();
+            requestJson.addProperty("data", encryptedRegisterBase64);
+
+            String registerUrl = serverUrl.replace("/key", "/register");
+            URL url = new URL(registerUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            connection.setRequestProperty("Authorization", token); // nagłówek z JWT
+
+            try (OutputStream os = connection.getOutputStream()) {
+                os.write(requestJson.toString().getBytes(StandardCharsets.UTF_8));
+                os.flush();
+            }
+
+            int responseCode = connection.getResponseCode();
+            System.out.println("[DEBUG] Kod odpowiedzi rejestracji: " + responseCode);
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (InputStream is = connection.getInputStream();
+                     InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+
+                    JsonObject responseJson = JsonUtil.parseJsonFromISReader(reader);
+                    String encryptedResponseBase64 = responseJson.get("data").getAsString();
+
+                    String decryptedResponse = keyManager.decryptAes(encryptedResponseBase64);
+                    System.out.println("[DEBUG] Odszyfrowana odpowiedź rejestracji: " + decryptedResponse);
+
+                    JsonObject registerResponse = JsonParser.parseString(decryptedResponse).getAsJsonObject();
+                    String status = registerResponse.get("status").getAsString();
+
+                    if ("ok".equalsIgnoreCase(status)) {
+                        System.out.println("✅ Rejestracja powiodła się.");
+                        return true;
+                    } else {
+                        System.err.println("❌ Rejestracja nie powiodła się: " + registerResponse.get("message").getAsString());
+                        return false;
+                    }
+                }
+            } else {
+                System.err.println("❌ Błąd serwera przy rejestracji: " + responseCode);
+                try (InputStream errorStream = connection.getErrorStream()) {
+                    if (errorStream != null) {
+                        String errorResponse = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
+                        System.err.println("🧾 Treść błędu: " + errorResponse);
+                    }
+                }
+                return false;
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Wyjątek podczas rejestracji: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
     public KeyManager getKeyManager() {
@@ -176,6 +254,7 @@ public class KeyExchangeClient {
     public static void main(String[] args) {
         KeyExchangeClient client = new KeyExchangeClient("http://localhost:12346/key");
         client.performKeyExchange();
+        client.register("Dominiik","Koralik","java@java.com", "admin", "26-09-2004");
         client.login("admin", "admin");
     }
 }
