@@ -5,18 +5,23 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/com/casino/java_online_casino/auth.fxml"));
 
-        Scene scene = new Scene(root, 800, 600);
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+
+        Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
         scene.getStylesheets().add(getClass().getResource("/com/casino/styles/casino.css").toExternalForm());
 
         primaryStage.setTitle("Sigma Kasyno - Logowanie");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 

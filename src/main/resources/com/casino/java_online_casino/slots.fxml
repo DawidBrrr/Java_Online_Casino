@@ -11,10 +11,14 @@
             stylesheets="@../styles/slots.css">
 
     <top>
-        <HBox styleClass="header" alignment="CENTER">
-            <Label text="Sigma Kasyno - Slots" styleClass="title"/>
-            <Button text="Powrót" onAction="#handleBack" styleClass="back-button"/>
-        </HBox>
+        <StackPane>
+            <HBox alignment="CENTER">
+                <Label text="Sigma Kasyno - Slots" styleClass="title"/>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT">
+                <Button text="Powrót" onAction="#handleBack" styleClass="back-button"/>
+            </HBox>
+        </StackPane>
     </top>
 
     <center>

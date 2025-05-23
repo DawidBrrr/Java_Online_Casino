@@ -2,9 +2,13 @@ package com.casino.java_online_casino.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class AuthController {
@@ -15,7 +19,16 @@ public class AuthController {
     @FXML private PasswordField registerPassword;
     @FXML private PasswordField registerConfirm;
     @FXML private Label registerError;
+    @FXML private ImageView backgroundImage;
 
+    @FXML
+    public void initialize(){
+        // Bindowanie rozmiaru obrazu do rozmiaru rodzica (StackPane)
+        StackPane parent = (StackPane) backgroundImage.getParent();
+        backgroundImage.fitWidthProperty().bind(parent.widthProperty());
+        backgroundImage.fitHeightProperty().bind(parent.heightProperty());
+
+    }
     @FXML
     private void handleLogin() {
         String username = loginUsername.getText();
@@ -39,8 +52,14 @@ public class AuthController {
 
                 // Zmiana sceny
                 Stage stage = (Stage) loginUsername.getScene().getWindow();
-                stage.setScene(new Scene(root));
                 stage.setTitle("Sigma Kasyno - Panel Użytkownika");
+                // Pobierz wymiary ekranu
+                Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+                Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
+                stage.setScene(scene);
+                stage.setMaximized(true);
+                stage.setResizable(true);
+                stage.show();
             } catch (Exception e) {
                 e.printStackTrace();
             }
