@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -342,9 +344,15 @@ public class SlotsController {
             dashboardController.updateBalance();
 
             Stage stage = (Stage) resultLabel.getScene().getWindow();
-            Scene scene = new Scene(root);
+            // Pobierz wymiary ekranu
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
+
             scene.getStylesheets().add(getClass().getResource("/com/casino/styles/casino.css").toExternalForm());
             stage.setScene(scene);
+            stage.setMaximized(true);
+            stage.setResizable(true);
+            stage.show();
             stage.setTitle("Sigma Kasyno - Dashboard");
         } catch (IOException e) {
             e.printStackTrace();

@@ -27,7 +27,7 @@
                     <Label text="Balans:" styleClass="balance-label"/>
                     <Label fx:id="balanceLabel" text='0' styleClass="balance-value"/>
                 </HBox>
-                <HBox spacing="15">
+                <HBox spacing="15" alignment="CENTER">
                     <Button text="Depozyt" onAction="#handleDeposit" styleClass="money-button"/>
                     <Button text="Wypłać" onAction="#handleWithdraw" styleClass="money-button"/>
                 </HBox>
@@ -38,21 +38,21 @@
                 <Label text="Wybierz grę" styleClass="section-title"/>
                 <HBox spacing="30" alignment="CENTER">
                     <VBox alignment="CENTER" spacing="10" styleClass="game-card" onMouseClicked="#playSlots">
-                        <ImageView fitWidth="120" fitHeight="120">
+                        <ImageView fitWidth="240" fitHeight="240">
                             <Image url="@../assets/slots_icon.png"/>
                         </ImageView>
                         <Label text="Slots" styleClass="game-title"/>
                         <Label text="Klasyka gatunku" styleClass="game-description"/>
                     </VBox>
                     <VBox alignment="CENTER" spacing="10" styleClass="game-card" onMouseClicked="#playBlackjack">
-                        <ImageView fitWidth="120" fitHeight="120">
+                        <ImageView fitWidth="240" fitHeight="240">
                             <Image url="@../assets/blackjack_icon.png"/>
                         </ImageView>
                         <Label text="Blackjack" styleClass="game-title"/>
                         <Label text="Pokonaj Dealera!" styleClass="game-description"/>
                     </VBox>
                     <VBox alignment="CENTER" spacing="10" styleClass="game-card" onMouseClicked="#playPoker">
-                        <ImageView fitWidth="120" fitHeight="120">
+                        <ImageView fitWidth="240" fitHeight="240">
                             <Image url="@../assets/poker_icon.png"/>
                         </ImageView>
                         <Label text="Poker" styleClass="game-title"/>

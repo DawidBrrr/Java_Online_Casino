@@ -12,13 +12,13 @@
 
     <center>
         <StackPane>
-            <!-- Tło -->
-            <ImageView fitWidth="800" fitHeight="600" preserveRatio="false">
+            <!-- Tło dopasowane do pełnego ekranu -->
+            <ImageView fx:id="backgroundImage" StackPane.alignment="CENTER" preserveRatio="false">
                 <Image url="@../assets/casino_bg.png"/>
             </ImageView>
 
             <!-- Główny kontener formularza -->
-            <VBox alignment="CENTER" spacing="30">
+            <VBox alignment="CENTER" spacing="30" maxWidth="600">
                 <VBox alignment="CENTER" spacing="20" styleClass="auth-box">
                     <Label text="Sigma Kasyno" styleClass="title"/>
 
