@@ -1,0 +1,106 @@
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+
+    /* Estetyczne gradientowe tło pasujące do motywu kasyna */
+    -fx-background-color: linear-gradient(
+            from 0% 0% to 100% 100%,
+            #0f0f0f 0%,
+            #1a1a1a 30%,
+            #222d22 55%,
+            #2e8b57 100%
+    );
+}
+
+.status-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+    -fx-padding: 15;
+    -fx-alignment: center;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, #00000099, 5, 0.5, 0, 2);
+}
+
+.game-button {
+    -fx-font-size: 16px;
+    -fx-padding: 10px 25px;
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 20;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #ffcc00aa, 8, 0.7, 0, 2);
+    -fx-alignment: center;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.game-button:hover {
+    -fx-background-color: linear-gradient(to right, #FFA500, #FFD700);
+}
+
+#playerCards .card, #dealerCards .card {
+    -fx-pref-width: 100px;
+    -fx-pref-height: 140px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 8, 0.5, 0, 3);
+    -fx-cursor: default;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #FFD700;
+    -fx-border-width: 2;
+    -fx-background-color: white; /* lub transparent jeśli masz grafikę kart */
+}
+
+.score-label {
+    -fx-font-size: 28px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-min-width: 140px;
+    -fx-alignment: center_right;
+    -fx-padding: 8 15 8 15;
+    -fx-background-color: rgba(0,0,0,0.5);
+    -fx-background-radius: 12;
+}
+
+.score-value {
+    -fx-font-size: 22px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-min-width: 120px;
+    -fx-alignment: center_right;
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-background-radius: 10;
+}
+
+.section-title {
+    -fx-font-size: 22px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-min-width: 120px;
+    -fx-alignment: center_right;
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-background-radius: 10;
+}
+
+.bet-box {
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 5 15;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #ffcc00aa, 6, 0.5, 0, 1);
+}
+
+.balance-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-padding: 8 15;
+    -fx-background-radius: 12;
+    -fx-alignment: center;
+}

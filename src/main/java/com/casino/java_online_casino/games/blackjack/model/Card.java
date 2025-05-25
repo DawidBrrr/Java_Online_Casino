@@ -24,7 +24,8 @@ public class Card {
     }
 
     public String getImagePath() {
-        //Do zrobienia
-        return "";
+        return String.format("/com/casino/assets/cards/%s_of_%s.png",
+                rank.toLowerCase(),
+                suit.toLowerCase());
     }
 }
