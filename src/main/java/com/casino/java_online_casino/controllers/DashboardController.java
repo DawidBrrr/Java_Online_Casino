@@ -81,8 +81,21 @@ public class DashboardController {
 
     @FXML
     private void playBlackjack() {
-        System.out.println("Starting Blackjack game...");
-        // Tutaj przejście do gry
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/blackjack.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) usernameLabel.getScene().getWindow();
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
+            stage.setScene(scene);
+            stage.setMaximized(true);
+            stage.setResizable(true);
+            stage.setTitle("Sigma Kasyno - Gra w Blackjacka");
+            scene.getStylesheets().add(getClass().getResource("/com/casino/styles/blackjack.css").toExternalForm());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
