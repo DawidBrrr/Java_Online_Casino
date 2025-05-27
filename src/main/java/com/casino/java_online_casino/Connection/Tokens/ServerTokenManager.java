@@ -12,15 +12,17 @@ import java.util.Map;
 
 /**
  * TokenFactory odpowiada WYŁĄCZNIE za tworzenie i weryfikację tokenów JWT podpisanych algorytmem RS256.
- * Szyfrowanie AES zostało przeniesione do osobnej klasy.
+ * Szyfrowanie wartości claimsów (Base64 po RSA) dla własnych claimsów.
  */
 @Experimental
 public class ServerTokenManager {
     private static final long EXPIRATION_SECONDS = 3 * 60 * 60; // 3 godziny
+
     /**
      * Tworzy podpisany JWT (bez szyfrowania) przy użyciu RSA (RS256).
+     * Wszystkie wartości claimsów z mapy są szyfrowane (Base64 po RSA).
      */
-    public static  String createJwt(Map<String, Object> publicClaims) {
+    public static String createJwt(Map<String, String> publicClaims) {
         PrivateKey privateKey = ServerKeyManager.getInstance().getPrivateKey();
         if (privateKey == null)
             throw new IllegalStateException("Brakuje prywatnego klucza RSA do podpisu");
@@ -38,7 +40,12 @@ public class ServerTokenManager {
                 .signWith(privateKey, SignatureAlgorithm.RS256);
 
         if (publicClaims != null && !publicClaims.isEmpty()) {
-            publicClaims.forEach(builder::claim);
+            publicClaims.forEach((k, v) -> {
+                if (v != null) {
+                    String encoded = ServerKeyManager.getInstance().encryptToBase64(v);
+                    builder.claim(k, encoded);
+                }
+            });
         }
 
         return builder.compact();
@@ -46,8 +53,9 @@ public class ServerTokenManager {
 
     /**
      * Waliduje JWT – podpis, termin ważności i podstawowe parametry.
+     * Deszyfruje wartości claimsów, które są stringami (pozostałe kopiuje bez zmian).
      */
-    public static  Claims validateJwt(String jwtToken) {
+    public static Claims validateJwt(String jwtToken) {
         PublicKey publicKey = ServerKeyManager.getInstance().getPublicKey();
         if (publicKey == null)
             throw new IllegalStateException("Brakuje publicznego klucza RSA do weryfikacji podpisu JWT");
@@ -61,7 +69,25 @@ public class ServerTokenManager {
                     .build();
 
             Jws<Claims> jws = parser.parseClaimsJws(jwtToken);
-            return jws.getBody();
+            Claims encryptedClaims = jws.getBody();
+            Claims decryptedClaims = Jwts.claims();
+
+            encryptedClaims.forEach((k, v) -> {
+                if (v instanceof String) {
+                    try {
+                        // Próbujemy odszyfrować, jeśli się nie uda, zostawiamy oryginał
+                        String decoded = ServerKeyManager.getInstance().decryptFromBase64((String) v);
+                        decryptedClaims.put(k, decoded);
+                    } catch (Exception e) {
+                        System.out.println("[DEBUG] Błąd deszyfracji claimu: " + k + " (" + e.getMessage() + ")");
+                        decryptedClaims.put(k, v); // Zostaw oryginalną (zaszyfrowaną) wartość
+                    }
+                } else {
+                    // Standardowe claims (np. daty, liczby) kopiujemy bez zmian
+                    decryptedClaims.put(k, v);
+                }
+            });
+            return decryptedClaims;
 
         } catch (JwtException e) {
             throw new IllegalArgumentException("Nieprawidłowy lub wygasły token: " + e.getMessage(), e);

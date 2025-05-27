@@ -26,7 +26,7 @@ public class ReconnectHandler implements HttpHandler {
         JsonObject res = new JsonObject();
 
         // Próba odzyskania sesji
-        String sessionKey = sessionManager.reconnectSession(userId);
+        String sessionKey = sessionManager.getSession(userId).getSessionKey();
         if (sessionKey == null) {
             res.addProperty("status", "error");
             res.addProperty("message", "Brak aktywnej sesji do przywrócenia.");

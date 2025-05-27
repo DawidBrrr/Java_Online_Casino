@@ -37,4 +37,8 @@ public class ServerConfig {
     public static int getApiServerPort() {
          return Integer.parseInt(properties.getProperty(API_SERVER_PORT));
     }
+    public static String getApiPath() {
+        return "http://"+getApiServerHost()+":"+getApiServerPort()+"/";
+    }
 }
+

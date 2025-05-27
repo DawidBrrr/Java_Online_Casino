@@ -54,7 +54,7 @@ public class KeyHandler implements HttpHandler {
             UUID uuid = UUID.randomUUID();
             System.out.println("[DEBUG] Wygenerowany UUID sesji: " + uuid.toString());
 
-            Map<String, Object> claims = new HashMap<>();
+            Map<String, String> claims = new HashMap<>();
             claims.put("UUID", uuid.toString());
 
             String token = ServerTokenManager.createJwt(claims);

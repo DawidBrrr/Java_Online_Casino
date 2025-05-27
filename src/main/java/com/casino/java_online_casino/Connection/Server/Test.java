@@ -1,48 +1,76 @@
 package com.casino.java_online_casino.Connection.Server;
 
-import com.casino.java_online_casino.Connection.Tokens.ClientTokenManager;
-import com.casino.java_online_casino.Connection.Tokens.KeyManager;
-import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
+import com.casino.java_online_casino.Connection.Client.KeyExchangeService;
+import com.casino.java_online_casino.Connection.Client.Service;
+import com.casino.java_online_casino.Connection.Server.API.ApiServer;
+import com.casino.java_online_casino.Connection.Server.GameServer.GameServer;
+import com.casino.java_online_casino.Main;
+import com.casino.java_online_casino.games.blackjack.controller.BlackjackTcpClient;
+import com.casino.java_online_casino.games.blackjack.controller.RemoteBlackJackController;
 
-import java.rmi.server.UID;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
 
 public class Test {
     public static void main(String[] args) {
-        System.out.println("=== TEST BEZ INTERNETU: ECDH + JWT + AES ===");
+        //Api i serwre używaja wspołnych kluczy - muszą być uruchamiane w jednej instancji razem
+        ApiServer apiServer = new ApiServer();
+        GameServer gameServer = new GameServer();
 
-        // === 1. Tworzenie managerów ===
-        KeyManager clientKeyManager = new KeyManager();
-        KeyManager serverKeyManager = new KeyManager();
+        // Uruchom ApiServer w osobnym wątku
+        Thread apiThread = new Thread(() -> {
+            try {
+                apiServer.start();
+            } catch (Exception e) {
+                System.out.println("[ERROR] ApiServer: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }, "ApiServer-Thread");
+        apiThread.start();
 
-        // === 2. Wymiana kluczy publicznych ===
-        String clientPub = clientKeyManager.exportEcPublicKey();
-        String serverPub = serverKeyManager.exportEcPublicKey();
+        // Uruchom GameServer w osobnym wątku
+        Thread gameThread = new Thread(() -> {
+            try {
+                gameServer.start();
+            } catch (Exception e) {
+                System.out.println("[ERROR] GameServer: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }, "GameServer-Thread");
+        gameThread.start();
 
-        clientKeyManager.importForeignKey(serverPub);
-        serverKeyManager.importForeignKey(clientPub);
+        // Jeśli chcesz poczekać aż serwery się rozkręcą
+        try {
+            Thread.sleep(1000); // wystarczy na "rozgrzanie" serwerów
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        // === 3. Uzgadnianie klucza AES ===
-        clientKeyManager.deriveSharedSecret();
-        serverKeyManager.deriveSharedSecret();
+        // Klient: wymiana kluczy + rozgrywka -- można zostawić bez zmian
+        Service keyService = new KeyExchangeService();
+        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
+        keyExchangeThread.start();
 
-        // === 4. Serwer generuje UUID i statyczny token JWT ===
-        UUID uuid = UUID.randomUUID();
-        System.out.println("UUID: " + uuid);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("UUID", uuid.toString());
+        System.out.println(Service.getToken());
+
+        BlackjackTcpClient tcpClient = new BlackjackTcpClient(Service.getToken(), Service.getKeyManager());
+        try {
+            tcpClient.connect();
+        } catch (IOException e) {
+            throw new RuntimeException("Połączenie z blackjack nie powiodło się");
+        }
+
+        RemoteBlackJackController controller = new RemoteBlackJackController(tcpClient);
 
 
-        // === 6. Klient szyfruje dane JSON za pomocą AES ===
-        String json = "{ \"email\": \"user@example.com\", \"password\": \"secret\" }";
-        String encrypted = clientKeyManager.encryptAes(json);
-        System.out.println("Zaszyfrowany JSON przez klienta (Base64): " + encrypted);
-
-        // === 7. Serwer odszyfrowuje dane używając AES ===
-        String decrypted = serverKeyManager.decryptAes(encrypted);
-        System.out.println("ODSZYFROWANY JSON po stronie serwera: " + decrypted);
+        Thread aplicationThread = new Thread(() -> {
+            Main.main(new String[]{});
+        });
+        aplicationThread.start();
     }
 }

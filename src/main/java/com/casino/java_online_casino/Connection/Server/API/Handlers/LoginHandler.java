@@ -37,9 +37,15 @@ public class LoginHandler implements HttpHandler {
             sendError(exchange, 401, "Brak nagłówka Authorization");
             return;
         }
+        String uuidStr;
+        try{
+            Claims claims = ServerTokenManager.validateJwt(authHeader);
+            uuidStr =  claims.get("UUID", String.class);
+        }catch(IllegalArgumentException e){
+            sendError(exchange,401,"Nieważny token");
+            return;
+        }
 
-        Claims claims = ServerTokenManager.validateJwt(authHeader);
-        String uuidStr = claims.get("UUID", String.class);
         System.out.println("[DEBUG] Odczytane UUID z tokena JWT: " + uuidStr);
 
         if (uuidStr == null) {
@@ -106,7 +112,7 @@ public class LoginHandler implements HttpHandler {
         System.out.println("[DEBUG] Otrzymano dane logowania - email: " + email + ", password: " + password);
 
         // TODO: Logika uwierzytelniania
-        Map<String, Object> tokenclaims = new HashMap<>();
+        Map<String, String> tokenclaims = new HashMap<>();
         tokenclaims.put("email", email);
         String token  = ServerTokenManager.createJwt(tokenclaims);
         JsonObject responseData = new JsonObject();

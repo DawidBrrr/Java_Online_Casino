@@ -26,7 +26,7 @@ public class ConnectHandler implements HttpHandler {
         String userId = req.get("userId").getAsString();
 
         // Tworzenie nowej sesji (lub nadpisanie starej)
-        String sessionKey = sessionManager.createSession(userId);
+        String sessionKey = sessionManager.createSession(userId, gameId);
 
         // Tutaj możemy dodać dodatkową logikę np. przypisanie gracza do pokoju / wysłanie klucza AES itd.
 

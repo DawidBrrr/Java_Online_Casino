@@ -1,5 +1,7 @@
 package com.casino.java_online_casino.controllers;
 
+import com.casino.java_online_casino.Connection.Client.KeyExchangeService;
+import com.casino.java_online_casino.Connection.Client.Service;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;

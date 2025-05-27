@@ -107,9 +107,12 @@ public class RegisterHandler implements HttpHandler {
 
         String firstName = credentials.get("first_name").getAsString();
         String lastName = credentials.get("last_name").getAsString();
+        String nickname = credentials.get("nickname").getAsString();
         String email = credentials.get("email").getAsString();
         String password = credentials.get("password").getAsString();
         String birthDate = credentials.get("birth_date").getAsString(); // format: "YYYY-MM-DD" (np. 2000-01-01)
+       String credits = credentials.get("credits").getAsString();
+
 
         System.out.println("[DEBUG] Dane rejestracyjne:");
         System.out.println("  Imię: " + firstName);
@@ -117,6 +120,8 @@ public class RegisterHandler implements HttpHandler {
         System.out.println("  Email: " + email);
         System.out.println("  Hasło: " + password);
         System.out.println("  Data urodzenia: " + birthDate);
+        System.out.println("  Credits: " + credits);
+        System.out.println("  Nickname: " + nickname);
 
         System.out.println("[DEBUG] Otrzymano dane logowania - email: " + email + ", password: " + password);
 

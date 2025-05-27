@@ -1,7 +1,5 @@
 package com.casino.java_online_casino.Connection.Server.API.Handlers;
 
-import com.casino.java_online_casino.Connection.Server.ServerData;
-import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 

@@ -1,5 +1,6 @@
 package com.casino.java_online_casino.Connection.Client;
 
+import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
 import com.google.gson.JsonObject;
@@ -14,11 +15,10 @@ import java.util.Base64;
 public class KeyExchangeClient {
 
     private final KeyManager keyManager;
-    private final String serverUrl;
+    private final String serverUrl = ServerConfig.getApiPath()+"key";
     private  String token;
 
-    public KeyExchangeClient(String serverUrl) {
-        this.serverUrl = serverUrl; // np. http://localhost:12346/key
+    public KeyExchangeClient() {
         this.keyManager = new KeyManager();
     }
 
@@ -166,7 +166,6 @@ public class KeyExchangeClient {
 
         } catch (Exception e) {
             System.err.println("❌ Wyjątek podczas logowania: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
@@ -242,7 +241,6 @@ public class KeyExchangeClient {
 
         } catch (Exception e) {
             System.err.println("❌ Wyjątek podczas rejestracji: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
@@ -252,7 +250,7 @@ public class KeyExchangeClient {
         return keyManager;
     }
     public static void main(String[] args) {
-        KeyExchangeClient client = new KeyExchangeClient("http://localhost:12346/key");
+        KeyExchangeClient client = new KeyExchangeClient();
         client.performKeyExchange();
         client.register("Dominiik","Koralik","java@java.com", "admin", "26-09-2004");
         client.login("admin", "admin");
