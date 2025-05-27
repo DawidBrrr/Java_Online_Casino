@@ -1,0 +1,249 @@
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+
+    /* Estetyczne gradientowe tło pasujące do motywu kasyna */
+    -fx-background-color: linear-gradient(
+            from 0% 0% to 100% 100%,
+            #0f0f0f 0%,
+            #1a1a1a 30%,
+            #222d22 55%,
+            #2e8b57 100%
+    );
+}
+
+.status-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+    -fx-padding: 15;
+    -fx-alignment: center;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, #00000099, 5, 0.5, 0, 2);
+}
+
+.game-button {
+    -fx-font-size: 16px;
+    -fx-padding: 10px 25px;
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 20;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #ffcc00aa, 8, 0.7, 0, 2);
+    -fx-alignment: center;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.game-button:hover {
+    -fx-background-color: linear-gradient(to right, #FFA500, #FFD700);
+}
+
+.game-button:disabled {
+    -fx-background-color: #666666;
+    -fx-text-fill: #999999;
+    -fx-cursor: default;
+    -fx-effect: none;
+}
+
+.card {
+    -fx-pref-width: 80px;
+    -fx-pref-height: 112px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 8, 0.5, 0, 3);
+    -fx-cursor: default;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #FFD700;
+    -fx-border-width: 2;
+    -fx-background-color: white;
+}
+
+.score-label {
+    -fx-font-size: 28px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-min-width: 140px;
+    -fx-alignment: center_right;
+    -fx-padding: 8 15 8 15;
+    -fx-background-color: rgba(0,0,0,0.5);
+    -fx-background-radius: 12;
+}
+
+.score-value {
+    -fx-font-size: 22px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-min-width: 120px;
+    -fx-alignment: center_right;
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-background-radius: 10;
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-min-width: 120px;
+    -fx-alignment: center;
+    -fx-padding: 5 10 5 10;
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-background-radius: 10;
+}
+
+.bet-box {
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 5 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #ffcc00aa, 6, 0.5, 0, 1);
+}
+
+.balance-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-padding: 8 15;
+    -fx-background-radius: 12;
+    -fx-alignment: center;
+}
+
+/* Poker-specific styles */
+.player-container {
+    -fx-background-color: rgba(0,0,0,0.3);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: #444444;
+    -fx-border-width: 2;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0.3, 0, 2);
+}
+
+.current-player .player-container {
+    -fx-border-color: #FFD700;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, #FFD700, 15, 0.8, 0, 0);
+}
+
+.folded-player .player-container {
+    -fx-opacity: 0.5;
+    -fx-border-color: #666666;
+}
+
+.folded-player .card {
+    -fx-opacity: 0.3;
+}
+
+.message-area {
+    -fx-background-color: rgba(0,0,0,0.6);
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #FFD700;
+    -fx-border-width: 1;
+    -fx-font-family: "Consolas", "Monaco", monospace;
+    -fx-font-size: 12px;
+}
+
+.message-area .content {
+    -fx-background-color: transparent;
+}
+
+.message-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.message-area .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Spinner styling */
+.spinner {
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #FFD700;
+    -fx-border-width: 1;
+}
+
+.spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: #FFD700;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.spinner .increment-arrow-button:hover,
+.spinner .decrement-arrow-button:hover {
+    -fx-background-color: #FFA500;
+}
+
+/* Community cards area */
+.community-cards-container {
+    -fx-background-color: rgba(46, 139, 87, 0.2);
+    -fx-background-radius: 20;
+    -fx-padding: 20;
+    -fx-border-color: #2e8b57;
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+}
+
+/* Action buttons area */
+.action-buttons-area {
+    -fx-background-color: rgba(0,0,0,0.3);
+    -fx-background-radius: 15;
+    -fx-padding: 15;
+    -fx-border-color: #444444;
+    -fx-border-width: 1;
+    -fx-border-radius: 15;
+}
+
+/* Game info area styling */
+.game-info-area {
+    -fx-background-color: rgba(0,0,0,0.4);
+    -fx-background-radius: 15;
+    -fx-border-color: #FFD700;
+    -fx-border-width: 2;
+    -fx-border-radius: 15;
+}
+
+/* Animations and transitions */
+.card:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.8), 12, 0.7, 0, 4);
+}
+
+.game-button:pressed {
+    -fx-scale-x: 0.95;
+    -fx-scale-y: 0.95;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .card {
+        -fx-pref-width: 60px;
+        -fx-pref-height: 84px;
+    }
+
+    .game-button {
+        -fx-font-size: 14px;
+        -fx-padding: 8px 20px;
+    }
+
+    .section-title {
+        -fx-font-size: 16px;
+    }
+}
