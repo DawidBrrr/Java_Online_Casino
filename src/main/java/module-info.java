@@ -20,17 +20,20 @@ module com.casino.java_online_casino {
     opens com.casino.java_online_casino to javafx.fxml;
     opens com.casino.java_online_casino.User to com.google.gson;
 
-
     exports com.casino.java_online_casino;
     exports com.casino.java_online_casino.controllers;
     exports com.casino.java_online_casino.User;
     exports com.casino.java_online_casino.games.slots.controller;
     exports com.casino.java_online_casino.games.blackjack.gui;
+    exports com.casino.java_online_casino.games.poker.gui;
+
 
     opens com.casino.java_online_casino.games.slots.controller to javafx.fxml;
-    opens com.casino.java_online_casino.games.blackjack.controller;
+    opens com.casino.java_online_casino.games.blackjack.controller to javafx.fxml;
     opens com.casino.java_online_casino.games.blackjack.gui to javafx.fxml;
     opens com.casino.java_online_casino.Connection.Server.GameServer to com.google.gson;
     opens com.casino.java_online_casino.Connection.Server.DTO to com.google.gson;
     opens com.casino.java_online_casino.Connection.Games to com.google.gson;
+    opens com.casino.java_online_casino.games.poker.gui to javafx.fxml;
+
 }
