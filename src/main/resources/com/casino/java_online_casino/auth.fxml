@@ -18,8 +18,8 @@
             </ImageView>
 
             <!-- Główny kontener formularza -->
-            <VBox alignment="CENTER" spacing="30" maxWidth="600">
-                <VBox alignment="CENTER" spacing="20" styleClass="auth-box">
+            <VBox alignment="CENTER" StackPane.alignment="CENTER">
+                <VBox alignment="CENTER" spacing="20" styleClass="auth-box" maxWidth="600">
                     <Label text="Sigma Kasyno" styleClass="title"/>
 
                     <TabPane styleClass="auth-tabs">

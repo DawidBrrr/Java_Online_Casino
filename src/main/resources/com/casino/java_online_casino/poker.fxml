@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.casino.java_online_casino.games.poker.gui.PokerView"
+            stylesheets="/com/casino/styles/poker.css">
+
+    <top>
+        <StackPane>
+            <HBox alignment="CENTER">
+                <Label text="Sigma Kasyno - Texas Hold'em Poker" styleClass="title"/>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT">
+                <Button text="Powrót" onAction="#handleBack" styleClass="back-button"/>
+            </HBox>
+        </StackPane>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20">
+            <!-- Obszar kart wspólnych -->
+            <HBox fx:id="communityCardsArea" alignment="CENTER" spacing="10" styleClass="community-cards"/>
+
+            <!-- Informacje o grze -->
+            <HBox alignment="CENTER" spacing="20">
+                <Label text="Pula:" styleClass="info-label"/>
+                <Label fx:id="potLabel" styleClass="value-label"/>
+                <Label text="Aktualny zakład:" styleClass="info-label"/>
+                <Label fx:id="currentBetLabel" styleClass="value-label"/>
+            </HBox>
+
+            <!-- Obszar kart gracza -->
+            <HBox fx:id="playerCardsArea" alignment="CENTER" spacing="10" styleClass="player-cards"/>
+
+            <!-- Panel akcji gracza -->
+            <HBox fx:id="actionButtons" alignment="CENTER" spacing="10">
+                <Button text="Fold" onAction="#handleFold" styleClass="action-button"/>
+                <Button text="Check" onAction="#handleCheck" styleClass="action-button"/>
+                <Button text="Call" onAction="#handleCall" styleClass="action-button"/>
+                <VBox alignment="CENTER" spacing="5">
+                    <Slider fx:id="raiseSlider" min="0" max="1000"/>
+                    <Button text="Raise" onAction="#handleRaise" styleClass="action-button"/>
+                </VBox>
+                <Button text="All In" onAction="#handleAllIn" styleClass="action-button"/>
+            </HBox>
+        </VBox>
+    </center>
+
+    <right>
+        <VBox fx:id="playersListArea" spacing="10" styleClass="players-list">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </VBox>
+    </right>
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="10">
+            <Label text="Balance:" styleClass="info-label"/>
+            <Label fx:id="balanceLabel" styleClass="value-label"/>
+        </HBox>
+    </bottom>
+</BorderPane>
