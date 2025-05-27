@@ -1,0 +1,120 @@
+/* Ogólne */
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: linear-gradient(to bottom, #0f0f0f, #1a1a1a);
+}
+
+/* Nagłówek */
+.header {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-padding: 15;
+}
+
+.title {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+/* Przyciski */
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #FFD700;
+    -fx-border-color: #FFD700;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.logout-button:hover {
+    -fx-background-color: #FFD700;
+    -fx-text-fill: black;
+}
+
+/* Panel użytkownika */
+.profile-box {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, #00000088, 10, 0.5, 0, 2);
+}
+
+.username {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.balance-label {
+    -fx-text-fill: #CCCCCC;
+    -fx-font-size: 16px;
+}
+
+.balance-value {
+    -fx-text-fill: #00FF00;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+/* Przyciski pieniędzy */
+.money-button {
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 20;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.money-button:hover {
+    -fx-background-color: linear-gradient(to right, #FFA500, #FFD700);
+}
+
+/* Sekcja gier */
+.section-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* Karty gier */
+.game-card {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 15;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, #00000055, 5, 0.3, 0, 2);
+    -fx-cursor: hand;
+    -fx-transition: all 0.3s ease;
+}
+
+.game-card:hover {
+    -fx-background-color: rgba(255, 215, 0, 0.2);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.game-title {
+    -fx-text-fill: #FFD700;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.game-description {
+    -fx-text-fill: #CCCCCC;
+    -fx-font-size: 12px;
+}
+
+/* Stopka */
+.footer {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-padding: 10;
+}
+
+.footer-text {
+    -fx-text-fill: #666666;
+    -fx-font-size: 12px;
+}
