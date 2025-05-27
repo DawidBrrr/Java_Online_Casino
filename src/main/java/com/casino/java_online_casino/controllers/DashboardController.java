@@ -100,8 +100,21 @@ public class DashboardController {
 
     @FXML
     private void playPoker() {
-        System.out.println("Starting Poker game...");
-        // Tutaj przejście do gry
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/poker.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) usernameLabel.getScene().getWindow();
+            Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+            Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
+            stage.setScene(scene);
+            stage.setMaximized(true);
+            stage.setResizable(true);
+            stage.setTitle("Sigma Kasyno - Texas Hold'em Poker");
+            scene.getStylesheets().add(getClass().getResource("/com/casino/styles/poker.css").toExternalForm());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static int getBalance() {
