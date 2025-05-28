@@ -1,6 +1,7 @@
 package com.casino.java_online_casino.Connection.Server;
 
 import com.casino.java_online_casino.Connection.Client.KeyExchangeService;
+import com.casino.java_online_casino.Connection.Client.LoginService;
 import com.casino.java_online_casino.Connection.Client.Service;
 import com.casino.java_online_casino.Connection.Server.API.ApiServer;
 import com.casino.java_online_casino.Connection.Server.GameServer.GameServer;
@@ -56,21 +57,16 @@ public class Test {
             throw new RuntimeException(e);
         }
 
-        System.out.println(Service.getToken());
+        LoginService login = new LoginService("java@j", "admin");
+        Thread loginThread = new Thread(login);
+        loginThread.start();
 
-        BlackjackTcpClient tcpClient = new BlackjackTcpClient(Service.getToken(), Service.getKeyManager());
         try {
-            tcpClient.connect();
-        } catch (IOException e) {
-            throw new RuntimeException("Połączenie z blackjack nie powiodło się");
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
-        RemoteBlackJackController controller = new RemoteBlackJackController(tcpClient);
-
-
-        Thread aplicationThread = new Thread(() -> {
-            Main.main(new String[]{});
-        });
-        aplicationThread.start();
+        System.out.println(Service.getToken());
     }
 }

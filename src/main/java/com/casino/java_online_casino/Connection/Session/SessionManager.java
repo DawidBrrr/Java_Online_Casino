@@ -1,16 +1,20 @@
 package com.casino.java_online_casino.Connection.Session;
 
+import com.casino.java_online_casino.Connection.Tokens.KeyManager;
+import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Experimental;
 
-import java.time.Instant;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Experimental
-public class SessionManager {
+public class    SessionManager {
     private static volatile SessionManager instance;
-    private final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
+    private final Map<UUID, SessionToken> sessionMap = new ConcurrentHashMap<>();
 
     private SessionManager() {}
 
@@ -26,63 +30,129 @@ public class SessionManager {
     }
 
     // Tworzy nową sesję i przechowuje dowolny obiekt powiązany z użytkownikiem (np. BlackJackController)
-    public String createSession(String userId, Object sessionData) {
-        String sessionKey = UUID.randomUUID().toString();
-        Session session = new Session(sessionKey, userId, sessionData, Instant.now());
-        sessionMap.put(userId, session);
-        return sessionKey;
+    public SessionToken createSession(String userId) {
+        SessionToken sessionToken = new SessionToken(userId);
+        UUID uuid = sessionToken.getUuid();
+        sessionMap.put(uuid, sessionToken);
+        return sessionToken;
+    }
+    public SessionToken createSession(){
+        return createSession(null);
+    }
+
+    public SessionToken getUnregisteredSession() {
+        return new SessionToken();
     }
 
     // Pobiera sesję użytkownika
-    public Session getSession(String userId) {
+    public SessionToken getSessionByUUID(UUID userId) {
         return sessionMap.get(userId);
+    }
+    public SessionToken getSessionByUserId(String userId) {
+        return sessionMap.values().stream().filter(session -> session.getUserId().equals(userId)).findFirst().orElse(null);
     }
 
     // Sprawdza, czy użytkownik ma aktywną sesję
-    public boolean hasSession(String userId) {
+    public boolean hasSessionByUUID(UUID userId) {
         return sessionMap.containsKey(userId);
+    }
+    public boolean hasSessionByUserId(String userId) {
+        return sessionMap.values().stream().anyMatch(session -> session.getUserId().equals(userId));
+    }
+    public void deleteSessionByUUID(UUID userId) {
+        sessionMap.remove(userId);
+    }
+    public void deleteSessionByUserId(String userId) {
+        sessionMap.forEach((uuid, session) -> {
+            if (session.getUserId().equals(userId)) {
+                sessionMap.remove(uuid);
+                return;
+            }
+        });
     }
 
     // Aktualizuje dane sesji (np. nowy stan gry)
-    public void updateSessionData(String userId, Object sessionData) {
-        Session session = sessionMap.get(userId);
+    public void updateSessionData(UUID userId, SessionToken session) {
         if (session != null) {
-            session.setSessionData(sessionData);
-            session.setLastAccess(Instant.now());
+            session.updateLastAccess();
+            sessionMap.put(userId, session);
         }
     }
 
-    // Usuwa sesję użytkownika
-    public void removeSession(String userId) {
-        sessionMap.remove(userId);
+    public void cleanupExpiredSessions() {
+        sessionMap.values().removeIf(SessionToken::isTimeToExpire);
     }
+    public class SessionToken {
+        private final UUID uuid;
+        private String userId;
+        private final KeyManager keyManager;
+        private LocalDateTime lastAccess;
+        private Map<String,String> userData;
+        private boolean duringTheGame;
 
-    // (Opcjonalnie) Usuwa nieaktywne sesje po określonym czasie
-    public void cleanupExpiredSessions(long maxInactiveSeconds) {
-        Instant now = Instant.now();
-        sessionMap.values().removeIf(session ->
-                now.minusSeconds(maxInactiveSeconds).isAfter(session.getLastAccess()));
-    }
+        public SessionToken(){
+            this(null);
+        }
 
-    // Klasa wewnętrzna reprezentująca sesję
-    public static class Session {
-        private final String sessionKey;
-        private final String userId;
-        private Object sessionData; // np. BlackJackController
-        private Instant lastAccess;
-
-        public Session(String sessionKey, String userId, Object sessionData, Instant lastAccess) {
-            this.sessionKey = sessionKey;
+        public SessionToken(String userId) {
+            this.uuid = UUID.randomUUID();
+            this.keyManager = new KeyManager();
             this.userId = userId;
-            this.sessionData = sessionData;
-            this.lastAccess = lastAccess;
+            this.lastAccess = LocalDateTime.now();
+            this.userData = new HashMap<>();
+            userData.put("UUID", uuid.toString());
+            this.duringTheGame = false;
         }
 
-        public String getSessionKey() { return sessionKey; }
-        public String getUserId() { return userId; }
-        public Object getSessionData() { return sessionData; }
-        public void setSessionData(Object sessionData) { this.sessionData = sessionData; }
-        public Instant getLastAccess() { return lastAccess; }
-        public void setLastAccess(Instant lastAccess) { this.lastAccess = lastAccess; }
+        public String getNewToken(){
+            return ServerTokenManager.createJwt(userData);
+        }
+        public boolean isExpiredToken(String token){
+            try{
+                ServerTokenManager.validateJwt(token);
+                return false;
+            }catch(Exception e) {
+                return true;
+            }
+        }
+
+        public boolean isTimeToExpire(){
+            if(userId!=null){
+                return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 15;
+            }
+            return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 5;
+
+        }
+        public String getUserId() {
+            return userId;
+        }
+        public KeyManager getKeyManager() {
+            lastAccess = LocalDateTime.now();
+            return keyManager;
+        }
+        public UUID getUuid() {
+            return uuid;
+        }
+        public String getUuidString() {
+            return uuid.toString();
+        }
+        public LocalDateTime getLastAccess() {
+            return lastAccess;
+        }
+        public void updateLastAccess() {
+            lastAccess = LocalDateTime.now();
+        }
+        public boolean isDuringTheGame() {
+            return duringTheGame;
+        }
+        public void setDuringTheGame(boolean duringTheGame) {
+            this.duringTheGame = duringTheGame;
+        }
+        public void setUserId(String userId) {
+            if(userId!=null){
+                return;
+            }
+            this.userId = userId;
+        }
     }
 }

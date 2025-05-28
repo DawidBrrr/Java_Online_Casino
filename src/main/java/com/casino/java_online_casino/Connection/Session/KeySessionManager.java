@@ -10,11 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Wzorzec Singleton. Wątko-bezpieczna.
  */
 public class KeySessionManager {
-
+    //bez przypisanego user id więć ytzymam tutaj dla wydajności
     private static volatile KeySessionManager instance;
-
-    private final ConcurrentHashMap<UUID, KeyManager> sessionMap;
-
+    private final ConcurrentHashMap<UUID, SessionManager.SessionToken> sessionMap;
     private KeySessionManager() {
         sessionMap = new ConcurrentHashMap<>();
     }
@@ -40,24 +38,24 @@ public class KeySessionManager {
      * @param uuid UUID klienta
      * @return KeyManager przypisany do UUID
      */
-    public KeyManager getOrCreateKeyManager(UUID uuid) {
-        return sessionMap.computeIfAbsent(uuid, id -> new KeyManager());
+    public SessionManager.SessionToken getOrCreateSession(UUID uuid) {
+        return sessionMap.get(uuid);
     }
 
     /**
      * Ręczne dodanie instancji KeyManager (jeśli potrzebujesz customowej inicjalizacji).
      */
-    public void putKeyManager(UUID uuid, KeyManager keyManager) {
-        if (uuid == null || keyManager == null) {
+    public void putKeyManager(UUID uuid, SessionManager.SessionToken sessionToken) {
+        if (uuid == null || sessionToken == null) {
             throw new IllegalArgumentException("UUID i KeyManager nie mogą być null.");
         }
-        sessionMap.put(uuid, keyManager);
+        sessionMap.put(uuid, sessionToken);
     }
 
     /**
      * Usunięcie KeyManagera powiązanego z UUID.
      */
-    public void removeKeyManager(UUID uuid) {
+    public void removeSession(UUID uuid) {
         sessionMap.remove(uuid);
     }
 

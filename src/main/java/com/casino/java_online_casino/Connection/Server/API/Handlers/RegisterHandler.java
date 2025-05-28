@@ -60,7 +60,7 @@ public class RegisterHandler implements HttpHandler {
             return;
         }
 
-        KeyManager keyManager = KeySessionManager.getInstance().getOrCreateKeyManager(clientId);
+        KeyManager keyManager = KeySessionManager.getInstance().getOrCreateSession(clientId).getKeyManager();
         System.out.println("[DEBUG] Pobranie KeyManager dla klienta: " + clientId);
         if (keyManager == null) {
             System.out.println("[DEBUG] Brak KeyManager dla klienta o UUID: " + clientId);

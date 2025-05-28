@@ -87,6 +87,7 @@ public class BlackjackTcpHandler implements Runnable {
 
                 GameStateDTO state = GameStateDTO.fromController(controller);
                 String jsonResponse = gson.toJson(state);
+                System.out.println(jsonResponse);
 
                 String encryptedResponse;
                 try {

@@ -113,7 +113,7 @@ public class GameServer {
             // 3. Pobierz KeyManager powiązany z UUID
             KeyManager keyManager = null;
             try {
-                keyManager = keySessionManager.getOrCreateKeyManager(playerUUID);
+                keyManager = keySessionManager.getOrCreateSession(playerUUID).getKeyManager();
                 System.out.println("[DEBUG] Pobrano KeyManager: " + keyManager);
             } catch (Exception e) {
                 System.out.println("[DEBUG] Błąd pobierania KeyManager: " + e.getMessage());
