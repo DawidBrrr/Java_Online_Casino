@@ -17,25 +17,25 @@ public class ConnectHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-            return;
-        }
-        JsonObject req = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
-        String gameId = req.get("gameId").getAsString();
-        String userId = req.get("userId").getAsString();
-
-        // Tworzenie nowej sesji (lub nadpisanie starej)
-        String sessionKey = sessionManager.createSession(userId, gameId);
-
-        // Tutaj możemy dodać dodatkową logikę np. przypisanie gracza do pokoju / wysłanie klucza AES itd.
-
-        JsonObject res = new JsonObject();
-        res.addProperty("status", "connected");
-        res.addProperty("gameId", gameId);
-        res.addProperty("userId", userId);
-        res.addProperty("sessionKey", sessionKey);
-
-        JsonUtil.sendJson(exchange, res);
-    }
+//        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+//            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+//            return;
+//        }
+//        JsonObject req = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
+//        String gameId = req.get("gameId").getAsString();
+//        String userId = req.get("userId").getAsString();
+//
+//        // Tworzenie nowej sesji (lub nadpisanie starej)
+//        String sessionKey = sessionManager.createSession(userId, gameId);
+//
+//        // Tutaj możemy dodać dodatkową logikę np. przypisanie gracza do pokoju / wysłanie klucza AES itd.
+//
+//        JsonObject res = new JsonObject();
+//        res.addProperty("status", "connected");
+//        res.addProperty("gameId", gameId);
+//        res.addProperty("userId", userId);
+//        res.addProperty("sessionKey", sessionKey);
+//
+//        JsonUtil.sendJson(exchange, res);
+   }
 }

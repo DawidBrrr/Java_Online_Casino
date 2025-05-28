@@ -74,6 +74,7 @@ public class LoginService extends Service {
                     String status = loginResponse.get("status").getAsString();
                     String token = loginResponse.get("token").getAsString();
                     System.out.println("[DEBUG] Token auth " + token);
+                    Service.token = token;
 
                     if ("ok".equalsIgnoreCase(status)) {
                         System.out.println("✅ Logowanie powiodło się.");

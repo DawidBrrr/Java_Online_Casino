@@ -15,29 +15,33 @@ public class ReconnectHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-            return;
-        }
-
-        JsonObject req = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
-        String userId = req.get("userId").getAsString();
-
-        JsonObject res = new JsonObject();
-
-        // Próba odzyskania sesji
-        String sessionKey = sessionManager.getSession(userId).getSessionKey();
-        if (sessionKey == null) {
-            res.addProperty("status", "error");
-            res.addProperty("message", "Brak aktywnej sesji do przywrócenia.");
-            exchange.sendResponseHeaders(404, 0);
-        } else {
-            res.addProperty("status", "reconnected");
-            res.addProperty("userId", userId);
-            res.addProperty("sessionKey", sessionKey);
-            exchange.sendResponseHeaders(200, 0);
-        }
-
-        JsonUtil.sendJson(exchange, res);
-    }
+//        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+//            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+//            return;
+//        }
+//
+//        JsonObject req = JsonUtil.parseJsonFromIS(exchange.getRequestBody());
+//
+//
+//        JsonObject res = new JsonObject();
+//
+//        // Próba odzyskania sesji
+//        String sessionKey = sessionManager.getSession(userId).getSessionKey();
+//        if (sessionKey == null) {
+//            res.addProperty("status", "error");
+//            res.addProperty("message", "Brak aktywnej sesji do przywrócenia.");
+//            exchange.sendResponseHeaders(404, 0);
+//        } else {
+//            res.addProperty("status", "reconnected");
+//            res.addProperty("userId", userId);
+//            res.addProperty("sessionKey", sessionKey);
+//            exchange.sendResponseHeaders(200, 0);
+//        }
+//
+//        JsonUtil.sendJson(exchange, res);
+//    }
+//
+//    public String getUserUuid() {
+//
+   }
 }
