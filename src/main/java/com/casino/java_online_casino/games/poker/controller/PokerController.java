@@ -248,6 +248,8 @@ public class PokerController {
         return game.getGameState();
     }
 
+    public String getCurrentPlayerId() {return currentPlayerId;}
+
     public void shutdown() {
         if (scheduler != null) {
             scheduler.shutdown();
