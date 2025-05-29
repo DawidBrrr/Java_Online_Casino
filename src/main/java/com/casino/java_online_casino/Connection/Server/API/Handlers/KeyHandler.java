@@ -86,6 +86,8 @@ public class KeyHandler implements HttpHandler {
         logAndSend(exchange, 200, response);
 
         KeySessionManager.getInstance().putKeyManager(uuid, session);
+        session.setUserId(uuid.toString());
+        SessionManager.getInstance().updateSessionData(uuid,session);
         System.out.println("[DEBUG] Sesja zapisana w KeySessionManager pod UUID: " + uuid);
     }
 

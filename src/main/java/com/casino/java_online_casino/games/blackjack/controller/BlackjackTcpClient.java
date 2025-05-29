@@ -41,10 +41,8 @@ public class BlackjackTcpClient {
         InitRequest initRequest = new InitRequest(token, "blackjack");
         String initJson = gson.toJson(initRequest);
         writer.println(initJson);
-
-        // Możesz dodać tu odebranie ewentualnej odpowiedzi serwera,
-        // np. potwierdzenie połączenia lub błąd.
-        // (Serwer w Twojej wersji nie wysyła na start niczego, więc można pominąć)
+        writer.flush();
+        socket.setSoTimeout(5000);
     }
 
     /**

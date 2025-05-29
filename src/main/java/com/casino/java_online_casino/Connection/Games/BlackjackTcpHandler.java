@@ -1,4 +1,4 @@
-package com.casino.java_online_casino.Connection.Server.GameServer;
+package com.casino.java_online_casino.Connection.Games;
 
 import com.casino.java_online_casino.Connection.Server.DTO.GameStateDTO;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
@@ -55,6 +55,7 @@ public class BlackjackTcpHandler implements Runnable {
 
             String command = commandRequest.command == null ? "" : commandRequest.command.trim().toLowerCase();
             if ("exit".equals(command) || "quit".equals(command)) {
+                controller.onPlayerLeave(controller.getCurrentUserId()); // Wywołaj logikę opuszczenia gry
                 break;
             }
 
@@ -64,6 +65,8 @@ public class BlackjackTcpHandler implements Runnable {
 
             sendGameState(writer);
         }
+        // Po zakończeniu pętli (np. utrata połączenia) również wywołaj cleanup
+        controller.onPlayerLeave(controller.getCurrentUserId());
     }
 
     private String decryptRequest(String base64Request, PrintWriter writer) {
@@ -123,7 +126,6 @@ public class BlackjackTcpHandler implements Runnable {
     }
 
     private void sendError(PrintWriter writer, String message) {
-        // Uwaga: w produkcji lepiej zawsze szyfrować, ale dla czytelności zostawiamy nieszyfrowane
         writer.println("{\"error\":\"" + message + "\"}");
     }
 

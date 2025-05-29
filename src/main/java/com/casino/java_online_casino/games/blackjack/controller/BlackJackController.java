@@ -1,18 +1,28 @@
 package com.casino.java_online_casino.games.blackjack.controller;
 
+import com.casino.java_online_casino.Connection.Games.Game;
 import com.casino.java_online_casino.games.blackjack.model.Card;
 import com.casino.java_online_casino.games.blackjack.model.Hand;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BlackJackController {
+public class BlackJackController implements Game {
 
     private List<Card> deck;
     private Hand playerHand;
     private Hand dealerHand;
     private boolean gameOver;
+
+    // Zarządzanie sesją gracza
+    private volatile String currentUserId = null;
+    private final AtomicBoolean inProgress = new AtomicBoolean(false);
+    private final AtomicBoolean cleanupScheduled = new AtomicBoolean(false);
+    private Timer cleanupTimer = null;
 
     public BlackJackController() {
         playerHand = new Hand();
@@ -108,5 +118,72 @@ public class BlackJackController {
         return newDeck;
     }
 
+    // --- Game interface implementation ---
 
+    /**
+     * Ustawia userId tylko raz, nie pozwala na zmianę po ustawieniu.
+     */
+    public synchronized void setCurrentUserId(String userId) {
+        if (this.currentUserId != null) {
+            throw new IllegalStateException("UserId can only be set once and is already set to: " + this.currentUserId);
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId cannot be null");
+        }
+        this.currentUserId = userId;
+    }
+
+    @Override
+    public synchronized void onPlayerJoin(String userId) {
+        if (inProgress.get() && (currentUserId != null && !currentUserId.equals(userId))) {
+            throw new IllegalStateException("Game already in progress for another user");
+        }
+        if (cleanupTimer != null) {
+            cleanupTimer.cancel();
+            cleanupTimer = null;
+            cleanupScheduled.set(false);
+        }
+        if (currentUserId == null) {
+            setCurrentUserId(userId); // Ustawia tylko raz!
+        }
+        inProgress.set(true);
+        System.out.println("[DEBUG] Player joined: " + userId);
+    }
+
+    public String getCurrentUserId() {
+        return currentUserId;
+    }
+
+    @Override
+    public synchronized void onPlayerLeave(String userId) {
+        if (!inProgress.get() || (currentUserId != null && !currentUserId.equals(userId))) {
+            return;
+        }
+        System.out.println("[DEBUG] Player left: " + userId + ", scheduling cleanup in 5 minutes...");
+        inProgress.set(false);
+        if (!cleanupScheduled.getAndSet(true)) {
+            cleanupTimer = new Timer();
+            cleanupTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized (BlackJackController.this) {
+                        System.out.println("[DEBUG] Cleanup: closing game for user " + userId);
+                        cleanupScheduled.set(false);
+                        // currentUserId pozostaje ustawione, bo nie wolno go zmieniać
+                        // Możesz dodać np. czyszczenie stanu gry
+                    }
+                }
+            }, 5 * 60 * 1000); // 5 minut
+        }
+    }
+
+    @Override
+    public synchronized boolean isInProgress() {
+        return inProgress.get();
+    }
+
+    @Override
+    public synchronized boolean canJoin(String userId) {
+        return !inProgress.get() || (currentUserId != null && currentUserId.equals(userId));
+    }
 }
