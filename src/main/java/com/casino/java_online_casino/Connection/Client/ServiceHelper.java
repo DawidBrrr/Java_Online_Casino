@@ -8,7 +8,7 @@ public interface ServiceHelper {
     String LOGIN = "login";
     String REGISTER = "register";
     String LOGOUT = "logout";
-    String KEY = "KEY";
+    String KEY = "key";
     String METHOD_GET = "GET";
     String METHOD_POST = "POST";
     String METHOD_PUT = "PUT";

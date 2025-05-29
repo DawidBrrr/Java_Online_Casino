@@ -79,17 +79,6 @@ public class Main extends Application {
         }
 
         System.out.println(Service.getToken());
-
-        BlackjackTcpClient tcpClient = new BlackjackTcpClient(Service.getToken(), Service.getKeyManager());
-        try {
-            tcpClient.connect();
-        } catch (IOException e) {
-            throw new RuntimeException("Połączenie z blackjack nie powiodło się");
-        }
-
-        RemoteBlackJackController controller = new RemoteBlackJackController(tcpClient);
-
-
         launch(args);
     }
 }

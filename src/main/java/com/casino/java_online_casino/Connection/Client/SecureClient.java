@@ -10,7 +10,7 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-
+@Deprecated
 public class SecureClient {
     private final String host;
     private final int port;

@@ -1,6 +1,7 @@
 package com.casino.java_online_casino.Connection.Client;
 
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -10,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class LoginService extends Service {
@@ -24,8 +24,8 @@ public class LoginService extends Service {
     @Override
     public JsonObject toJson() {
         JsonObject loginJson = new JsonObject();
-        loginJson.addProperty("email", username);
-        loginJson.addProperty("password", password);
+        loginJson.addProperty(JsonFields.EMAIL, username);
+        loginJson.addProperty(JsonFields.PASSWORD, password);
         return loginJson;
     }
 
@@ -73,8 +73,8 @@ public class LoginService extends Service {
             }
 
             // Dekodujemy i odszyfrowujemy dane w polu "data"
-            if (responseJson.has("data")) {
-                String encryptedResponseBase64 = responseJson.get("data").getAsString();
+            if (responseJson.has(JsonFields.DATA)) {
+                String encryptedResponseBase64 = responseJson.get(JsonFields.DATA).getAsString();
                 String decryptedResponse = keyManager.decryptAes(encryptedResponseBase64);
                 System.out.println("[DEBUG] Odszyfrowana odpowiedź logowania: " + decryptedResponse);
                 JsonObject decryptedJson = JsonParser.parseString(decryptedResponse).getAsJsonObject();
@@ -92,12 +92,12 @@ public class LoginService extends Service {
     // Metoda handleResponse, która decyduje co zrobić na podstawie kodu odpowiedzi
     @Override
     public boolean handleResponse(JsonObject response) throws IOException {
-        if (response == null || !response.has("code")) {
-            System.err.println("Invalid response object: missing 'code'.");
+        if (response == null || !response.has(JsonFields.HTTP_CODE)) {
+            System.err.println("Invalid response object: missing '" + JsonFields.HTTP_CODE + "'.");
             return false;
         }
 
-        int code = response.get("code").getAsInt();
+        int code = response.get(JsonFields.HTTP_CODE).getAsInt();
 
         switch (code) {
             case 200:
@@ -136,8 +136,8 @@ public class LoginService extends Service {
 
     @Override
     protected void ok200(JsonObject response) {
-        String status = response.has("status") ? response.get("status").getAsString() : "";
-        String token = response.has("token") ? response.get("token").getAsString() : null;
+        String status = response.has(JsonFields.HTTP_STATUS) ? response.get(JsonFields.HTTP_STATUS).getAsString() : "";
+        String token = response.has(JsonFields.TOKEN) ? response.get(JsonFields.TOKEN).getAsString() : null;
 
         if (token != null) {
             Service.token = token;
@@ -147,7 +147,7 @@ public class LoginService extends Service {
 
     @Override
     protected void badRequest400(JsonObject response) {
-        System.out.println("Bad request: " + response.get("message").getAsString());
+        System.out.println("Bad request: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
@@ -160,37 +160,37 @@ public class LoginService extends Service {
 
     @Override
     protected void denied403(JsonObject response) {
-        System.out.println("Access denied: " + response.get("message").getAsString());
+        System.out.println("Access denied: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void denied404(JsonObject response) {
-        System.out.println("Not found: " + response.get("message").getAsString());
+        System.out.println("Not found: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void notAllowed405(JsonObject response) {
-        System.out.println("Method not allowed: " + response.get("message").getAsString());
+        System.out.println("Method not allowed: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void unsupported415(JsonObject response) {
-        System.out.println("Unsupported media type: " + response.get("message").getAsString());
+        System.out.println("Unsupported media type: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void serverError500(JsonObject response) {
-        System.out.println("Internal server error: " + response.get("message").getAsString());
+        System.out.println("Internal server error: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void databaseError503(JsonObject response) {
-        System.out.println("Database error: " + response.get("message").getAsString());
+        System.out.println("Database error: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void unhandledCode(JsonObject response) {
-        int code = response.get("code").getAsInt();
-        System.out.println("Unhandled response code: " + code + " - " + response.get("message").getAsString());
+        int code = response.get(JsonFields.HTTP_CODE).getAsInt();
+        System.out.println("Unhandled response code: " + code + " - " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 }
