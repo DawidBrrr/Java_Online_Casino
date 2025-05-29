@@ -1,12 +1,21 @@
 package com.casino.java_online_casino.Connection.Server.GameServer;
 
+
+import com.almasb.fxgl.net.Server;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoom;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoomManager;
 import com.casino.java_online_casino.Connection.Games.BlackjackTcpHandler;
 import com.casino.java_online_casino.Connection.Games.Game;
+
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
+
+import com.casino.java_online_casino.games.poker.controller.PokerController;
+import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -109,6 +118,30 @@ public class GameServer {
                         return;
                 }
             }
+
+
+            // 4. Wybierz handler na podstawie nazwy gry
+            Runnable gameHandler;
+            switch (request.game.toLowerCase()) {
+                case "blackjack":
+                    BlackJackController controller = new BlackJackController();
+                    gameHandler = new BlackjackTcpHandler(clientSocket, controller, keyManager);
+                    System.out.println("[INFO] GameServer blackjack started dla UUID=" + playerUUID);
+                    break;
+                case "poker":
+                    PokerTCPClient pokerTcpClient = new PokerTCPClient(request.token, keyManager);
+                    PokerRoom pokerRoom = PokerRoomManager.getInstance().createRoom(pokerTcpClient);
+                    gameHandler = new PokerTCPHandler(clientSocket, pokerRoom, keyManager);
+                    System.out.println("[INFO] GameServer poker started dla UUID=" + playerUUID);
+                    break;
+                case "slots":
+                    writer.println("{\"error\":\"Slots not implemented yet\"}");
+                    clientSocket.close();
+                    return;
+                default:
+                    writer.println("{\"error\":\"Unknown game type\"}");
+                    clientSocket.close();
+                    return;
 
             // 6. Uruchom handler gry, przekazując kontroler z sesji
             KeyManager keyManager = session.getKeyManager();
