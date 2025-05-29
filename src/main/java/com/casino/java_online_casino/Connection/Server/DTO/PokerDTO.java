@@ -21,8 +21,8 @@ public class PokerDTO {
     public String winnerId;
 
     public static class CardDTO {
-        public String suit;
-        public String rank;
+        public Card.Suit suit;
+        public Card.Rank rank;
         public String imagePath;
     }
 
@@ -46,8 +46,8 @@ public class PokerDTO {
         dto.communityCards = controller.getCommunityCards().stream()
             .map(card -> {
                 CardDTO cardDTO = new CardDTO();
-                cardDTO.suit = card.getSuit().toString();
-                cardDTO.rank = card.getRank().toString();
+                cardDTO.suit = card.getSuit();
+                cardDTO.rank = card.getRank();
                 //cardDTO.imagePath = card.getImagePath(); CZEMU DO CHOLERY NIE WIDZI FUNKCJI
                 return cardDTO;
             }).toList();
@@ -63,15 +63,15 @@ public class PokerDTO {
                     playerDTO.hand = player.getHand().stream()
                         .map(card -> {
                             CardDTO cardDTO = new CardDTO();
-                            cardDTO.suit = card.getSuit().toString();
-                            cardDTO.rank = card.getRank().toString();
+                            cardDTO.suit = card.getSuit();
+                            cardDTO.rank = card.getRank();
                             //cardDTO.imagePath = card.getImagePath(); CZEMU DO CHOLERY NIE WIDZI FUNKCJI
                             return cardDTO;
                         }).toList();
                     playerDTO.status = player.isFolded() ? "folded" : (player.isAllIn() ? "all_in" : "active");
                     //playerDTO.isDealer = controller.isDealer(player);
                    // playerDTO.isSmallBlind = controller.isSmallBlind(player);
-                   // playerDTO.isBigBlind = controller.isBigBlind(player); CZAT PODPOWIADA NIE MAM POJĘCIA CO TO
+                   // playerDTO.isBigBlind = controller.isBigBlind(player); CZAT PODPOWIADA NIE MAM POJĘCIA CO TO NIE ZNAM ZASAD POKERA
                     return playerDTO;
                 }
             ));
