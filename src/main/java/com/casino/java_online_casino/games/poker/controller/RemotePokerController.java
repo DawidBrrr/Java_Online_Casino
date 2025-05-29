@@ -2,6 +2,8 @@ package com.casino.java_online_casino.games.poker.controller;
 
 import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
 import com.casino.java_online_casino.games.poker.model.Card;
+import com.casino.java_online_casino.games.poker.model.PokerGame;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +39,8 @@ public class RemotePokerController {
     }
 
     // Gettery stanu gry
-    public String getGameStatus() {
-        return lastState != null ? lastState.gameState.toString() : "";
+    public PokerGame.GameState getGameStatus() {
+        return lastState != null ? lastState.gameState : PokerGame.GameState.WAITING_FOR_PLAYERS;
     }
 
     public int getPot() {

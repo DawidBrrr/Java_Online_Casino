@@ -1,11 +1,15 @@
 package com.casino.java_online_casino.Connection.Server.GameServer;
 
 import com.almasb.fxgl.net.Server;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoom;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoomManager;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Session.KeySessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
+import com.casino.java_online_casino.games.poker.controller.PokerController;
+import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -131,9 +135,11 @@ public class GameServer {
                     System.out.println("[INFO] GameServer blackjack started dla UUID=" + playerUUID);
                     break;
                 case "poker":
-                    writer.println("{\"error\":\"Poker not implemented yet\"}");
-                    clientSocket.close();
-                    return;
+                    PokerTCPClient pokerTcpClient = new PokerTCPClient(request.token, keyManager);
+                    PokerRoom pokerRoom = PokerRoomManager.getInstance().createRoom(pokerTcpClient);
+                    gameHandler = new PokerTCPHandler(clientSocket, pokerRoom, keyManager);
+                    System.out.println("[INFO] GameServer poker started dla UUID=" + playerUUID);
+                    break;
                 case "slots":
                     writer.println("{\"error\":\"Slots not implemented yet\"}");
                     clientSocket.close();
