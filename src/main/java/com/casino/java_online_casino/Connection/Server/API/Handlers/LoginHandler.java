@@ -4,6 +4,7 @@ import com.casino.java_online_casino.Connection.Session.KeySessionManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.google.gson.JsonObject;
@@ -15,8 +16,6 @@ import io.jsonwebtoken.Claims;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class LoginHandler implements HttpHandler {
@@ -45,34 +44,34 @@ public class LoginHandler implements HttpHandler {
         }
 
         JsonObject requestJson = readRequestJson(exchange);
-        if (requestJson == null || !requestJson.has("data")) {
-            logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing field: 'data'"));
+        if (requestJson == null || !requestJson.has(JsonFields.DATA)) {
+            logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing field: '" + JsonFields.DATA + "'"));
             return;
         }
 
         SessionManager.SessionToken session = KeySessionManager.getInstance().getOrCreateSession(clientId);
-        String decryptedJson = decryptRequestData(exchange, requestJson.get("data").getAsString(), session.getKeyManager());
+        String decryptedJson = decryptRequestData(exchange, requestJson.get(JsonFields.DATA).getAsString(), session.getKeyManager());
         if (decryptedJson == null) return;
 
         JsonObject credentials = JsonParser.parseString(decryptedJson).getAsJsonObject();
-        if (!credentials.has("email") || !credentials.has("password")) {
-            logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing fields: 'email' and/or 'password'"));
+        if (!credentials.has(JsonFields.EMAIL) || !credentials.has(JsonFields.PASSWORD)) {
+            logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing fields: '" + JsonFields.EMAIL + "' and/or '" + JsonFields.PASSWORD + "'"));
             return;
         }
 
-        String email = credentials.get("email").getAsString();
-        String password = credentials.get("password").getAsString();
+        String email = credentials.get(JsonFields.EMAIL).getAsString();
+        String password = credentials.get(JsonFields.PASSWORD).getAsString();
 
         System.out.println("[DEBUG] Dane logowania - email: " + email + ", password: " + password);
 
         String jwt = session.getNewToken();
 
         JsonObject response = ServerJsonMessage.ok("Zalogowano");
-        response.addProperty("token", jwt);
+        response.addProperty(JsonFields.TOKEN, jwt);
 
         String encryptedResponse = session.getKeyManager().encryptAes(response.toString());
         JsonObject encryptedWrapper = new JsonObject();
-        encryptedWrapper.addProperty("data", encryptedResponse);
+        encryptedWrapper.addProperty(JsonFields.DATA, encryptedResponse);
 
         logAndSend(exchange, 200, encryptedWrapper);
         session.setUserId(email);
@@ -90,9 +89,9 @@ public class LoginHandler implements HttpHandler {
     private UUID extractClientIdFromToken(HttpExchange exchange, String token) throws IOException {
         try {
             Claims claims = ServerTokenManager.validateJwt(token);
-            String uuidStr = claims.get("UUID", String.class);
+            String uuidStr = claims.get(JsonFields.UUID, String.class);
             if (uuidStr == null) {
-                logAndSend(exchange, 400, ServerJsonMessage.badRequest("Token does not contain UUID"));
+                logAndSend(exchange, 400, ServerJsonMessage.badRequest("Token does not contain " + JsonFields.UUID));
                 return null;
             }
             return UUID.fromString(uuidStr);

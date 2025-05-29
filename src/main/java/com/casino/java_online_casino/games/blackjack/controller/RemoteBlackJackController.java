@@ -14,8 +14,13 @@ public class RemoteBlackJackController {
     // Ostatni znany stan, aktualizujesz po każdej akcji!
     private GameStateDTO lastState;
 
-    public RemoteBlackJackController(BlackjackTcpClient tcpClient) {
+    public RemoteBlackJackController(BlackjackTcpClient tcpClient)  {
         this.tcpClient = tcpClient;
+        try {
+            lastState = tcpClient.reconnect();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void startNewGame() throws Exception {

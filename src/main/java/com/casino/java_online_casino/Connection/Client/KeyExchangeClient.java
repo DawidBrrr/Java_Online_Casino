@@ -11,7 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
+@Deprecated
 public class KeyExchangeClient {
 
     private final KeyManager keyManager;

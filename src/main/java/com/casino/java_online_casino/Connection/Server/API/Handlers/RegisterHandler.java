@@ -8,22 +8,21 @@ import java.io.IOException;
 import com.casino.java_online_casino.Connection.Session.KeySessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import io.jsonwebtoken.Claims;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+
 @Experimental
 public class RegisterHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        System.out.println("[DEBUG] Odebrano zapytanie do LoginHandler");
+        System.out.println("[DEBUG] Odebrano zapytanie do RegisterHandler");
 
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
             System.out.println("[DEBUG] Nieobsługiwana metoda HTTP: " + exchange.getRequestMethod());
@@ -41,7 +40,7 @@ public class RegisterHandler implements HttpHandler {
         }
 
         Claims claims = ServerTokenManager.validateJwt(authHeader);
-        String uuidStr = claims.get("UUID", String.class);
+        String uuidStr = claims.get(JsonFields.UUID, String.class);
         System.out.println("[DEBUG] Odczytane UUID z tokena JWT: " + uuidStr);
 
         if (uuidStr == null) {
@@ -76,13 +75,13 @@ public class RegisterHandler implements HttpHandler {
         }
         System.out.println("[DEBUG] Parsowanie JSON z żądania zakończone");
 
-        if (!requestJson.has("data")) {
-            System.out.println("[DEBUG] Brak pola 'data' w żądaniu");
-            sendError(exchange, 400, "Brak pola 'data'");
+        if (!requestJson.has(JsonFields.DATA)) {
+            System.out.println("[DEBUG] Brak pola '" + JsonFields.DATA + "' w żądaniu");
+            sendError(exchange, 400, "Brak pola '" + JsonFields.DATA + "'");
             return;
         }
 
-        String encryptedPayload = requestJson.get("data").getAsString();
+        String encryptedPayload = requestJson.get(JsonFields.DATA).getAsString();
         System.out.println("[DEBUG] Otrzymano zaszyfrowane dane: " + encryptedPayload);
 
         String decryptedJson;
@@ -96,23 +95,27 @@ public class RegisterHandler implements HttpHandler {
         }
 
         JsonObject credentials = JsonParser.parseString(decryptedJson).getAsJsonObject();
-        if (!credentials.has("first_name") || !credentials.has("last_name") ||
-                !credentials.has("email") || !credentials.has("password") ||
-                !credentials.has("birth_date")) {
+        if (!credentials.has(JsonFields.FIRST_NAME) || !credentials.has(JsonFields.LAST_NAME) ||
+                !credentials.has(JsonFields.EMAIL) || !credentials.has(JsonFields.PASSWORD) ||
+                !credentials.has(JsonFields.BIRTH_DATE)) {
 
-            System.out.println("[DEBUG] Brak jednego z wymaganych pól: first_name, last_name, email, password, birth_date");
+            System.out.println("[DEBUG] Brak jednego z wymaganych pól: "
+                    + JsonFields.FIRST_NAME + ", "
+                    + JsonFields.LAST_NAME + ", "
+                    + JsonFields.EMAIL + ", "
+                    + JsonFields.PASSWORD + ", "
+                    + JsonFields.BIRTH_DATE);
             sendError(exchange, 400, "Brak wymaganych pól do rejestracji");
             return;
         }
 
-        String firstName = credentials.get("first_name").getAsString();
-        String lastName = credentials.get("last_name").getAsString();
-        String nickname = credentials.get("nickname").getAsString();
-        String email = credentials.get("email").getAsString();
-        String password = credentials.get("password").getAsString();
-        String birthDate = credentials.get("birth_date").getAsString(); // format: "YYYY-MM-DD" (np. 2000-01-01)
-       String credits = credentials.get("credits").getAsString();
-
+        String firstName = credentials.get(JsonFields.FIRST_NAME).getAsString();
+        String lastName = credentials.get(JsonFields.LAST_NAME).getAsString();
+        String nickname = credentials.has(JsonFields.NICKNAME) ? credentials.get(JsonFields.NICKNAME).getAsString() : "";
+        String email = credentials.get(JsonFields.EMAIL).getAsString();
+        String password = credentials.get(JsonFields.PASSWORD).getAsString();
+        String birthDate = credentials.get(JsonFields.BIRTH_DATE).getAsString();
+        String credits = credentials.has(JsonFields.CREDITS) ? credentials.get(JsonFields.CREDITS).getAsString() : "";
 
         System.out.println("[DEBUG] Dane rejestracyjne:");
         System.out.println("  Imię: " + firstName);
@@ -123,30 +126,24 @@ public class RegisterHandler implements HttpHandler {
         System.out.println("  Credits: " + credits);
         System.out.println("  Nickname: " + nickname);
 
-        System.out.println("[DEBUG] Otrzymano dane logowania - email: " + email + ", password: " + password);
+        // TODO: Logika rejestracji użytkownika
 
-        // TODO: Logika uwierzytelniania
         JsonObject responseData = new JsonObject();
-        responseData.addProperty("status", "ok");
-        responseData.addProperty("message", "Zalogowano");
+        responseData.addProperty(JsonFields.HTTP_STATUS, "ok");
+        responseData.addProperty(JsonFields.HTTP_MESSAGE, "Zarejestrowano");
 
-// Zamień na String
         String responseDataString = responseData.toString();
-
-// Zaszyfruj responseDataString za pomocą AES
         String encryptedResponseBase64 = keyManager.encryptAes(responseDataString);
 
-// Utwórz obiekt JSON z polem encryptedData
         JsonObject responseWrapper = new JsonObject();
-        responseWrapper.addProperty("data", encryptedResponseBase64);
+        responseWrapper.addProperty(JsonFields.DATA, encryptedResponseBase64);
         sendJson(exchange, 200, responseWrapper);
-// Wyślij zaszyfrowaną odpowiedź
     }
 
     private void sendError(HttpExchange exchange, int status, String message) throws IOException {
         JsonObject error = new JsonObject();
-        error.addProperty("status", "error");
-        error.addProperty("message", message);
+        error.addProperty(JsonFields.HTTP_STATUS, "error");
+        error.addProperty(JsonFields.HTTP_MESSAGE, message);
         sendJson(exchange, status, error);
     }
 

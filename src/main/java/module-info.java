@@ -35,4 +35,5 @@ module com.casino.java_online_casino {
     opens com.casino.java_online_casino.games.poker.gui to javafx.fxml;
     opens com.casino.java_online_casino.Connection.Server.GameServer to com.google.gson;
     opens com.casino.java_online_casino.Connection.Server.DTO to com.google.gson;
+    opens com.casino.java_online_casino.Connection.Games to com.google.gson;
 }

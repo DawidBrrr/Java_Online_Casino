@@ -4,6 +4,7 @@ import com.casino.java_online_casino.Connection.Session.KeySessionManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager.SessionToken;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.google.gson.JsonObject;
@@ -33,7 +34,7 @@ public class KeyHandler implements HttpHandler {
             System.out.println("[DEBUG] Odebrano body żądania: " + requestBody);
 
             if (!hasClientPublicKey(requestBody)) {
-                logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing field: 'clientPublicKey'"));
+                logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing field: '" + JsonFields.CL_PUBLIC_KEY + "'"));
                 return;
             }
 
@@ -53,8 +54,8 @@ public class KeyHandler implements HttpHandler {
     }
 
     private boolean hasClientPublicKey(JsonObject requestBody) {
-        if (!requestBody.has("clientPublicKey")) {
-            System.out.println("[DEBUG] Brak pola 'clientPublicKey' w żądaniu");
+        if (!requestBody.has(JsonFields.CL_PUBLIC_KEY)) {
+            System.out.println("[DEBUG] Brak pola '" + JsonFields.CL_PUBLIC_KEY + "' w żądaniu");
             return false;
         }
         return true;
@@ -62,7 +63,7 @@ public class KeyHandler implements HttpHandler {
 
     private void handleKeyExchange(HttpExchange exchange, JsonObject requestBody) throws IOException {
         SessionToken session  = SessionManager.getInstance().getUnregisteredSession();
-        String clientPublicKeyBase64 = requestBody.get("clientPublicKey").getAsString();
+        String clientPublicKeyBase64 = requestBody.get(JsonFields.CL_PUBLIC_KEY).getAsString();
         System.out.println("[DEBUG] Klucz publiczny klienta (Base64): " + clientPublicKeyBase64);
 
         session.getKeyManager().importForeignKey(clientPublicKeyBase64);
@@ -79,12 +80,14 @@ public class KeyHandler implements HttpHandler {
         System.out.println("[DEBUG] Wygenerowany token JWT: " + token);
 
         JsonObject response = ServerJsonMessage.ok("Key exchange completed successfully.");
-        response.addProperty("serverPublicKey", serverPublicKeyBase64);
-        response.addProperty("token", token);
+        response.addProperty(JsonFields.SR_PUBLIC_KEY, serverPublicKeyBase64);
+        response.addProperty(JsonFields.TOKEN, token);
 
         logAndSend(exchange, 200, response);
 
         KeySessionManager.getInstance().putKeyManager(uuid, session);
+        session.setUserId(uuid.toString());
+        SessionManager.getInstance().updateSessionData(uuid,session);
         System.out.println("[DEBUG] Sesja zapisana w KeySessionManager pod UUID: " + uuid);
     }
 

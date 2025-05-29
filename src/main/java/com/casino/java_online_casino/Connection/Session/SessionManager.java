@@ -1,5 +1,6 @@
 package com.casino.java_online_casino.Connection.Session;
 
+import com.casino.java_online_casino.Connection.Games.Game;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Experimental;
@@ -10,11 +11,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Experimental
-public class    SessionManager {
+public class SessionManager {
     private static volatile SessionManager instance;
     private final Map<UUID, SessionToken> sessionMap = new ConcurrentHashMap<>();
+    private final ReentrantReadWriteLock mapLock = new ReentrantReadWriteLock();
 
     private SessionManager() {}
 
@@ -33,7 +37,12 @@ public class    SessionManager {
     public SessionToken createSession(String userId) {
         SessionToken sessionToken = new SessionToken(userId);
         UUID uuid = sessionToken.getUuid();
-        sessionMap.put(uuid, sessionToken);
+        mapLock.writeLock().lock();
+        try {
+            sessionMap.put(uuid, sessionToken);
+        } finally {
+            mapLock.writeLock().unlock();
+        }
         return sessionToken;
     }
     public SessionToken createSession(){
@@ -46,42 +55,80 @@ public class    SessionManager {
 
     // Pobiera sesję użytkownika
     public SessionToken getSessionByUUID(UUID userId) {
-        return sessionMap.get(userId);
+        mapLock.readLock().lock();
+        try {
+            return sessionMap.get(userId);
+        } finally {
+            mapLock.readLock().unlock();
+        }
     }
     public SessionToken getSessionByUserId(String userId) {
-        return sessionMap.values().stream().filter(session -> session.getUserId().equals(userId)).findFirst().orElse(null);
+        mapLock.readLock().lock();
+        try {
+            return sessionMap.values().stream()
+                    .filter(session -> userId != null && userId.equals(session.getUserId()))
+                    .findFirst().orElse(null);
+        } finally {
+            mapLock.readLock().unlock();
+        }
     }
 
     // Sprawdza, czy użytkownik ma aktywną sesję
     public boolean hasSessionByUUID(UUID userId) {
-        return sessionMap.containsKey(userId);
+        mapLock.readLock().lock();
+        try {
+            return sessionMap.containsKey(userId);
+        } finally {
+            mapLock.readLock().unlock();
+        }
     }
     public boolean hasSessionByUserId(String userId) {
-        return sessionMap.values().stream().anyMatch(session -> session.getUserId().equals(userId));
+        mapLock.readLock().lock();
+        try {
+            return sessionMap.values().stream().anyMatch(session -> userId != null && userId.equals(session.getUserId()));
+        } finally {
+            mapLock.readLock().unlock();
+        }
     }
     public void deleteSessionByUUID(UUID userId) {
-        sessionMap.remove(userId);
+        mapLock.writeLock().lock();
+        try {
+            sessionMap.remove(userId);
+        } finally {
+            mapLock.writeLock().unlock();
+        }
     }
     public void deleteSessionByUserId(String userId) {
-        sessionMap.forEach((uuid, session) -> {
-            if (session.getUserId().equals(userId)) {
-                sessionMap.remove(uuid);
-                return;
-            }
-        });
+        mapLock.writeLock().lock();
+        try {
+            sessionMap.entrySet().removeIf(entry -> userId != null && userId.equals(entry.getValue().getUserId()));
+        } finally {
+            mapLock.writeLock().unlock();
+        }
     }
 
     // Aktualizuje dane sesji (np. nowy stan gry)
     public void updateSessionData(UUID userId, SessionToken session) {
         if (session != null) {
             session.updateLastAccess();
-            sessionMap.put(userId, session);
+            mapLock.writeLock().lock();
+            try {
+                sessionMap.put(userId, session);
+            } finally {
+                mapLock.writeLock().unlock();
+            }
         }
     }
 
     public void cleanupExpiredSessions() {
-        sessionMap.values().removeIf(SessionToken::isTimeToExpire);
+        mapLock.writeLock().lock();
+        try {
+            sessionMap.values().removeIf(SessionToken::isTimeToExpire);
+        } finally {
+            mapLock.writeLock().unlock();
+        }
     }
+
     public class SessionToken {
         private final UUID uuid;
         private String userId;
@@ -89,6 +136,8 @@ public class    SessionManager {
         private LocalDateTime lastAccess;
         private Map<String,String> userData;
         private boolean duringTheGame;
+        private Game game;
+        private final ReentrantLock gameLock = new ReentrantLock();
 
         public SessionToken(){
             this(null);
@@ -102,6 +151,7 @@ public class    SessionManager {
             this.userData = new HashMap<>();
             userData.put("UUID", uuid.toString());
             this.duringTheGame = false;
+            this.game = null;
         }
 
         public String getNewToken(){
@@ -121,7 +171,6 @@ public class    SessionManager {
                 return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 15;
             }
             return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 5;
-
         }
         public String getUserId() {
             return userId;
@@ -153,6 +202,37 @@ public class    SessionManager {
                 return;
             }
             this.userId = userId;
+        }
+
+        // --- GAME MANAGEMENT ---
+
+        public Game getGame() {
+            return this.game;
+        }
+
+        public void setGame(Game game) {
+            this.game = game;
+        }
+
+        /**
+         * Próbuje zarezerwować kontroler gry dla klienta.
+         * Zwraca true jeśli rezerwacja się powiodła, false jeśli już jest zajęty.
+         */
+        public boolean tryLockGame() {
+            return gameLock.tryLock();
+        }
+
+        /**
+         * Zwalnia rezerwację kontrolera gry.
+         */
+        public void unlockGame() {
+            if (gameLock.isHeldByCurrentThread()) {
+                gameLock.unlock();
+            }
+        }
+
+        public boolean isGameLocked() {
+            return gameLock.isLocked();
         }
     }
 }
