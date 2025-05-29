@@ -2,8 +2,11 @@ package com.casino.java_online_casino.Connection.Games;
 
 import com.casino.java_online_casino.Connection.Server.DTO.GameStateDTO;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
+import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.net.Socket;
@@ -43,7 +46,7 @@ public class BlackjackTcpHandler implements Runnable {
         String base64Request;
         while ((base64Request = reader.readLine()) != null) {
             if (base64Request.isBlank()) {
-                sendError(writer, "Empty request");
+                sendError(writer, ServerJsonMessage.badRequest("Puste żądanie"));
                 continue;
             }
 
@@ -55,15 +58,13 @@ public class BlackjackTcpHandler implements Runnable {
 
             String command = commandRequest.command == null ? "" : commandRequest.command.trim().toLowerCase();
             if ("exit".equals(command) || "quit".equals(command)) {
-                controller.onPlayerLeave(controller.getCurrentUserId()); // Wywołaj logikę opuszczenia gry
+                controller.onPlayerLeave(controller.getCurrentUserId());
                 break;
             }
 
             if (!processCommand(command, writer)) {
                 continue;
             }
-
-            sendGameState(writer);
         }
         // Po zakończeniu pętli (np. utrata połączenia) również wywołaj cleanup
         controller.onPlayerLeave(controller.getCurrentUserId());
@@ -73,7 +74,7 @@ public class BlackjackTcpHandler implements Runnable {
         try {
             return keyManager.decryptAes(base64Request);
         } catch (Exception e) {
-            sendError(writer, "Decryption failed");
+            sendError(writer, ServerJsonMessage.badRequest("Błąd deszyfracji danych"));
             return null;
         }
     }
@@ -82,12 +83,12 @@ public class BlackjackTcpHandler implements Runnable {
         try {
             CommandRequest cmd = gson.fromJson(jsonRequest, CommandRequest.class);
             if (cmd == null || cmd.command == null) {
-                sendError(writer, "Missing command");
+                sendError(writer, ServerJsonMessage.badRequest("Puste dane"));
                 return null;
             }
             return cmd;
         } catch (Exception e) {
-            sendError(writer, "Invalid JSON format");
+            sendError(writer, ServerJsonMessage.badRequest("Nieprawidłowy format JSON"));
             return null;
         }
     }
@@ -97,15 +98,22 @@ public class BlackjackTcpHandler implements Runnable {
             switch (command) {
                 case "newgame":
                     controller.startNewGame();
+                    sendGameState(writer);
                     break;
                 case "hit":
                     controller.playerHit();
+                    sendGameState(writer);
                     break;
                 case "stand":
                     controller.playerStand();
+                    sendGameState(writer);
+                    break;
+                case "reconnect":
+                    // Po reconnect zawsze wysyłamy pełny stan gry, nawet jeśli gameOver
+                    sendGameState(writer);
                     break;
                 default:
-                    sendError(writer, "Unknown command");
+                    sendError(writer, ServerJsonMessage.methodNotAllowed());
                     return false;
             }
         }
@@ -114,19 +122,26 @@ public class BlackjackTcpHandler implements Runnable {
 
     private void sendGameState(PrintWriter writer) {
         GameStateDTO state = GameStateDTO.fromController(controller);
-        String jsonResponse = gson.toJson(state);
-        System.out.println("[DEBUG] Odpowiedź GameState: " + jsonResponse);
+        JsonObject okMessage = ServerJsonMessage.ok("Stan gry");
+        okMessage.addProperty(JsonFields.DATA, gson.toJson(state));
+        System.out.println("[DEBUG] Odpowiedź " + okMessage);
 
         try {
-            String encryptedResponse = keyManager.encryptAes(jsonResponse);
+            String encryptedResponse = keyManager.encryptAes(okMessage.toString());
             writer.println(encryptedResponse);
         } catch (Exception e) {
-            sendError(writer, "Encryption failed");
+            sendError(writer, ServerJsonMessage.internalServerError());
         }
     }
 
-    private void sendError(PrintWriter writer, String message) {
-        writer.println("{\"error\":\"" + message + "\"}");
+    private void sendError(PrintWriter writer, JsonObject errorJson) {
+        try {
+            String encrypted = keyManager.encryptAes(errorJson.toString());
+            writer.println(encrypted);
+        } catch (Exception e) {
+            // Ostateczność: wyślij plain JSON
+            writer.println("{\"status\":\"error\",\"code\":500,\"message\":\"Encryption failed\"}");
+        }
     }
 
     private void closeSocketQuietly() {

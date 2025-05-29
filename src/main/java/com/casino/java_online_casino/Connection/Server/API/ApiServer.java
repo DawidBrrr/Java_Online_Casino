@@ -8,14 +8,15 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+
 @Experimental
 public class ApiServer {
     static boolean isActive = false;
+
     public static void start() {
-        if(isActive){
+        if (isActive) {
             System.out.println("Server jest już aktywny");
-        }
-        else{
+        } else {
             init();
         }
     }

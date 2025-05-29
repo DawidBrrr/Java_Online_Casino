@@ -64,4 +64,15 @@ public class ServerJsonMessage {
     public static JsonObject accessDenied() {
         return create("error", 403, "You do not have permission to access this resource.");
     }
+    // --- Ping/Echo ---
+    public static JsonObject ping() {
+        return create("check", 100, "Ping/Echo - connection alive.");
+    }
+    public static JsonObject pong() {
+        return create("check", 101, "Ping/Echo - connection alive.");
+    }
+
+    public static JsonObject echo(String echoMessage) {
+        return create("check", 100, echoMessage);
+    }
 }

@@ -3,18 +3,17 @@ package com.casino.java_online_casino.games.blackjack.controller;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Server.DTO.GameStateDTO;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
+import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
-/**
- * Klient TCP kompatybilny z GameServer i BlackjackTcpHandler.
- * Wysyła token i nazwę gry na start,
- * a następnie wykonuje komendy: newGame, hit, stand,
- * szyfrując je AES i deszyfrując odpowiedzi.
- */
 public class BlackjackTcpClient {
 
     private final String token;
@@ -29,26 +28,19 @@ public class BlackjackTcpClient {
         this.keyManager = keyManager;
     }
 
-    /**
-     * Nawiązuje połączenie i przesyła inicjalny JSON z tokenem i nazwą gry.
-     */
     public void connect() throws IOException {
         this.socket = new Socket(ServerConfig.getGameServerHost(), ServerConfig.getGameServerPort());
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
 
-        // Wysłanie inicjalnego JSON z tokenem i nazwą gry "blackjack"
         InitRequest initRequest = new InitRequest(token, "blackjack");
         String initJson = gson.toJson(initRequest);
         writer.println(initJson);
         writer.flush();
         socket.setSoTimeout(5000);
+        System.out.println("[DEBUG JACK CLIENT] Połączono z serwerem i wysłano initRequest.");
     }
 
-    /**
-     * Wysyła komendę do serwera i zwraca obiekt GameStateDTO z odpowiedzi.
-     * Komenda jest szyfrowana AES.
-     */
     private GameStateDTO sendCommand(String command) throws Exception {
         CommandRequest req = new CommandRequest(command);
         String jsonReq = gson.toJson(req);
@@ -56,23 +48,46 @@ public class BlackjackTcpClient {
         writer.println(encryptedReq);
 
         String encryptedResp = reader.readLine();
+        System.out.println("[DEBUG JACK CLIENT] Odebrano odpowiedź: " + encryptedResp);
         if (encryptedResp == null) {
-            throw new IOException("Połączenie zamknięte przez serwer.");
+            throw new IOException("[DEBUG JACK CLIENT] Połączenie zamknięte przez serwer.");
         }
 
-        // Jeśli serwer zwrócił JSON z błędem (bez szyfrowania), próbujemy to wykryć
-        if (encryptedResp.startsWith("{")) {
-            ErrorResponse error = gson.fromJson(encryptedResp, ErrorResponse.class);
-            if (error.error != null) {
-                throw new IOException("Serwer zwrócił błąd: " + error.error);
+        // Jeśli odpowiedź wygląda na plain JSON (nie base64), nie próbuj jej deszyfrować!
+        if (encryptedResp.strip().startsWith("{")) {
+            JsonObject errorObj = JsonParser.parseString(encryptedResp).getAsJsonObject();
+            if (errorObj.has(JsonFields.HTTP_STATUS) && errorObj.has(JsonFields.HTTP_CODE) && errorObj.has(JsonFields.HTTP_MESSAGE)) {
+                throw new IOException("[DEBUG JACK CLIENT] Serwer zwrócił błąd: " + errorObj.get(JsonFields.HTTP_MESSAGE).getAsString());
+            }
+            throw new IOException("[DEBUG JACK CLIENT] Serwer zwrócił nieoczekiwany plain JSON: " + encryptedResp);
+        }
+
+        // Odpowiedź wygląda na base64 – deszyfruj
+        String jsonResp = keyManager.decryptAes(encryptedResp);
+        System.out.println("[DEBUG JACK CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
+
+        JsonObject wholeJson = JsonParser.parseString(jsonResp).getAsJsonObject();
+
+        if (wholeJson.has(JsonFields.HTTP_STATUS) && wholeJson.has(JsonFields.HTTP_CODE) && wholeJson.has(JsonFields.HTTP_MESSAGE)) {
+            String status = wholeJson.get(JsonFields.HTTP_STATUS).getAsString();
+            if (status.equalsIgnoreCase(JsonFields.HTTP_ERROR)) {
+                throw new IOException("[DEBUG JACK CLIENT] Serwer zwrócił błąd: " + wholeJson.get(JsonFields.HTTP_MESSAGE).getAsString());
+            } else if (status.equalsIgnoreCase(JsonFields.HTTP_CHECK)) {
+                // Odpowiadamy pongiem na ping/check serwera
+                String pong = keyManager.encryptAes(ServerJsonMessage.pong().toString());
+                writer.println(pong);
+                writer.flush();
+                System.out.println("[DEBUG JACK CLIENT] Odpowiedź pong na ping serwera: " + LocalDateTime.now());
+                // Możesz zwrócić null lub kontynuować oczekiwanie na kolejną odpowiedź, jeśli to część flow
+                return null;
             }
         }
 
-        String jsonResp = keyManager.decryptAes(encryptedResp);
-        return gson.fromJson(jsonResp, GameStateDTO.class);
+        if (wholeJson.has(JsonFields.DATA)) {
+            return gson.fromJson(wholeJson.get(JsonFields.DATA).getAsString(), GameStateDTO.class);
+        }
+        throw new IOException("[DEBUG JACK CLIENT] Nieprawidłowy format odpowiedzi od serwera: " + jsonResp);
     }
-
-    // Metody odpowiadające akcjom w kontrolerze Blackjack
 
     public GameStateDTO newGame() throws Exception {
         return sendCommand("newgame");
@@ -86,22 +101,24 @@ public class BlackjackTcpClient {
         return sendCommand("stand");
     }
 
-    /**
-     * Zamknięcie połączenia.
-     */
+    public GameStateDTO reconnect() throws Exception {
+        return sendCommand("reconnect");
+    }
+
     public void close() {
         try {
             if (writer != null) {
-                writer.println(keyManager.encryptAes("{\"command\":\"exit\"}")); // wysłanie exit
+                writer.println(keyManager.encryptAes("{\"command\":\"exit\"}"));
                 writer.flush();
             }
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-        } catch (Exception ignored) {}
+            System.out.println("[DEBUG JACK CLIENT] Zamknięto połączenie.");
+        } catch (Exception e) {
+            System.out.println("[DEBUG JACK CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
+        }
     }
-
-    // --- Klasy pomocnicze ---
 
     private static class InitRequest {
         String token;
@@ -119,9 +136,5 @@ public class BlackjackTcpClient {
         CommandRequest(String command) {
             this.command = command;
         }
-    }
-
-    private static class ErrorResponse {
-        String error;
     }
 }

@@ -15,6 +15,9 @@ public final class JsonFields {
     public static final String HTTP_CODE = "code";
     public static final String HTTP_MESSAGE = "message";
     public static final String HTTP_STATUS = "status";
+    public static final String HTTP_ERROR = "error";
+    public static final String HTTP_OK = "ok";
+    public static final String HTTP_CHECK = "check";
     public static final String TOKEN = "token";
     public static final String UUID = "uuid";
 

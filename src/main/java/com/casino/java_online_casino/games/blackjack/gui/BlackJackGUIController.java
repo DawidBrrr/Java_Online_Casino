@@ -21,6 +21,7 @@
     import java.io.IOException;
 
     public class BlackJackGUIController {
+        private static int conCounter = 0;
 
         @FXML
         private FlowPane playerCards;
@@ -63,6 +64,10 @@
             betComboBox.setOnAction(e -> currentBet = betComboBox.getValue());
 
             updateBalance();
+            if(controller.getDealerHand()!=null){
+                updateUI();
+                showResult();
+            }
             statusLabel.setText("Kliknij 'Nowa Gra', aby rozpocząć.");
         }
 
