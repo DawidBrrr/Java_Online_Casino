@@ -84,7 +84,7 @@ public class LoginHandler implements HttpHandler {
             System.out.println("[DEBUG] Nieobsługiwana metoda: " + exchange.getRequestMethod());
             return false;
         }
-        return true;
+        return true;    
     }
 
     private UUID extractClientIdFromToken(HttpExchange exchange, String token) throws IOException {
