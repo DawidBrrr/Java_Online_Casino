@@ -3,12 +3,16 @@ package com.casino.java_online_casino.Connection.Server.GameServer;
 import com.casino.java_online_casino.Connection.Games.BlackjackTcpHandler;
 import com.casino.java_online_casino.Connection.Games.Game;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoom;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoomManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
+import com.casino.java_online_casino.games.poker.controller.PokerController;
+import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -54,7 +58,7 @@ public class GameServer {
                 return;
             }
             InitRequest request = new com.google.gson.Gson().fromJson(initRequest, InitRequest.class);
-            if (request.token == null || request.game == null) {
+            if (request == null || request.token == null || request.game == null) {
                 writer.println("{\"status\":\"error\",\"code\":400,\"message\":\"Missing token or game\"}");
                 return;
             }
@@ -74,8 +78,6 @@ public class GameServer {
             }
 
             int userId = session.getUserId();
-
-            // Szukamy wszystkie sesje z tym userId
             List<SessionManager.SessionToken> candidateSessions = sessionManager.findSessionsByUserId(userId);
 
             // Jeśli nie ma żadnej sesji z tym userId – błąd, nie tworzymy nowej!
@@ -96,8 +98,10 @@ public class GameServer {
                     if (tryPingPong(clientSocket, s.getKeyManager())) {
                         writer.println("{\"status\":\"error\",\"code\":409,\"message\":\"Game already in use by another client\"}");
                         return;
-                    }else{
+                    } else {
+                        // Usuwamy nieaktywne sesje (zombie)
                         SessionManager.getInstance().deleteSessionByUUID(s.getUuid());
+                        System.out.println("[DEBUG GAME SERVER] Usunięto nieaktywną sesję: " + s.getUuid());
                     }
                 }
                 // Żadna nie odpowiedziała – użyj pierwszej (lub możesz wybrać wg własnej logiki)
@@ -129,6 +133,11 @@ public class GameServer {
                         game = new BlackJackController();
                         session.setGame(game);
                         break;
+                    case "poker":
+                        PokerController pokerController = new PokerController();
+                        session.setGame(pokerController);
+                        break;
+                    // Dodaj kolejne gry tutaj
                     default:
                         writer.println("{\"status\":\"error\",\"code\":400,\"message\":\"Unknown game type\"}");
                         return;
@@ -137,11 +146,26 @@ public class GameServer {
 
             // 6. Uruchom handler gry, przekazując kontroler z sesji i KeyManager z wybranej sesji!
             KeyManager keyManager = session.getKeyManager();
-            if (game instanceof BlackJackController) {
-                new BlackjackTcpHandler(clientSocket, (BlackJackController) game, keyManager).run();
-            } else {
-                writer.println("{\"status\":\"error\",\"code\":500,\"message\":\"Game handler not implemented\"}");
+            Runnable gameHandler;
+            switch (request.game.toLowerCase()) {
+                case "blackjack":
+                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) game, keyManager);
+                    break;
+                case "poker":
+                    // Przykład: możesz przekazać PokerRoom, PokerController itd.
+                    PokerRoom pokerRoom = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, keyManager));
+                    gameHandler = new PokerTCPHandler(clientSocket, pokerRoom, keyManager);
+                    break;
+                case "slots":
+                    writer.println("{\"error\":\"Slots not implemented yet\"}");
+                    clientSocket.close();
+                    return;
+                default:
+                    writer.println("{\"error\":\"Unknown game type\"}");
+                    clientSocket.close();
+                    return;
             }
+            gameHandler.run();
 
         } catch (Exception e) {
             System.err.println("[ERROR] GameServer: " + e.getMessage());
@@ -165,7 +189,6 @@ public class GameServer {
         new GameServer().start();
     }
 
-    // Ping-pong na wybranym KeyManagerze (czyli z wybranej sesji)
     boolean tryPingPong(Socket clientSocket, KeyManager keyManager) {
         try {
             String encryptedPing = keyManager.encryptAes(ServerJsonMessage.ping().toString());

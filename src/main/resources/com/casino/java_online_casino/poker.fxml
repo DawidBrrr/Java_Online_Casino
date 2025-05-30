@@ -6,7 +6,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.casino.java_online_casino.games.poker.gui.PokerView"
-            stylesheets="/com/casino/styles/poker.css">
+            stylesheets="@../styles/poker.css">
 
     <top>
         <StackPane>
