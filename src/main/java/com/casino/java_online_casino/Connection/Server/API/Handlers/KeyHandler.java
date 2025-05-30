@@ -86,15 +86,7 @@ public class KeyHandler implements HttpHandler {
         logAndSend(exchange, 200, response);
 
         KeySessionManager.getInstance().putKeyManager(uuid, session);
-        session.setUserId(uuid.toString());
-        SessionManager.getInstance().updateSessionData(uuid,session);
         System.out.println("[DEBUG] Sesja zapisana w KeySessionManager pod UUID: " + uuid);
-    }
-
-    private String createJwtToken(UUID uuid) {
-        Map<String, String> claims = new HashMap<>();
-        claims.put("UUID", uuid.toString());
-        return ServerTokenManager.createJwt(claims);
     }
 
     private void logAndSend(HttpExchange exchange, int statusCode, JsonObject body) throws IOException {

@@ -15,6 +15,7 @@ module com.casino.java_online_casino {
     requires com.google.gson;
     requires java.rmi;
     requires java.sql;
+    requires mysql.connector.j;
 
     opens com.casino.java_online_casino.controllers to javafx.fxml;
     opens com.casino.java_online_casino to javafx.fxml;

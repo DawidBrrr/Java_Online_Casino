@@ -3,16 +3,19 @@ package com.casino.java_online_casino.Connection.Session;
 import com.casino.java_online_casino.Connection.Games.Game;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
+import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Experimental;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 @Experimental
 public class SessionManager {
@@ -32,9 +35,20 @@ public class SessionManager {
         }
         return instance;
     }
+    public List<SessionToken> findSessionsByUserId(int userId) {
+        cleanupExpiredSessions();
+        mapLock.readLock().lock();
+        try {
+            return sessionMap.values().stream()
+                    .filter(session -> session.getUserId() == userId)
+                    .collect(Collectors.toList());
+        } finally {
+            mapLock.readLock().unlock();
+        }
+    }
 
     // Tworzy nową sesję i przechowuje dowolny obiekt powiązany z użytkownikiem (np. BlackJackController)
-    public SessionToken createSession(String userId) {
+    public SessionToken createSession(int userId) {
         SessionToken sessionToken = new SessionToken(userId);
         UUID uuid = sessionToken.getUuid();
         mapLock.writeLock().lock();
@@ -46,7 +60,7 @@ public class SessionManager {
         return sessionToken;
     }
     public SessionToken createSession(){
-        return createSession(null);
+        return createSession(-1);
     }
 
     public SessionToken getUnregisteredSession() {
@@ -55,6 +69,7 @@ public class SessionManager {
 
     // Pobiera sesję użytkownika
     public SessionToken getSessionByUUID(UUID userId) {
+        cleanupExpiredSessions();
         mapLock.readLock().lock();
         try {
             return sessionMap.get(userId);
@@ -63,6 +78,7 @@ public class SessionManager {
         }
     }
     public SessionToken getSessionByUserId(String userId) {
+        cleanupExpiredSessions();
         mapLock.readLock().lock();
         try {
             return sessionMap.values().stream()
@@ -131,7 +147,7 @@ public class SessionManager {
 
     public class SessionToken {
         private final UUID uuid;
-        private String userId;
+        private int userId;
         private final KeyManager keyManager;
         private LocalDateTime lastAccess;
         private Map<String,String> userData;
@@ -140,21 +156,22 @@ public class SessionManager {
         private final ReentrantLock gameLock = new ReentrantLock();
 
         public SessionToken(){
-            this(null);
+            this(-1);
         }
 
-        public SessionToken(String userId) {
+        public SessionToken(int userId) {
             this.uuid = UUID.randomUUID();
             this.keyManager = new KeyManager();
             this.userId = userId;
             this.lastAccess = LocalDateTime.now();
             this.userData = new HashMap<>();
-            userData.put("UUID", uuid.toString());
+            userData.put(JsonFields.UUID, uuid.toString());
             this.duringTheGame = false;
             this.game = null;
         }
 
         public String getNewToken(){
+
             return ServerTokenManager.createJwt(userData);
         }
         public boolean isExpiredToken(String token){
@@ -167,12 +184,12 @@ public class SessionManager {
         }
 
         public boolean isTimeToExpire(){
-            if(userId!=null){
+            if(userId!=-1){
                 return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 15;
             }
             return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 5;
         }
-        public String getUserId() {
+        public int getUserId() {
             return userId;
         }
         public KeyManager getKeyManager() {
@@ -197,8 +214,8 @@ public class SessionManager {
         public void setDuringTheGame(boolean duringTheGame) {
             this.duringTheGame = duringTheGame;
         }
-        public void setUserId(String userId) {
-            if(userId!=null){
+        public void setUserId(int userId) {
+            if(userId!=-1){
                 return;
             }
             this.userId = userId;

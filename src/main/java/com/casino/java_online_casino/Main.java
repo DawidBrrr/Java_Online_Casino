@@ -27,7 +27,7 @@ public class Main extends Application {
         // Tworzymy pierwsze okno
         createClientWindow("Klient 1");
         // Tworzymy drugie okno
-        createClientWindow("Klient 2");
+        //createClientWindow("Klient 2");
         // Możesz dodać kolejne okna...
     }
 
@@ -46,3 +46,4 @@ public class Main extends Application {
         launch(args); // Tylko tutaj!
     }
 }
+

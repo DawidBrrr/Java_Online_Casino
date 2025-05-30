@@ -40,5 +40,14 @@ public class ServerConfig {
     public static String getApiPath() {
         return "http://"+getApiServerHost()+":"+getApiServerPort()+"/";
     }
+    public static String getDbUrl() {
+        return properties.getProperty("db.url");
+    }
+    public static String getDbUser() {
+        return properties.getProperty("db.user");
+    }
+    public static String getDbPassword() {
+        return properties.getProperty("db.password");
+    }
 }
 

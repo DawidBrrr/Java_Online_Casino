@@ -33,9 +33,13 @@
                         </Tab>
                         <Tab text="Rejestracja" closable="false">
                             <VBox spacing="15" styleClass="form-container">
-                                <TextField fx:id="registerUsername" promptText="Nazwa Użytkownika"/>
+                                <TextField fx:id="registerFirstName" promptText="Imię"/>
+                                <TextField fx:id="registerLastName" promptText="Nazwisko"/>
+                                <TextField fx:id="registerNickname" promptText="Nickname"/>
+                                <TextField fx:id="registerEmail" promptText="Email"/>
                                 <PasswordField fx:id="registerPassword" promptText="Hasło"/>
                                 <PasswordField fx:id="registerConfirm" promptText="Potwierdź hasło"/>
+                                <DatePicker fx:id="registerBirthDate" promptText="Data urodzenia"/>
                                 <Button text="Utwórz konto" onAction="#handleRegister" styleClass="auth-button"/>
                                 <Label fx:id="registerError" styleClass="error-label"/>
                             </VBox>

@@ -14,7 +14,9 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 
 public class LoginService extends Service {
-    String username, password;
+    private final String username;
+    private final String password;
+    private boolean loginResult = false; // pole do przechowywania wyniku logowania
 
     public LoginService(String username, String password) {
         this.username = username;
@@ -33,6 +35,7 @@ public class LoginService extends Service {
     public boolean perform() {
         if (keyManager.getAesKey() == null) {
             System.err.println("❌ Brak ustalonego klucza AES. Najpierw wykonaj wymianę kluczy.");
+            loginResult = false;
             return false;
         }
 
@@ -45,7 +48,6 @@ public class LoginService extends Service {
 
             HttpURLConnection connection = getConnection(loginUrl, ServiceHelper.METHOD_POST);
 
-            // Wysyłamy zaszyfrowane dane
             try (OutputStream os = connection.getOutputStream()) {
                 os.write(requestJson.getBytes(StandardCharsets.UTF_8));
                 os.flush();
@@ -63,33 +65,34 @@ public class LoginService extends Service {
 
             if (is == null) {
                 System.err.println("Brak strumienia odpowiedzi.");
+                loginResult = false;
                 return false;
             }
 
-            // Parsujemy odpowiedź JSON
             JsonObject responseJson;
             try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
                 responseJson = JsonUtil.parseJsonFromISReader(reader);
             }
 
-            // Dekodujemy i odszyfrowujemy dane w polu "data"
             if (responseJson.has(JsonFields.DATA)) {
                 String encryptedResponseBase64 = responseJson.get(JsonFields.DATA).getAsString();
                 String decryptedResponse = keyManager.decryptAes(encryptedResponseBase64);
                 System.out.println("[DEBUG] Odszyfrowana odpowiedź logowania: " + decryptedResponse);
                 JsonObject decryptedJson = JsonParser.parseString(decryptedResponse).getAsJsonObject();
-                return handleResponse(decryptedJson);
+                loginResult = handleResponse(decryptedJson);
+                return loginResult;
             } else {
-                return handleResponse(responseJson);
+                loginResult = handleResponse(responseJson);
+                return loginResult;
             }
 
         } catch (Exception e) {
             System.err.println("❌ Wyjątek podczas logowania: " + e.getMessage());
+            loginResult = false;
             return false;
         }
     }
 
-    // Metoda handleResponse, która decyduje co zrobić na podstawie kodu odpowiedzi
     @Override
     public boolean handleResponse(JsonObject response) throws IOException {
         if (response == null || !response.has(JsonFields.HTTP_CODE)) {
@@ -192,5 +195,9 @@ public class LoginService extends Service {
     protected void unhandledCode(JsonObject response) {
         int code = response.get(JsonFields.HTTP_CODE).getAsInt();
         System.out.println("Unhandled response code: " + code + " - " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
+    }
+
+    public boolean getLoginResult() {
+        return loginResult;
     }
 }
