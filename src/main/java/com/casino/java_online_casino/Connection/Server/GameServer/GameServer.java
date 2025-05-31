@@ -134,8 +134,8 @@ public class GameServer {
                         session.setGame(game);
                         break;
                     case "poker":
-                        PokerController pokerController = new PokerController();
-                        session.setGame(pokerController);
+                        game = new PokerController();
+                        session.setGame(game);
                         break;
                     // Dodaj kolejne gry tutaj
                     default:
