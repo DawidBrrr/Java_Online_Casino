@@ -30,7 +30,7 @@ public class RegisterService extends Service {
         registerJson.addProperty(JsonFields.NICKNAME, gamer.getNickName());
         registerJson.addProperty(JsonFields.EMAIL, gamer.getEmail());
         registerJson.addProperty(JsonFields.PASSWORD, gamer.getPassword());
-        registerJson.addProperty(JsonFields.BIRTH_DATE, gamer.getDateOfBirth().toString());
+        registerJson.addProperty(JsonFields.BIRTH_DATE, gamer.getDateOfBirth().getTime());
         registerJson.addProperty(JsonFields.CREDITS, gamer.getCredits());
         return registerJson;
     }
