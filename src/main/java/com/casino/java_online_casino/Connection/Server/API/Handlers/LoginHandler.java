@@ -71,7 +71,8 @@ public class LoginHandler implements HttpHandler {
             System.out.println("[DEBUG LOGIN] Próba logowania email: " + email);
 
             GamerDAO.getInstance();
-            Gamer gamer = GamerDAO.login(email, password);
+            GamerDAO dao = GamerDAO.getInstance();
+            Gamer gamer = dao.login(email, password);
             if (gamer == null) {
                 System.out.println("[DEBUG LOGIN] Nie znaleziono gracza lub błędne hasło.");
                 logAndSend(exchange, ServerJsonMessage.accessDenied().get(JsonFields.HTTP_CODE).getAsInt(), ServerJsonMessage.accessDenied());

@@ -106,9 +106,8 @@ public class RegisterHandler implements HttpHandler {
                         credentials.get(JsonFields.PASSWORD).getAsString(),
                         0, birthDate
                 );
-
-                GamerDAO.getInstance();
-                registered = GamerDAO.register(gamer);
+                GamerDAO dao = GamerDAO.getInstance();
+                registered = dao.register(gamer); // ✅ używamy instancji
             } catch (Exception e) {
                 System.out.println("[DEBUG REGISTER] Błąd podczas rejestracji: " + e.getMessage());
                 logAndSend(exchange, 500, ServerJsonMessage.internalServerError());

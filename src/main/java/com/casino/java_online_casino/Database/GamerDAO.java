@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class GamerDAO {
     private static GamerDAO instance;
-    private static Connection connection;
+    private final Connection connection;
 
     private GamerDAO() {
         try {
@@ -35,7 +35,7 @@ public class GamerDAO {
     }
 
     // Rejestracja nowego gracza
-    public static boolean register(Gamer gamer) {
+    public boolean register(Gamer gamer) {
         String sql = "INSERT INTO gamers (name, last_name, nickname, email, password, date_of_birth, credits) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, gamer.getName());
@@ -54,7 +54,7 @@ public class GamerDAO {
     }
 
     // Logowanie gracza (po emailu i haśle)
-    public static Gamer login(String email, String password) {
+    public Gamer login(String email, String password) {
         String sql = "SELECT * FROM gamers WHERE email = ? AND password = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, email);
@@ -70,7 +70,7 @@ public class GamerDAO {
     }
 
     // Pobieranie gracza po emailu
-    public static Gamer findByEmail(String email) {
+    public Gamer findByEmail(String email) {
         String sql = "SELECT * FROM gamers WHERE email = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, email);
@@ -85,7 +85,7 @@ public class GamerDAO {
     }
 
     // Pobieranie gracza po ID
-    public static Gamer findById(int userId) {
+    public Gamer findById(int userId) {
         String sql = "SELECT * FROM gamers WHERE user_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, userId);
@@ -100,7 +100,7 @@ public class GamerDAO {
     }
 
     // Aktualizacja kredytów gracza
-    public static boolean updateCredits(int userId, float newCredits) {
+    public boolean updateCredits(int userId, float newCredits) {
         String sql = "UPDATE gamers SET credits = ? WHERE user_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setFloat(1, newCredits);
@@ -113,7 +113,7 @@ public class GamerDAO {
         }
     }
 
-    private static Gamer mapResultSetToGamer(ResultSet rs) throws SQLException {
+    private Gamer mapResultSetToGamer(ResultSet rs) throws SQLException {
         return new Gamer(
                 rs.getInt("user_id"),
                 rs.getString("name"),
@@ -126,7 +126,7 @@ public class GamerDAO {
         );
     }
 
-    public static void close() {
+    public void close() {
         try {
             if (connection != null && !connection.isClosed())
                 connection.close();
