@@ -1,10 +1,15 @@
 package com.casino.java_online_casino.games.poker.gui;
-
+import com.casino.java_online_casino.Connection.Client.Service;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoom;
+import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoomManager;
 import com.casino.java_online_casino.controllers.DashboardController;
 import com.casino.java_online_casino.games.poker.controller.PokerController;
+import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
 import com.casino.java_online_casino.games.poker.model.Card;
 import com.casino.java_online_casino.games.poker.model.Player;
 import com.casino.java_online_casino.games.poker.model.PokerGame;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +28,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class PokerView {
     @FXML private HBox communityCardsArea;
@@ -45,12 +52,75 @@ public class PokerView {
     @FXML private TextField playerNameField;
     @FXML private Label messageLabel;
 
-    @FXML
     private PokerController controller;
+    private PokerTCPClient tcpClient;
     private String currentPlayerId;
 
+    @FXML
     public void initialize() {
-        setupUI();
+        try {
+            System.out.println("[DEBUG POKER_VIEW] Inicjalizacja widoku pokera");
+
+            // Inicjalizacja klienta TCP z Service
+            tcpClient = new PokerTCPClient(Service.getToken(), Service.getKeyManager());
+            tcpClient.connect();
+            System.out.println("[DEBUG POKER_VIEW] Połączono z serwerem TCP");
+
+            // Utworzenie i konfiguracja kontrolera
+            controller = new PokerController();
+            controller.setView(this);
+            System.out.println("[DEBUG POKER_VIEW] Kontroler zainicjalizowany");
+
+            // Czekaj na odpowiedź z serwera
+            String response = tcpClient.readEncryptedMessage(5000);
+            System.out.println("[DEBUG POKER_VIEW] Otrzymano odpowiedź: " + response);
+
+            JsonObject json = JsonParser.parseString(response).getAsJsonObject();
+
+            // Sprawdź typ odpowiedzi
+            if (json.has("type")) {
+                String type = json.get("type").getAsString();
+
+                if ("room_created".equals(type)) {
+                    // Pierwszy gracz - tworzenie pokoju
+                    String roomId = json.get("roomId").getAsString();
+                    System.out.println("[DEBUG POKER_VIEW] Utworzono nowy pokój: " + roomId);
+
+                    PokerRoom room = PokerRoomManager.getInstance().createRoom(tcpClient);
+                    room.setRoomId(roomId);
+                    room.addPlayer(Service.getToken());
+
+                } else if ("room_joined".equals(type)) {
+                    // Drugi gracz - dołączanie do pokoju
+                    String roomId = json.get("roomId").getAsString();
+                    System.out.println("[DEBUG POKER_VIEW] Dołączanie do pokoju: " + roomId);
+
+                    PokerRoom room = PokerRoomManager.getInstance().getRoom(roomId)
+                            .orElseGet(() -> {
+                                PokerRoom newRoom = PokerRoomManager.getInstance().createRoom(tcpClient);
+                                newRoom.setRoomId(roomId);
+                                return newRoom;
+                            });
+
+                    room.addPlayer(Service.getToken());
+                } else {
+                    throw new RuntimeException("Nieznany typ odpowiedzi: " + type);
+                }
+
+                // Konfiguracja UI
+                setupUI();
+                updatePlayerActions(false);
+                messageLabel.setText("Dołączono do gry. Oczekiwanie na innych graczy...");
+
+            } else {
+                throw new RuntimeException("Nieprawidłowa odpowiedź serwera - brak typu");
+            }
+
+        } catch (Exception e) {
+            System.err.println("[ERROR POKER_VIEW] Błąd inicjalizacji: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Połączenie z pokerem nie powiodło się");
+        }
     }
 
     private void setupUI() {
