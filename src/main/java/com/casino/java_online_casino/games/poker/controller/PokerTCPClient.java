@@ -4,6 +4,9 @@ import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.*;
 import java.net.Socket;
@@ -26,6 +29,57 @@ public class PokerTCPClient {
     public void setRoomId(String roomId) {
         this.roomId = roomId;
     }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public String readEncryptedMessage(int timeoutMillis) throws IOException {
+        long startTime = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() - startTime < timeoutMillis) {
+            if (reader.ready()) {
+                String encryptedMessage = reader.readLine();
+                if (encryptedMessage == null) {
+                    throw new IOException("Połączenie zamknięte przez serwer");
+                }
+
+                try {
+                    return keyManager.decryptAes(encryptedMessage);
+                } catch (Exception e) {
+                    throw new IOException("Błąd deszyfrowania: " + e.getMessage());
+                }
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Przerwano oczekiwanie na wiadomość");
+            }
+        }
+
+        throw new IOException("Timeout: brak odpowiedzi w ciągu " + timeoutMillis + "ms");
+    }
+    private String readMessage() throws IOException {
+        String message = reader.readLine();
+        if (message == null) {
+            throw new IOException("Połączenie zamknięte przez serwer");
+        }
+
+        // Sprawdź czy wiadomość jest zaszyfrowana
+        if (!message.startsWith("{")) {
+            try {
+                message = keyManager.decryptAes(message);
+            } catch (Exception e) {
+                throw new IOException("Błąd deszyfrowania wiadomości: " + e.getMessage());
+            }
+        }
+
+        return message;
+    }
+
+
 
     public void connect() throws IOException {
         this.socket = new Socket(ServerConfig.getGameServerHost(), ServerConfig.getGameServerPort());

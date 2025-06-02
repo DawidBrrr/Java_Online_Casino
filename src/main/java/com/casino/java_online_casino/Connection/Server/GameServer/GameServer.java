@@ -22,6 +22,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -152,9 +153,28 @@ public class GameServer {
                     gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) game, keyManager);
                     break;
                 case "poker":
-                    // Przykład: możesz przekazać PokerRoom, PokerController itd.
-                    PokerRoom pokerRoom = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, keyManager));
-                    gameHandler = new PokerTCPHandler(clientSocket, pokerRoom, keyManager);
+                    System.out.println("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
+                    JsonObject response = new JsonObject();
+
+                    // Sprawdź czy istnieje aktywny pokój z wolnym miejscem
+                    Optional<PokerRoom> existingRoom = PokerRoomManager.getInstance().getAvailableRoom();
+
+                    if (existingRoom.isPresent()) {
+                        // Dołącz do istniejącego pokoju
+                        response.addProperty("type", "room_joined");
+                        response.addProperty("roomId", existingRoom.get().getRoomId());
+                    } else {
+                        // Utwórz nowy pokój
+                        PokerRoom pokerRoom = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, keyManager));
+                        response.addProperty("type", "room_created");
+                        response.addProperty("roomId", pokerRoom.getRoomId());
+                    }
+
+                    String encryptedResponse = keyManager.encryptAes(response.toString());
+                    writer.println(encryptedResponse);
+                    writer.flush();
+
+                    gameHandler = new PokerTCPHandler(clientSocket, existingRoom.orElse(null), keyManager);
                     break;
                 case "slots":
                     writer.println("{\"error\":\"Slots not implemented yet\"}");

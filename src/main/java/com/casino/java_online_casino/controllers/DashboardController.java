@@ -131,70 +131,9 @@ public class DashboardController {
     @FXML
     private void playPoker() {
         try {
+            System.out.println("[DEBUG DASHBOARD] Rozpoczynam inicjalizację widoku pokera");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/poker.fxml"));
             Parent root = loader.load();
-
-            // Pobierz widok - użyj właściwego typu
-            PokerView pokerView = loader.getController();
-
-            // Utwórz nowy kontroler i przypisz go do widoku
-            PokerController pokerController = new PokerController();
-            pokerView.setController(pokerController);
-
-            //SEKCJA TEEESTOWAAA
-            /*
-            // Dodaj testową komunikację z serwerem z botem All-In
-            pokerController.setServerCommunication(new PokerController.ServerCommunication() {
-                @Override
-                public void sendPlayerAction(String playerId, Player.playerAction action, int amount) {
-                    if (playerId.equals("player2")) { // Bot
-                        new Thread(() -> {
-                            try {
-                                Thread.sleep(1000);
-                                Platform.runLater(() -> {
-                                    pokerController.setCurrentPlayer("player2");
-                                    pokerController.playerAllIn();
-                                });
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }).start();
-                    }
-                }
-
-                @Override
-                public void sendGameState(PokerGame.GameState state) {
-                    if (pokerController.getGame().isPlayerTurn("player2")) {
-                        pokerController.playerAllIn();
-                    }
-                }
-
-                @Override
-                public void sendPlayerUpdate(Player player) {
-                    // Tymczasowo puste
-                }
-
-                @Override
-                public void broadcastMessage(String message) {
-                    System.out.println(message);
-                }
-            });
-
-            // Pobierz aktualny balans użytkownika
-            String balanceText = balanceLabel.getText().replace("$", "").replace(",", ".");
-            double currentBalance = Double.parseDouble(balanceText);
-
-            // Dodaj graczy używając joinGame z poprawnym balansem
-            pokerController.joinGame("player1", currentUser);
-            pokerController.getGame().getPlayerById("player1").setBalance((int)currentBalance);
-            pokerController.joinGame("player2", "Bot");
-            pokerController.setCurrentPlayer("player1");
-
-
-
-
-            // KONIEC SEEEKCJI TESTOWEJ
-            */
             Stage stage = (Stage) usernameLabel.getScene().getWindow();
             Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
             Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
@@ -203,6 +142,7 @@ public class DashboardController {
             stage.setResizable(true);
             stage.setTitle("Sigma Kasyno - Texas Hold'em Poker");
             scene.getStylesheets().add(getClass().getResource("/com/casino/styles/poker.css").toExternalForm());
+            System.out.println("[DEBUG DASHBOARD] Widok pokera załadowany pomyślnie");
         } catch (Exception e) {
             e.printStackTrace();
         }

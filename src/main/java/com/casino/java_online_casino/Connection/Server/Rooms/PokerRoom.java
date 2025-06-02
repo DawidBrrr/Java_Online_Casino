@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class PokerRoom {
-    private final String roomId;
+    private String roomId;
     private final RemotePokerController controller;
     private final PokerTCPClient tcpClient;
     private final Set<String> players;
@@ -32,19 +32,30 @@ public class PokerRoom {
     }
 
     public boolean addPlayer(String playerId) {
+        System.out.println("[DEBUG POKER_ROOM] Próba dodania gracza: " + playerId + " do pokoju: " + roomId);
         if (players.size() < maxPlayers) {
-            return players.add(playerId);
+            boolean added = players.add(playerId);
+            System.out.println("[DEBUG POKER_ROOM] " + (added ? "Dodano gracza" : "Gracz już istnieje") +
+                    ". Liczba graczy: " + players.size());
+            return added;
         }
+        System.out.println("[DEBUG POKER_ROOM] Nie można dodać gracza - pokój pełny");
         return false;
     }
 
     public boolean removePlayer(String playerId) {
-        return players.remove(playerId);
+        System.out.println("[DEBUG POKER_ROOM] Próba usunięcia gracza: " + playerId + " z pokoju: " + roomId);
+        boolean removed = players.remove(playerId);
+        System.out.println("[DEBUG POKER_ROOM] " + (removed ? "Usunięto gracza" : "Nie znaleziono gracza") +
+                ". Pozostało graczy: " + players.size());
+        return removed;
     }
 
     public void closeRoom() {
+        System.out.println("[DEBUG POKER_ROOM] Zamykanie pokoju: " + roomId);
         isActive = false;
         tcpClient.close();
+        System.out.println("[DEBUG POKER_ROOM] Pokój zamknięty");
     }
 
     public boolean isActive() {
@@ -52,6 +63,14 @@ public class PokerRoom {
     }
 
     public int getPlayerCount() {
+        System.out.println("[DEBUG POKER_ROOM] Liczba graczy w pokoju " + roomId + ": " + players.size());
         return players.size();
     }
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
+    }
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
 }
