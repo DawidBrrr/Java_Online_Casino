@@ -12,6 +12,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -40,6 +41,10 @@ public class BlackJackGUIController {
     private ComboBox<Integer> betComboBox;
     @FXML
     private Label balanceLabel;
+    @FXML
+    private Button hitButton;
+    @FXML
+    private Button standButton;
 
     private int currentBet = 50;
 
@@ -133,12 +138,16 @@ public class BlackJackGUIController {
             statusLabel.setText("Za mało środków, aby rozpocząć grę!");
             return;
         }
+
         balance -= currentBet;
         updateBalance();
         updateDBBalance();
         controller.startNewGame();
         updateUI();
         statusLabel.setText("Rozdano karty.");
+
+        hitButton.setDisable(false);
+        standButton.setDisable(false);
     }
 
     private void updateUI() {
@@ -155,6 +164,7 @@ public class BlackJackGUIController {
 
         updateScores();
     }
+
 
     private void updateScores() {
         playerScoreLabel.setText("Punkty: " + controller.getPlayerScore());
@@ -177,6 +187,9 @@ public class BlackJackGUIController {
         updateBalance();
         updateDBBalance();
         statusLabel.setText(result);
+
+        hitButton.setDisable(true);
+        standButton.setDisable(true);
     }
 
     private ImageView createCardImage(Card card) {
