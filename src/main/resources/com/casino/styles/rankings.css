@@ -1,0 +1,70 @@
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 15px;
+    -fx-background-color: #141414; /* Ciemne, neutralne tło */
+}
+
+.section-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+    -fx-alignment: center;
+    -fx-padding: 20 0 18 0;
+    -fx-effect: dropshadow(gaussian, #000, 7, 0.5, 0, 2);
+    -fx-background-color: rgba(0,0,0,0.40);
+    -fx-background-radius: 14;
+}
+
+/* Styl tabeli rankingów */
+.table-view {
+    -fx-background-color: rgba(0,0,0,0.6);
+    -fx-background-radius: 20;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, #FFD70055, 16, 0.7, 0, 2);
+}
+
+.table-view .column-header-background {
+    -fx-background-color: linear-gradient(to right, #FFD700cc, #FFA500cc);
+}
+
+.table-column, .table-view .table-cell {
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFD700;
+    -fx-alignment: center;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #222d22cc;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-table-cell-border-color: #FFD70033;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-view .filler {
+    -fx-background-color: transparent;
+}
+
+.ranking-button, .game-button {
+    -fx-font-size: 16px;
+    -fx-padding: 10 30 10 30;
+    -fx-background-color: linear-gradient(to right, #FFD700, #FFA500);
+    -fx-background-radius: 18;
+    -fx-text-fill: black;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #ffcc00aa, 7, 0.6, 0, 2);
+    -fx-alignment: center;
+    -fx-border-color: transparent;
+}
+
+.ranking-button:hover, .game-button:hover {
+    -fx-background-color: linear-gradient(to right, #FFA500, #FFD700);
+    -fx-text-fill: #3637a4;
+}
+
+.button {
+    -fx-background-radius: 18;
+}

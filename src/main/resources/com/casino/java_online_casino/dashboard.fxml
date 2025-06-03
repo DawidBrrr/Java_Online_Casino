@@ -30,6 +30,8 @@
                 <HBox spacing="15" alignment="CENTER">
                     <Button text="Depozyt" onAction="#handleDeposit" styleClass="money-button"/>
                     <Button text="Wypłać" onAction="#handleWithdraw" styleClass="money-button"/>
+                    <Button text="Rankingi" onAction="#showRankings" styleClass="money-button"/>
+
                 </HBox>
             </VBox>
 

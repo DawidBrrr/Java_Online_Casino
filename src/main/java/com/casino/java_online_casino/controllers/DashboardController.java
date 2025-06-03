@@ -149,6 +149,21 @@ public class DashboardController {
         }
     }
 
+    @FXML
+    private void showRankings() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/rankings.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Rankingi graczy");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 
 }

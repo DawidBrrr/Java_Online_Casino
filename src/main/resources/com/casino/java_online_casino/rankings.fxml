@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.casino.java_online_casino.controllers.RankingsController"
+            stylesheets="@../styles/rankings.css">
+
+    <top>
+        <VBox alignment="CENTER" spacing="10" style="-fx-padding: 30 0 10 0;">
+            <Label text="🏆 Rankingi graczy" styleClass="section-title"/>
+            <Separator />
+        </VBox>
+    </top>
+
+    <center>
+        <TableView fx:id="rankingTable" prefWidth="600" prefHeight="400">
+            <columns>
+                <TableColumn text="Gracz" fx:id="userColumn" prefWidth="220"/>
+                <TableColumn text="Wygrane w Blackjack" fx:id="bjWinColumn" prefWidth="180"/>
+                <TableColumn text="Wygrane w Poker" fx:id="pokerWinColumn" prefWidth="180"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER" style="-fx-padding: 15 0 15 0;">
+            <Button text="Powrót" onAction="#handleBack" styleClass="game-button"/>
+        </HBox>
+    </bottom>
+</BorderPane>
