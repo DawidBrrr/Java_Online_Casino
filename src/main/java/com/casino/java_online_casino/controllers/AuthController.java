@@ -55,6 +55,24 @@ public class AuthController {
             return;
         }
 
+        // >>> DODAJ HANDSHAKE ZAWSZE PRZED logowaniem <<<
+        try {
+            com.casino.java_online_casino.Connection.Client.Service.keyManager =
+                    new com.casino.java_online_casino.Connection.Tokens.KeyManager();
+            com.casino.java_online_casino.Connection.Client.KeyExchangeService handshake =
+                    new com.casino.java_online_casino.Connection.Client.KeyExchangeService();
+            boolean handshakeResult = handshake.perform();
+            if (!handshakeResult) {
+                loginError.setText("Błąd podczas wymiany kluczy z serwerem. Spróbuj ponownie.");
+                return;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            loginError.setText("Błąd podczas nawiązywania połączenia szyfrowanego.");
+            return;
+        }
+        // <<< KONIEC: handshake
+
         LoginService service = new LoginService(username, password);
         boolean result = service.perform();
 
@@ -64,7 +82,7 @@ public class AuthController {
                 Parent root = loader.load();
 
                 DashboardController controller = loader.getController();
-                controller.initialize(username); // Możesz przekazać inne dane
+                controller.initialize(username);
 
                 Stage stage = (Stage) loginUsername.getScene().getWindow();
                 stage.setTitle("Sigma Kasyno - Panel Użytkownika");
@@ -115,6 +133,24 @@ public class AuthController {
             return;
         }
 
+        // >>> HANDSHAKE tuż przed próbą rejestracji!
+        try {
+            com.casino.java_online_casino.Connection.Client.Service.keyManager =
+                    new com.casino.java_online_casino.Connection.Tokens.KeyManager();
+            com.casino.java_online_casino.Connection.Client.KeyExchangeService handshake =
+                    new com.casino.java_online_casino.Connection.Client.KeyExchangeService();
+            boolean handshakeResult = handshake.perform();
+            if (!handshakeResult) {
+                registerError.setText("Błąd podczas wymiany kluczy z serwerem. Spróbuj ponownie.");
+                return;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            registerError.setText("Błąd podczas nawiązywania połączenia szyfrowanego.");
+            return;
+        }
+        // <<< KONIEC handshake
+
         Date birth = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         // Domyślne kredyty: 0 (lub inna logika)
@@ -132,6 +168,7 @@ public class AuthController {
             registerError.setText("Rejestracja nie powiodła się. Sprawdź dane lub spróbuj ponownie.");
         }
     }
+
 
     private void clearRegisterFields() {
         registerFirstName.setText("");

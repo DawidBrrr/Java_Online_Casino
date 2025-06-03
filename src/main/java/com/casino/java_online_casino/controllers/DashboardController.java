@@ -44,7 +44,26 @@ public class DashboardController {
     @FXML
     private void handleLogout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/views/auth.fxml"));
+            // 1. Czyść token i klucz po stronie klienta (czyli Service)
+            com.casino.java_online_casino.Connection.Client.Service.token = null;
+            com.casino.java_online_casino.Connection.Client.Service.keyManager =
+                    new com.casino.java_online_casino.Connection.Tokens.KeyManager();
+
+            // 2. (Opcjonalnie, dobry zwyczaj) Wyczyść dane lokalne kontrolera
+            currentUserEmail = null;
+            currentUserId = 0;
+            balance = 0.0;
+            usernameLabel.setText("");
+            balanceLabel.setText("");
+
+            // 3. (NAJWAŻNIEJSZE) Wyloguj sesję po stronie backendu, jeśli masz userId:
+            //    UWAGA: wyślij żądanie do backendu lub... (patrz niżej)
+            //    Jeśli obsługujesz userId jako String, przekazujemy jako String:
+            com.casino.java_online_casino.Connection.Session.SessionManager.getInstance()
+                    .deleteSessionByUserId(String.valueOf(currentUserId));
+
+            // 4. Przejdź do widoku logowania
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/auth.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) usernameLabel.getScene().getWindow();
             stage.setScene(new Scene(root));
