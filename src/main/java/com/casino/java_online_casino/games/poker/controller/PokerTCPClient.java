@@ -34,6 +34,17 @@ public class PokerTCPClient {
         return roomId;
     }
 
+    public void sendEncryptedMessage(String message) throws IOException {
+        try {
+            String encrypted = keyManager.encryptAes(message);
+            writer.println(encrypted);
+            writer.flush();
+            System.out.println("[DEBUG POKER CLIENT] Wysłano zaszyfrowaną wiadomość");
+        } catch (Exception e) {
+            throw new IOException("Błąd podczas szyfrowania/wysyłania wiadomości: " + e.getMessage());
+        }
+    }
+
     public String readEncryptedMessage(int timeoutMillis) throws IOException {
         long startTime = System.currentTimeMillis();
 
@@ -136,13 +147,15 @@ public class PokerTCPClient {
     public void close() {
         try {
             if (writer != null) {
-                writer.println(keyManager.encryptAes("{\"command\":\"exit\"}"));
-                writer.flush();
+                sendEncryptedMessage("{\"command\":\"exit\"}");
             }
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
-        } catch (Exception ignored) {}
+            System.out.println("[DEBUG POKER CLIENT] Zamknięto połączenie");
+        } catch (Exception e) {
+            System.out.println("[DEBUG POKER CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
+        }
     }
 
     private static class InitRequest {

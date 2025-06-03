@@ -66,46 +66,32 @@ public class PokerView {
             tcpClient.connect();
             System.out.println("[DEBUG POKER_VIEW] Połączono z serwerem TCP");
 
-            // Utworzenie i konfiguracja kontrolera
+            // Inicjalizacja kontrolera
             controller = new PokerController();
             controller.setView(this);
             System.out.println("[DEBUG POKER_VIEW] Kontroler zainicjalizowany");
 
-            // Czekaj na odpowiedź z serwera
-            String response = tcpClient.readEncryptedMessage(5000);
+            // Przygotowanie żądania dołączenia do pokera
+            JsonObject request = new JsonObject();
+            request.addProperty("type", "poker");
+            request.addProperty("action", "join");
+            request.addProperty("token", Service.getToken());
+
+            // Wysłanie żądania
+            tcpClient.sendEncryptedMessage(request.toString());
+            System.out.println("[DEBUG POKER_VIEW] Wysłano żądanie dołączenia do pokera");
+
+            // Czekaj na odpowiedź
+            String response = tcpClient.readEncryptedMessage(1000);
             System.out.println("[DEBUG POKER_VIEW] Otrzymano odpowiedź: " + response);
 
             JsonObject json = JsonParser.parseString(response).getAsJsonObject();
 
-            // Sprawdź typ odpowiedzi
-            if (json.has("type")) {
+            if (json.has("type") && json.has("roomId")) {
                 String type = json.get("type").getAsString();
+                String roomId = json.get("roomId").getAsString();
 
-                if ("room_created".equals(type)) {
-                    // Pierwszy gracz - tworzenie pokoju
-                    String roomId = json.get("roomId").getAsString();
-                    System.out.println("[DEBUG POKER_VIEW] Utworzono nowy pokój: " + roomId);
-
-                    PokerRoom room = PokerRoomManager.getInstance().createRoom(tcpClient);
-                    room.setRoomId(roomId);
-                    room.addPlayer(Service.getToken());
-
-                } else if ("room_joined".equals(type)) {
-                    // Drugi gracz - dołączanie do pokoju
-                    String roomId = json.get("roomId").getAsString();
-                    System.out.println("[DEBUG POKER_VIEW] Dołączanie do pokoju: " + roomId);
-
-                    PokerRoom room = PokerRoomManager.getInstance().getRoom(roomId)
-                            .orElseGet(() -> {
-                                PokerRoom newRoom = PokerRoomManager.getInstance().createRoom(tcpClient);
-                                newRoom.setRoomId(roomId);
-                                return newRoom;
-                            });
-
-                    room.addPlayer(Service.getToken());
-                } else {
-                    throw new RuntimeException("Nieznany typ odpowiedzi: " + type);
-                }
+                System.out.println("[DEBUG POKER_VIEW] " + type + " do pokoju: " + roomId);
 
                 // Konfiguracja UI
                 setupUI();
@@ -113,13 +99,18 @@ public class PokerView {
                 messageLabel.setText("Dołączono do gry. Oczekiwanie na innych graczy...");
 
             } else {
-                throw new RuntimeException("Nieprawidłowa odpowiedź serwera - brak typu");
+                throw new RuntimeException("Nieprawidłowa odpowiedź serwera - brak typu lub roomId");
             }
 
         } catch (Exception e) {
             System.err.println("[ERROR POKER_VIEW] Błąd inicjalizacji: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException("Połączenie z pokerem nie powiodło się");
+
+            // Obsługa UI w przypadku błędu
+            setupUI();
+            if (messageLabel != null) {
+                messageLabel.setText("Błąd połączenia z serwerem");
+            }
         }
     }
 
