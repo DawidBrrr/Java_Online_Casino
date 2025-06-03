@@ -26,6 +26,22 @@ public class PokerTCPClient {
         this.keyManager = keyManager;
     }
 
+    public PokerDTO startGame() throws Exception {
+        return sendCommand("start_game", 0);
+    }
+
+    public void broadcastMessage(String message) throws Exception {
+        PokerCommandRequest req = new PokerCommandRequest("broadcast", 0, roomId);
+        String jsonReq = gson.toJson(req);
+        String encryptedReq = keyManager.encryptAes(jsonReq);
+        writer.println(encryptedReq);
+        writer.flush();
+    }
+
+    public boolean isConnected() {
+        return socket != null && socket.isConnected() && !socket.isClosed();
+    }
+
     public void setRoomId(String roomId) {
         this.roomId = roomId;
     }
@@ -73,56 +89,70 @@ public class PokerTCPClient {
         throw new IOException("Timeout: brak odpowiedzi w ciągu " + timeoutMillis + "ms");
     }
     private String readMessage() throws IOException {
-        String message = reader.readLine();
-        if (message == null) {
-            throw new IOException("Połączenie zamknięte przez serwer");
-        }
-
-        // Sprawdź czy wiadomość jest zaszyfrowana
-        if (!message.startsWith("{")) {
-            try {
-                message = keyManager.decryptAes(message);
-            } catch (Exception e) {
-                throw new IOException("Błąd deszyfrowania wiadomości: " + e.getMessage());
+        try {
+            String message = reader.readLine();
+            if (message == null) {
+                throw new IOException("Połączenie zamknięte przez serwer");
             }
-        }
 
-        return message;
+            if (!message.startsWith("{")) {
+                return keyManager.decryptAes(message);
+            }
+            return message;
+        } catch (Exception e) {
+            throw new IOException("Błąd podczas odczytu wiadomości: " + e.getMessage());
+        }
     }
 
 
 
     public void connect() throws IOException {
         this.socket = new Socket(ServerConfig.getGameServerHost(), ServerConfig.getGameServerPort());
+        this.socket.setSoTimeout(5000);
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
 
         InitRequest initRequest = new InitRequest(token, "poker", roomId);
         String initJson = gson.toJson(initRequest);
         writer.println(initJson);
+        writer.flush();
+        System.out.println("[DEBUG POKER CLIENT] Połączono z serwerem i wysłano initRequest: " + initJson);
     }
 
     private PokerDTO sendCommand(String command, int amount) throws Exception {
+        if (!isConnected()) {
+            throw new IOException("Brak połączenia z serwerem");
+        }
+
         PokerCommandRequest req = new PokerCommandRequest(command, amount, roomId);
         String jsonReq = gson.toJson(req);
         String encryptedReq = keyManager.encryptAes(jsonReq);
         writer.println(encryptedReq);
+        writer.flush();
+        System.out.println("[DEBUG POKER CLIENT] Wysłano komendę: " + command);
 
         String encryptedResp = reader.readLine();
+        System.out.println("[DEBUG POKER CLIENT] Odebrano odpowiedź: " + encryptedResp);
+
         if (encryptedResp == null) {
-            throw new IOException("Połączenie zamknięte przez serwer.");
+            throw new IOException("Połączenie zamknięte przez serwer");
         }
 
-        if (encryptedResp.startsWith("{")) {
-            ErrorResponse error = gson.fromJson(encryptedResp, ErrorResponse.class);
-            if (error.error != null) {
-                throw new IOException("Serwer zwrócił błąd: " + error.error);
+        // Sprawdzamy czy to plain JSON (nie base64)
+        if (encryptedResp.strip().startsWith("{")) {
+            JsonObject errorObj = JsonParser.parseString(encryptedResp).getAsJsonObject();
+            if (errorObj.has("error")) {
+                throw new IOException(errorObj.get("error").getAsString());
             }
+            return gson.fromJson(encryptedResp, PokerDTO.class);
         }
 
+        // Deszyfrujemy odpowiedź base64
         String jsonResp = keyManager.decryptAes(encryptedResp);
+        System.out.println("[DEBUG POKER CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
         return gson.fromJson(jsonResp, PokerDTO.class);
     }
+
 
     public PokerDTO check() throws Exception {
         return sendCommand("check", 0);

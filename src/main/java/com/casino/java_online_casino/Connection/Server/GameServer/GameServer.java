@@ -157,20 +157,23 @@ public class GameServer {
                     gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) gameInstance, currentKeyManager);
                     break;
                 case "poker":
-                    System.out.println("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
                     JsonObject response = new JsonObject();
-
+                    System.out.println("[DEBUG GAME SERVER] Gracz " + userId + " próbuje dołączyć do gry pokerowej");
                     // Sprawdź czy istnieje aktywny pokój z wolnym miejscem
                     Optional<PokerRoom> existingRoom = PokerRoomManager.getInstance().getAvailableRoom();
 
                     PokerRoom room;
                     if (existingRoom.isPresent()) {
                         // Dołącz do istniejącego pokoju
+                        System.out.println("[DEBUG GAME SERVER] Gracz " + userId + " dołącza do istniejącego pokoju: " + existingRoom.get().getRoomId());
                         room = existingRoom.get();
+                        room.addPlayer(userId);
                         response.addProperty("type", "room_joined");
                     } else {
                         // Utwórz nowy pokój
+                        System.out.println("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
                         room = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, currentKeyManager));
+                        room.addPlayer(userId);
                         response.addProperty("type", "room_created");
                     }
                     if (room == null) {

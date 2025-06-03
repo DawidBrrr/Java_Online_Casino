@@ -20,6 +20,10 @@ public class PokerDTO {
     public boolean isGameOver;
     public String winnerId;
 
+    public boolean isStarted;
+    public boolean isInProgress;
+    public List<String> playerActions;
+
     public static class CardDTO {
         public Card.Suit suit;
         public Card.Rank rank;
@@ -86,5 +90,25 @@ public class PokerDTO {
 
 
         return dto;
+    }
+    public static PokerDTO createGameStartDTO(String roomId) {
+        PokerDTO dto = new PokerDTO();
+        dto.roomId = roomId;
+        dto.gameState = PokerGame.GameState.DEALING;
+        dto.isStarted = true;
+        dto.isInProgress = true;
+        dto.pot = 0;
+        dto.currentBet = 0;
+        dto.minimumBet = 10; // Domyślna wartość małej ciemnej
+        dto.communityCards = List.of();
+        dto.players = Map.of();
+        return dto;
+    }
+
+    // Metoda do aktualizacji statusu gracza
+    public void updatePlayerStatus(String playerId, String status) {
+        if (players != null && players.containsKey(playerId)) {
+            players.get(playerId).status = status;
+        }
     }
 }

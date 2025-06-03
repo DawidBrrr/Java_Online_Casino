@@ -4,6 +4,7 @@ import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
 import com.casino.java_online_casino.games.poker.model.Card;
 import com.casino.java_online_casino.games.poker.model.PokerGame;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,38 @@ public class RemotePokerController {
 
     public RemotePokerController(PokerTCPClient tcpClient) {
         this.tcpClient = tcpClient;
+        try {
+            tcpClient.connect();
+            System.out.println("[DEBUG POKER_CONTROLLER] Nawiązano połączenie z serwerem");
+        } catch (IOException e) {
+            System.err.println("[ERROR POKER_CONTROLLER] Nie można połączyć z serwerem: " + e.getMessage());
+        }
     }
+
+    public void startGame() {
+        try {
+            if (!isConnected()) {
+                tcpClient.connect();
+            }
+            System.out.println("[DEBUG POKER_CONTROLLER] Rozpoczynanie gry");
+            lastState = tcpClient.startGame();
+        } catch (Exception e) {
+            System.err.println("[ERROR POKER_CONTROLLER] Błąd podczas rozpoczynania gry: " + e.getMessage());
+        }
+    }
+    private boolean isConnected() {
+        return tcpClient != null && tcpClient.isConnected();
+    }
+
+    public void broadcastMessage(String message) {
+        try {
+            System.out.println("[DEBUG POKER_CONTROLLER] Wysyłanie wiadomości: " + message);
+            tcpClient.broadcastMessage(message);
+        } catch (Exception e) {
+            System.err.println("[ERROR POKER_CONTROLLER] Błąd podczas wysyłania wiadomości: " + e.getMessage());
+        }
+    }
+
 
     // Akcje gracza
     public void fold() throws Exception {

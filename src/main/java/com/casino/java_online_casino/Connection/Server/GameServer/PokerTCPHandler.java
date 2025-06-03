@@ -127,7 +127,7 @@ public class PokerTCPHandler implements Runnable {
 
     private static class PokerCommandRequest {
         String command;
-        String playerId;
+        int playerId;
         int amount;
     }
 

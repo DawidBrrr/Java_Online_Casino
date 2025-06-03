@@ -4,7 +4,7 @@ import java.util.*;
 
 public class PokerGame {
     public enum GameState {
-        WAITING_FOR_PLAYERS, PRE_FLOP, FLOP, TURN, RIVER, SHOWDOWN, GAME_OVER
+        WAITING_FOR_PLAYERS, PRE_FLOP, FLOP, TURN, RIVER, SHOWDOWN, GAME_OVER, DEALING
     }
 
     private List<Player> players;
