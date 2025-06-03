@@ -23,6 +23,9 @@ public class PokerRoomManager {
 
     public PokerRoom createRoom(PokerTCPClient tcpClient) {
         System.out.println("[DEBUG POKER ROOM MANAGER] Próba utworzenia nowego pokoju dla klienta: " + tcpClient);
+        if (tcpClient == null) {
+            throw new IllegalArgumentException("PokerTCPClient nie może być null");
+        }
         PokerRoom room = new PokerRoom(tcpClient);
         rooms.put(room.getRoomId(), room);
         System.out.println("[DEBUG POKER ROOM MANAGER] Utworzono pokój o ID: " + room.getRoomId() + ". Aktywne pokoje: " + rooms.size());

@@ -159,22 +159,27 @@ public class GameServer {
                     // Sprawdź czy istnieje aktywny pokój z wolnym miejscem
                     Optional<PokerRoom> existingRoom = PokerRoomManager.getInstance().getAvailableRoom();
 
+                    PokerRoom room;
                     if (existingRoom.isPresent()) {
                         // Dołącz do istniejącego pokoju
+                        room = existingRoom.get();
                         response.addProperty("type", "room_joined");
-                        response.addProperty("roomId", existingRoom.get().getRoomId());
                     } else {
                         // Utwórz nowy pokój
-                        PokerRoom pokerRoom = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, keyManager));
+                        room = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, keyManager));
                         response.addProperty("type", "room_created");
-                        response.addProperty("roomId", pokerRoom.getRoomId());
                     }
+                    if (room == null) {
+                        throw new RuntimeException("Nie udało się utworzyć/znaleźć pokoju");
+                    }
+
+                    response.addProperty("roomId", room.getRoomId());
 
                     String encryptedResponse = keyManager.encryptAes(response.toString());
                     writer.println(encryptedResponse);
                     writer.flush();
 
-                    gameHandler = new PokerTCPHandler(clientSocket, existingRoom.orElse(null), keyManager);
+                    gameHandler = new PokerTCPHandler(clientSocket, room, keyManager);
                     break;
                 case "slots":
                     writer.println("{\"error\":\"Slots not implemented yet\"}");
