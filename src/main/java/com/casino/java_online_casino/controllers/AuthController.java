@@ -3,14 +3,17 @@ package com.casino.java_online_casino.controllers;
 import com.casino.java_online_casino.Connection.Client.LoginService;
 import com.casino.java_online_casino.Connection.Client.RegisterService;
 import com.casino.java_online_casino.User.Gamer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -38,11 +41,36 @@ public class AuthController {
     @FXML private ImageView backgroundImage;
 
     @FXML
+    private StackPane rootPane;
+
+    @FXML
+    private VBox formContainer;
+
+
+    @FXML
     public void initialize() {
         // Bindowanie rozmiaru obrazu do rozmiaru rodzica (StackPane)
-        StackPane parent = (StackPane) backgroundImage.getParent();
-        backgroundImage.fitWidthProperty().bind(parent.widthProperty());
-        backgroundImage.fitHeightProperty().bind(parent.heightProperty());
+        backgroundImage.fitWidthProperty().bind(rootPane.widthProperty());
+        backgroundImage.fitHeightProperty().bind(rootPane.heightProperty());
+
+        // Nasłuchiwanie zmian wysokości i szerokości dla dynamicznych marginesów
+        rootPane.widthProperty().addListener((obs, oldVal, newVal) -> updateMargins());
+        rootPane.heightProperty().addListener((obs, oldVal, newVal) -> updateMargins());
+
+        // Pierwsze ustawienie marginesów
+        Platform.runLater(this::updateMargins);
+    }
+
+    private void updateMargins() {
+        double width = rootPane.getWidth();
+        double height = rootPane.getHeight();
+
+        if (width > 0 && height > 0) {
+            double horizontalMargin = Math.max(20, width * 0.05);  // minimum 20px
+            double verticalMargin = Math.max(20, height * 0.1);    // minimum 20px, 10% wysokości
+
+            StackPane.setMargin(formContainer, new Insets(verticalMargin, horizontalMargin, verticalMargin, horizontalMargin));
+        }
     }
 
     @FXML

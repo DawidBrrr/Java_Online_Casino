@@ -4,49 +4,58 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.casino.java_online_casino.controllers.AuthController"
-            stylesheets="@../styles/auth.css">
+<StackPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.casino.java_online_casino.controllers.AuthController"
+           stylesheets="@../styles/auth.css"
+           fx:id="rootPane">
 
-    <center>
-        <StackPane>
-            <!-- Tło dopasowane do pełnego ekranu -->
-            <ImageView fx:id="backgroundImage" StackPane.alignment="CENTER" preserveRatio="false">
-                <Image url="@../assets/casino_bg.png"/>
-            </ImageView>
+    <!-- Tło dopasowane do pełnego ekranu -->
+    <ImageView fx:id="backgroundImage"
+               fitWidth="2000"
+               fitHeight="2000"
+               preserveRatio="false"
+               StackPane.alignment="CENTER">
+        <Image url="@../assets/casino_bg.png"/>
+    </ImageView>
 
-            <!-- Główny kontener formularza -->
-            <VBox alignment="CENTER" StackPane.alignment="CENTER">
-                <VBox alignment="CENTER" spacing="20" styleClass="auth-box" maxWidth="600">
-                    <Label text="Sigma Kasyno" styleClass="title"/>
+    <!-- Główny kontener formularza - zawsze wycentrowany z marginesami -->
+    <VBox fx:id="formContainer"
+            alignment="CENTER"
+          StackPane.alignment="CENTER"
+          spacing="20"
+          styleClass="auth-box"
+          maxWidth="600"
+          minWidth="400"
+          prefWidth="500">
 
-                    <TabPane styleClass="auth-tabs">
-                        <Tab text="Logowanie" closable="false">
-                            <VBox spacing="15" styleClass="form-container">
-                                <TextField fx:id="loginUsername" promptText="Nazwa Użytkownika"/>
-                                <PasswordField fx:id="loginPassword" promptText="Hasło"/>
-                                <Button text="Zaloguj się" onAction="#handleLogin" styleClass="auth-button"/>
-                                <Label fx:id="loginError" styleClass="error-label"/>
-                            </VBox>
-                        </Tab>
-                        <Tab text="Rejestracja" closable="false">
-                            <VBox spacing="15" styleClass="form-container">
-                                <TextField fx:id="registerFirstName" promptText="Imię"/>
-                                <TextField fx:id="registerLastName" promptText="Nazwisko"/>
-                                <TextField fx:id="registerNickname" promptText="Nickname"/>
-                                <TextField fx:id="registerEmail" promptText="Email"/>
-                                <PasswordField fx:id="registerPassword" promptText="Hasło"/>
-                                <PasswordField fx:id="registerConfirm" promptText="Potwierdź hasło"/>
-                                <DatePicker fx:id="registerBirthDate" promptText="Data urodzenia"/>
-                                <Button text="Utwórz konto" onAction="#handleRegister" styleClass="auth-button"/>
-                                <Label fx:id="registerError" styleClass="error-label"/>
-                            </VBox>
-                        </Tab>
-                    </TabPane>
+
+        <Label text="Sigma Kasyno" styleClass="title"/>
+
+        <TabPane styleClass="auth-tabs">
+            <Tab text="Logowanie" closable="false">
+                <VBox spacing="15" styleClass="form-container">
+                    <TextField fx:id="loginUsername" promptText="Nazwa Użytkownika"/>
+                    <PasswordField fx:id="loginPassword" promptText="Hasło"/>
+                    <Button text="Zaloguj się" onAction="#handleLogin" styleClass="auth-button"/>
+                    <Label fx:id="loginError" styleClass="error-label"/>
                 </VBox>
-            </VBox>
-        </StackPane>
-    </center>
-</BorderPane>
+            </Tab>
+            <Tab text="Rejestracja" closable="false">
+                <VBox spacing="15" styleClass="form-container">
+                    <TextField fx:id="registerFirstName" promptText="Imię"/>
+                    <TextField fx:id="registerLastName" promptText="Nazwisko"/>
+                    <TextField fx:id="registerNickname" promptText="Nickname"/>
+                    <TextField fx:id="registerEmail" promptText="Email"/>
+                    <PasswordField fx:id="registerPassword" promptText="Hasło"/>
+                    <PasswordField fx:id="registerConfirm" promptText="Potwierdź hasło"/>
+                    <DatePicker fx:id="registerBirthDate" promptText="Data urodzenia"/>
+                    <Button text="Utwórz konto" onAction="#handleRegister" styleClass="auth-button"/>
+                    <Label fx:id="registerError" styleClass="error-label"/>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </VBox>
+</StackPane>
