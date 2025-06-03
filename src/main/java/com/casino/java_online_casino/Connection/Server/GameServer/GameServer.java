@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class GameServer {
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -42,9 +43,10 @@ public class GameServer {
     }
 
     private void handleClient(Socket clientSocket) {
-        UUID playerUUID = null;
+        UUID playerUUID ;
         SessionManager.SessionToken session = null;
         boolean locked = false;
+        final int userId;
         try (
                 BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true)
@@ -65,11 +67,17 @@ public class GameServer {
             }
 
             Object uuidObj = ServerTokenManager.validateJwt(request.token).get(JsonFields.UUID);
-            if (uuidObj == null) {
+            String id = (String)ServerTokenManager.validateJwt(request.token).get(JsonFields.ID);
+            if (uuidObj == null || id == null || id.isBlank()) {
                 writer.println("{\"status\":\"error\",\"code\":401,\"message\":\"Invalid token\"}");
                 return;
             }
             playerUUID = UUID.fromString(uuidObj.toString());
+            userId = Integer.parseInt(id);
+            if(userId == -1){
+                writer.println("{\"status\":\"error\",\"code\":401,\"message\":\"Invalid token\"}");
+                return;
+            }
 
             // Pobierz sesję po UUID (do szyfrowania)
             session = sessionManager.getSessionByUUID(playerUUID);
@@ -78,42 +86,41 @@ public class GameServer {
                 return;
             }
 
-            int userId = session.getUserId();
             List<SessionManager.SessionToken> candidateSessions = sessionManager.findSessionsByUserId(userId);
 
-            // Jeśli nie ma żadnej sesji z tym userId – błąd, nie tworzymy nowej!
+// Jeśli nie ma żadnej sesji z tym userId – błąd
             if (candidateSessions.isEmpty()) {
                 writer.println("{\"status\":\"error\",\"code\":404,\"message\":\"No session found for this userId\"}");
                 return;
             }
 
-            // Jeśli jest jedna i to ta sama (UUID == playerUUID), użyj jej
-            SessionManager.SessionToken chosenSession = null;
-            if (candidateSessions.size() == 1 && candidateSessions.get(0).getUuid().equals(playerUUID)) {
-                chosenSession = candidateSessions.get(0);
-                System.out.println("[DEBUG GAME SERVER] To ta sama sesja po UUID i userId.");
-            } else {
-                // Są inne sesje - sprawdź ping-pongiem
-                System.out.println("[DEBUG GAME SERVER] Wykryto " + candidateSessions.size() + " sesji dla userId, sprawdzam ping-pongiem...");
-                for (SessionManager.SessionToken s : candidateSessions) {
-                    if (tryPingPong(clientSocket, s.getKeyManager())) {
-                        writer.println("{\"status\":\"error\",\"code\":409,\"message\":\"Game already in use by another client\"}");
-                        return;
-                    } else {
-                        // Usuwamy nieaktywne sesje (zombie)
-                        SessionManager.getInstance().deleteSessionByUUID(s.getUuid());
-                        System.out.println("[DEBUG GAME SERVER] Usunięto nieaktywną sesję: " + s.getUuid());
-                    }
-                }
-                // Żadna nie odpowiedziała – użyj pierwszej (lub możesz wybrać wg własnej logiki)
-                chosenSession = candidateSessions.get(0);
-                System.out.println("[DEBUG GAME SERVER] Przełączam się na istniejącą nieaktywną sesję userId: " + userId);
-            }
-            session = chosenSession;
+// Zidentyfikuj bieżącą sesję (playerUUID)
+            SessionManager.SessionToken currentSession = sessionManager.getSessionByUUID(playerUUID);
 
-            // 4. Próbuj zablokować dostęp do gry
+// Zamknij wszystkie inne sesje (oprócz obecnej)
+            Game foundGame = null;
+            for (SessionManager.SessionToken s : candidateSessions) {
+                if (!s.getUuid().equals(playerUUID)) {
+                    if (foundGame == null && s.getGame() != null) {
+                        foundGame = s.getGame();
+                    }
+                    sessionManager.deleteSessionByUUID(s.getUuid());
+                    System.out.println("[DEBUG GAME SERVER] Usunięto starą sesję: " + s.getUuid());
+                }
+            }
+
+// Przypisz znalezioną grę (jeśli była) do obecnej sesji
+            if (foundGame != null) {
+                currentSession.setGame(foundGame);
+            }
+
+// Dalej korzystasz TYLKO z KeyManagera z currentSession!
+            KeyManager currentKeyManager = currentSession.getKeyManager();
+            // --- KONIEC KLUCZOWEJ LOGIKI ---
+
+            // Próbuj zablokować dostęp do gry
             if (!session.tryLockGame()) {
-                if (tryPingPong(clientSocket, session.getKeyManager())) {
+                if (tryPingPong(clientSocket,currentKeyManager)) {
                     writer.println("{\"status\":\"error\",\"code\":409,\"message\":\"Game already in use by another client\"}");
                     return;
                 } else {
@@ -126,17 +133,14 @@ public class GameServer {
             }
             locked = true;
 
-            // 5. Pobierz lub utwórz obiekt gry w sesji
-            Game game = session.getGame();
-            if (game == null) {
+            // Pobierz lub utwórz obiekt gry w sesji, jeśli jeszcze nie istnieje
+            if (session.getGame() == null) {
                 switch (request.game.toLowerCase()) {
                     case "blackjack":
-                        game = new BlackJackController();
-                        session.setGame(game);
+                        session.setGame(new BlackJackController());
                         break;
                     case "poker":
-                        game = new PokerController();
-                        session.setGame(game);
+                        session.setGame(new PokerController());
                         break;
                     // Dodaj kolejne gry tutaj
                     default:
@@ -145,12 +149,12 @@ public class GameServer {
                 }
             }
 
-            // 6. Uruchom handler gry, przekazując kontroler z sesji i KeyManager z wybranej sesji!
-            KeyManager keyManager = session.getKeyManager();
+            // Uruchom handler gry, przekazując kontroler z sesji i KeyManager z bieżącej sesji!
+            Game gameInstance = session.getGame();
             Runnable gameHandler;
             switch (request.game.toLowerCase()) {
                 case "blackjack":
-                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) game, keyManager);
+                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) gameInstance, currentKeyManager);
                     break;
                 case "poker":
                     System.out.println("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
@@ -166,7 +170,7 @@ public class GameServer {
                         response.addProperty("type", "room_joined");
                     } else {
                         // Utwórz nowy pokój
-                        room = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, keyManager));
+                        room = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, currentKeyManager));
                         response.addProperty("type", "room_created");
                     }
                     if (room == null) {
@@ -175,16 +179,12 @@ public class GameServer {
 
                     response.addProperty("roomId", room.getRoomId());
 
-                    String encryptedResponse = keyManager.encryptAes(response.toString());
+                    String encryptedResponse = currentKeyManager.encryptAes(response.toString());
                     writer.println(encryptedResponse);
                     writer.flush();
 
-                    gameHandler = new PokerTCPHandler(clientSocket, room, keyManager);
+                    gameHandler = new PokerTCPHandler(clientSocket, room, currentKeyManager);
                     break;
-                case "slots":
-                    writer.println("{\"error\":\"Slots not implemented yet\"}");
-                    clientSocket.close();
-                    return;
                 default:
                     writer.println("{\"error\":\"Unknown game type\"}");
                     clientSocket.close();
@@ -214,6 +214,7 @@ public class GameServer {
         new GameServer().start();
     }
 
+    // Ping-pong do sprawdzania aktywności sesji
     boolean tryPingPong(Socket clientSocket, KeyManager keyManager) {
         try {
             String encryptedPing = keyManager.encryptAes(ServerJsonMessage.ping().toString());
@@ -223,7 +224,7 @@ public class GameServer {
             writer.println(encryptedPing);
             writer.flush();
 
-            clientSocket.setSoTimeout(3000);
+            clientSocket.setSoTimeout(5000);
 
             String response = reader.readLine();
             if (response == null) return false;

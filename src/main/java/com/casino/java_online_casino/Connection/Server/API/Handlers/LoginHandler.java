@@ -81,7 +81,10 @@ public class LoginHandler implements HttpHandler {
 
             // Ustaw userId w sesji i odśwież czas
             session.setUserId(gamer.getUserId());
+            System.out.println(gamer.getUserId());
+            System.out.println(session.getUserId());
             session.updateLastAccess();
+            SessionManager.getInstance().updateSessionData(clientId, session);
 
             String jwt = session.getNewToken();
             System.out.println("[DEBUG LOGIN] Logowanie OK, wygenerowano token: " + jwt);
@@ -94,7 +97,7 @@ public class LoginHandler implements HttpHandler {
             encryptedWrapper.addProperty(JsonFields.DATA, encryptedResponse);
 
             logAndSend(exchange, 200, encryptedWrapper);
-            SessionManager.getInstance().updateSessionData(clientId, session);
+
             System.out.println("[DEBUG LOGIN] Odpowiedź OK wysłana i sesja zaktualizowana.");
         } catch (Exception e) {
             System.err.println("[ERROR LOGIN] Wyjątek: " + e.getMessage());

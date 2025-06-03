@@ -148,7 +148,7 @@ public class SessionManager {
     public class SessionToken {
         private final UUID uuid;
         private int userId;
-        private final KeyManager keyManager;
+        private  KeyManager keyManager;
         private LocalDateTime lastAccess;
         private Map<String,String> userData;
         private boolean duringTheGame;
@@ -166,6 +166,7 @@ public class SessionManager {
             this.lastAccess = LocalDateTime.now();
             this.userData = new HashMap<>();
             userData.put(JsonFields.UUID, uuid.toString());
+            userData.put(JsonFields.ID, Integer.toString(userId));
             this.duringTheGame = false;
             this.game = null;
         }
@@ -187,7 +188,7 @@ public class SessionManager {
             if(userId!=-1){
                 return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 15;
             }
-            return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 5;
+            return Duration.between(lastAccess, LocalDateTime.now()).toMinutes() >= 3;
         }
         public int getUserId() {
             return userId;
@@ -215,10 +216,10 @@ public class SessionManager {
             this.duringTheGame = duringTheGame;
         }
         public void setUserId(int userId) {
-            if(userId!=-1){
-                return;
-            }
+            System.out.println(userId);
             this.userId = userId;
+            userData.put(JsonFields.ID, Integer.toString(userId));
+            System.out.println(userData.get(JsonFields.ID));
         }
 
         // --- GAME MANAGEMENT ---
@@ -250,6 +251,10 @@ public class SessionManager {
 
         public boolean isGameLocked() {
             return gameLock.isLocked();
+        }
+
+        public void setKeyManager(KeyManager keyManager) {
+            this.keyManager = keyManager;
         }
     }
 }
