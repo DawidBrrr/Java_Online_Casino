@@ -21,6 +21,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import com.casino.java_online_casino.Database.GamerDAO;
+import com.casino.java_online_casino.User.Gamer;
 
 import java.io.IOException;
 import java.util.*;
@@ -36,6 +38,10 @@ public class SlotsController {
     @FXML private StackPane effectsPane;
     @FXML private Button playButton;
     @FXML private ComboBox<Integer> betComboBox;
+    private String currentUserEmail;
+    private int currentUserId;
+    private double balance;
+    private GamerDAO gamerDAO = GamerDAO.getInstance();
 
     private final Map<List<String>, WinCondition> winConditions = Map.ofEntries(
             // Główne kombinacje
@@ -62,7 +68,6 @@ public class SlotsController {
             Map.entry(List.of("any", "any", "any"), new WinCondition(0, "lose.png", -1))
     );
 
-    private double balance = DashboardController.getBalance();
     private Random random = new Random();
     private Map<Image, String> symbolNames = new HashMap<>();
     private Timeline timeline;
@@ -87,7 +92,22 @@ public class SlotsController {
     }
 
     @FXML
-    public void initialize() {
+    public void initWithUser(String email) {
+        this.currentUserEmail = email;
+        Gamer gamer = gamerDAO.findByEmail(email);
+        if (gamer != null) {
+            this.currentUserId = gamer.getUserId();
+            this.balance = gamer.getCredits();
+        } else {
+            this.balance = 0.0;
+        }
+        updateBalance();
+        // Reszta twojej standardowej inicjalizacji:
+        standardInit();
+    }
+
+    @FXML
+    public void standardInit() {
         betComboBox.getItems().addAll(10,20,50, 100, 200, 500, 1000);
         betComboBox.setValue(50);
         betComboBox.setOnAction(e -> currentBet = betComboBox.getValue());
@@ -102,13 +122,10 @@ public class SlotsController {
         symbolNames.put(symbols[1], "lemon.png");
         symbolNames.put(symbols[2], "orange.png");
         symbolNames.put(symbols[3], "seven.png");
-
         slot1.setImage(symbols[0]);
         slot2.setImage(symbols[1]);
         slot3.setImage(symbols[2]);
-
         setupAdvancedAnimations();
-        updateBalance();
     }
 
     private Image loadImage(String filename) {
@@ -161,18 +178,20 @@ public class SlotsController {
             return;
         }
 
+        // Odejmujemy stawkę i aktualizujemy w bazie:
         balance -= currentBet;
         updateBalance();
+        if (currentUserId > 0)
+            gamerDAO.updateCredits(currentUserId, (float) balance);
+
         resultLabel.setText("");
 
-        // Losowanie symboli z większą dramaturgią
+        // Losowanie i animacja:
         Image[] results = {
                 symbols[random.nextInt(symbols.length)],
                 symbols[random.nextInt(symbols.length)],
                 symbols[random.nextInt(symbols.length)]
         };
-
-        // Rozpocznij spektakularną animację
         startSpectacularSpin(results);
     }
 
@@ -418,14 +437,13 @@ public class SlotsController {
     }
 
     private void checkResult(Image[] results) {
-        String[] symbols = Arrays.stream(results)
+        String[] resultNames = Arrays.stream(results)
                 .map(img -> symbolNames.get(img))
                 .toArray(String[]::new);
 
         List<WinCondition> matchedConditions = new ArrayList<>();
-
         winConditions.forEach((pattern, condition) -> {
-            if (matchesPattern(symbols, pattern)) {
+            if (matchesPattern(resultNames, pattern)) {
                 matchedConditions.add(condition);
             }
         });
@@ -435,8 +453,13 @@ public class SlotsController {
                 .orElse(winConditions.get(List.of("any", "any", "any")));
 
         balance += (bestWin.payout * currentBet);
-        Platform.runLater(() -> showSpectacularWinEffect(bestWin));
+
+        // Wygrana = aktualizacja balansu w bazie
         updateBalance();
+        if (currentUserId > 0)
+            gamerDAO.updateCredits(currentUserId, (float) balance);
+
+        Platform.runLater(() -> showSpectacularWinEffect(bestWin));
     }
 
     private boolean matchesPattern(String[] symbols, List<String> pattern) {
@@ -549,14 +572,13 @@ public class SlotsController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/dashboard.fxml"));
             Parent root = loader.load();
 
+            // Pobierz kontroler dashboardu i przekaż email:
             DashboardController dashboardController = loader.getController();
-            DashboardController.setBalance(balance);
-            dashboardController.updateBalance();
+            dashboardController.initialize(currentUserEmail);
 
             Stage stage = (Stage) resultLabel.getScene().getWindow();
             Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
             Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
-
             scene.getStylesheets().add(getClass().getResource("/com/casino/styles/casino.css").toExternalForm());
             stage.setScene(scene);
             stage.setMaximized(true);

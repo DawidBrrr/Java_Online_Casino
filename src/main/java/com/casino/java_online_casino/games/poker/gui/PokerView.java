@@ -512,7 +512,7 @@ public class PokerView {
 
             DashboardController dashboardController = loader.getController();
             if (controller != null) {
-                DashboardController.setBalance(controller.getBalance());
+             //   DashboardController.setBalance(controller.getBalance());
                 dashboardController.updateBalance();
             }
 
