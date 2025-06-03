@@ -53,8 +53,8 @@
                 <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
 
-            <Button text="Hit" onAction="#onHit" styleClass="game-button"/>
-            <Button text="Stand" onAction="#onStand" styleClass="game-button"/>
+            <Button fx:id="hitButton" text="Hit" onAction="#onHit" styleClass="game-button"/>
+            <Button fx:id="standButton" text="Stand" onAction="#onStand" styleClass="game-button"/>
             <Button text="Nowa Gra" onAction="#onNewGame" styleClass="game-button"/>
 
             <ComboBox fx:id="betComboBox" prefWidth="120" styleClass="bet-box"/>
