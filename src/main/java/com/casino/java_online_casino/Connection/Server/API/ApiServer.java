@@ -28,8 +28,7 @@ public class ApiServer {
             // Endpointy
             server.createContext("/login", new LoginHandler());
             server.createContext("/register", new RegisterHandler());
-            server.createContext("/connect", new ConnectHandler());
-            server.createContext("/reconnect", new ReconnectHandler());
+            server.createContext("/logout", new LogoutHandler());
             server.createContext("/user", new UserHandler());
             server.createContext("/stat", new StatHandler());
             server.createContext("/key", new KeyHandler());

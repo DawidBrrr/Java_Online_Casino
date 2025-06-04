@@ -25,7 +25,7 @@ public class Main extends Application {
         // Możesz dodać kolejne okna...
     }
 
-    private void createClientWindow(String title) throws Exception {
+    private void createClientWindow(String                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               title) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/com/casino/java_online_casino/auth.fxml"));
         Scene scene = new Scene(root);
         Stage stage = new Stage();

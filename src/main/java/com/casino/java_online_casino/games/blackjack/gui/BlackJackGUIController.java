@@ -1,15 +1,13 @@
-
 package com.casino.java_online_casino.games.blackjack.gui;
 
 import com.casino.java_online_casino.Connection.Client.Service;
 import com.casino.java_online_casino.Connection.Client.UserDataService;
 import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
-import com.casino.java_online_casino.Database.GamerDAO;
-import com.casino.java_online_casino.User.Gamer;
 import com.casino.java_online_casino.controllers.DashboardController;
 import com.casino.java_online_casino.games.blackjack.controller.BlackjackTcpClient;
 import com.casino.java_online_casino.games.blackjack.controller.RemoteBlackJackController;
 import com.casino.java_online_casino.games.blackjack.model.Card;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -66,7 +64,6 @@ public class BlackJackGUIController {
             this.balance = 0.0;
         }
         updateBalance();
-        // Reszta logiki inicjalizacyjnej
         initializeGame();
     }
 
@@ -76,36 +73,55 @@ public class BlackJackGUIController {
         try {
             tcpClient.connect();
         } catch (IOException e) {
-            throw new RuntimeException("Połączenie z blackjack nie powiodło się");
+            showDisconnected();
+            return;
         }
-        controller = new RemoteBlackJackController(tcpClient);
+        try {
+            controller = new RemoteBlackJackController(tcpClient);
+        } catch (Exception e) {
+            showDisconnected();
+            return;
+        }
 
         betComboBox.getItems().addAll(10, 20, 50, 100, 200, 500, 1000);
         betComboBox.setValue(currentBet);
         betComboBox.setOnAction(e -> currentBet = betComboBox.getValue());
 
         updateBalance();
-        if (controller.getDealerHand() != null) {
+        if (!controller.getDealerHand().isEmpty()) {
             updateUI();
             showResult();
+            if(!controller.isGameOver()){
+                statusLabel.setText("Połączono ponownie , gra trwa dalej ");
+            }
+            else if(controller.isGameOver()){
+                statusLabel.setText("Połączono ponownie , ta partia już się zakończyła");
+            }
         }
-        statusLabel.setText("Kliknij 'Nowa Gra', aby rozpocząć.");
+        else{
+            statusLabel.setText("Kliknij 'Nowa Gra', aby rozpocząć.");
+        }
+
     }
 
     private void updateBalance() {
-        balanceLabel.setText(String.format("Saldo: $%.2f", UserDataService.updateGamerDTO().getCredits()));
+        GamerDTO updated = UserDataService.updateGamerDTO();
+        if (updated != null) {
+            balance = updated.getCredits();
+        }
+        balanceLabel.setText(String.format("Saldo: $%.2f", balance));
     }
 
     @FXML
     public void onHit() {
         try {
             controller.playerHit();
+            updateUI();
+            if (controller.isGameOver()) {
+                showResult();
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        updateUI();
-        if (controller.isGameOver()) {
-            showResult();
+            showDisconnected();
         }
     }
 
@@ -113,11 +129,11 @@ public class BlackJackGUIController {
     public void onStand() {
         try {
             controller.playerStand();
+            updateUI();
+            showResult();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            showDisconnected();
         }
-        updateUI();
-        showResult();
     }
 
     @FXML
@@ -125,7 +141,7 @@ public class BlackJackGUIController {
         try {
             startNewGame();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            showDisconnected();
         }
     }
 
@@ -134,8 +150,6 @@ public class BlackJackGUIController {
             statusLabel.setText("Za mało środków, aby rozpocząć grę!");
             return;
         }
-
-
         controller.setBet(currentBet);
         controller.startNewGame();
         updateBalance();
@@ -161,7 +175,6 @@ public class BlackJackGUIController {
         updateScores();
     }
 
-
     private void updateScores() {
         playerScoreLabel.setText("Punkty: " + controller.getPlayerScore());
         dealerScoreLabel.setText("Punkty: " + controller.getDealerScore());
@@ -182,7 +195,7 @@ public class BlackJackGUIController {
         }
         updateBalance();
         statusLabel.setText(result);
-        if(controller.isGameOver()){
+        if (controller.isGameOver()) {
             hitButton.setDisable(true);
             standButton.setDisable(true);
         }
@@ -227,5 +240,14 @@ public class BlackJackGUIController {
     @FXML
     public void onReturnToMenu() {
         handleBack(); // By zapewnić jeden punkt powrotu
+    }
+
+    // ---- NOWA METODA ----
+    private void showDisconnected() {
+        Platform.runLater(() -> {
+            statusLabel.setText("Rozłączono z serwerem. Spróbuj wrócić do menu.");
+            hitButton.setDisable(true);
+            standButton.setDisable(true);
+        });
     }
 }

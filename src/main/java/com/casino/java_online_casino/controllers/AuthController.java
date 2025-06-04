@@ -76,9 +76,9 @@ public class AuthController {
     @FXML
     private void handleLogin() {
         // Wykonaj wymianę kluczy przed otwarciem okien
-        Service keyService = new KeyExchangeService();
-        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
-        keyExchangeThread.start();
+//        Service keyService = new KeyExchangeService();
+//        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
+//        keyExchangeThread.start();
 
         String username = loginUsername.getText();
         String password = loginPassword.getText();

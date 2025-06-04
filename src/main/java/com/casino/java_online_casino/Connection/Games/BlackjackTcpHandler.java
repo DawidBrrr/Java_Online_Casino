@@ -32,6 +32,7 @@ public class BlackjackTcpHandler implements Runnable {
 
     @Override
     public void run() {
+        String userId = controller.getCurrentUserId();
         try (
                 BufferedReader reader = new BufferedReader(
                         new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
@@ -41,8 +42,16 @@ public class BlackjackTcpHandler implements Runnable {
             handleClientSession(reader, writer);
         } catch (Exception e) {
             System.err.println("[ERROR] Błąd w BlackjackTcpHandler: " + e.getMessage());
+            // Jeśli błąd dotyczy połączenia, natychmiast zwolnij sesję gracza
+            if (userId != null) {
+                System.out.println("[INFO] Connection lost for user " + userId + " – releasing session immediately.");
+                controller.onPlayerLeave(userId);
+            }
             e.printStackTrace();
         } finally {
+            if (userId != null) {
+                controller.onPlayerLeave(userId);
+            }
             closeSocketQuietly();
         }
     }

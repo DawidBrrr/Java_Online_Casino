@@ -56,29 +56,37 @@ public class DashboardController {
 
     @FXML
     private void handleLogout() {
-        try {
-
-            new Thread(UserDataService::new).start();
-            Service.token = null;
-            Service.keyManager = null ;
-
-
-            // Wyczyść dane lokalne
-            currentUserEmail = null;
-            gamerDTO = null;
-            usernameLabel.setText("");
-            balanceLabel.setText("");
-
-            // Przejdź do widoku logowania
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/auth.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) usernameLabel.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Sigma Kasyno - Logowanie");
-        } catch (Exception e) {
-            showError("Błąd podczas wylogowywania: " + e.getMessage());
-            e.printStackTrace();
-        }
+        new Thread(() -> {
+            boolean logoutOk = false;
+            try {
+                LogoutService logoutService = new LogoutService();
+                logoutOk = logoutService.perform();
+                System.out.println("[DEBUG LOGOUT] Wynik wylogowania: " + logoutOk);
+            } catch (Exception e) {
+                System.err.println("[DEBUG LOGOUT] Błąd podczas wylogowywania: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                // Zawsze czyść dane lokalne i wracaj do logowania
+                Platform.runLater(() -> {
+                    Service.token = null;
+                    Service.keyManager = null;
+                    currentUserEmail = null;
+                    gamerDTO = null;
+                    usernameLabel.setText("");
+                    balanceLabel.setText("");
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/auth.fxml"));
+                        Parent root = loader.load();
+                        Stage stage = (Stage) usernameLabel.getScene().getWindow();
+                        stage.setScene(new Scene(root));
+                        stage.setTitle("Sigma Kasyno - Logowanie");
+                    } catch (Exception e) {
+                        showError("Błąd podczas wylogowywania: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }).start();
     }
 
     @FXML
@@ -192,12 +200,7 @@ public class DashboardController {
     }
 
     // Pomocnicze do blokowania przycisków podczas operacji
-    private void setButtonsEnabled(boolean enabled) {
-        // Jeśli masz przyciski jako pola @FXML, tutaj je blokuj/odblokowuj
-        // np. depositButton.setDisable(!enabled);
-        // np. withdrawButton.setDisable(!enabled);
-        // np. refreshButton.setDisable(!enabled);
-    }
+    private void setButtonsEnabled(boolean enabled) {}
 
     private void showError(String msg) {
         Platform.runLater(() -> {

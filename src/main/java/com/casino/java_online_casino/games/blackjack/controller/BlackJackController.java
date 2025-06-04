@@ -171,8 +171,6 @@ public class BlackJackController implements Game {
                     synchronized (BlackJackController.this) {
                         System.out.println("[DEBUG] Cleanup: closing game for user " + userId);
                         cleanupScheduled.set(false);
-                        // currentUserId pozostaje ustawione, bo nie wolno go zmieniać
-                        // Możesz dodać np. czyszczenie stanu gry
                     }
                 }
             }, 5 * 60 * 1000); // 5 minut

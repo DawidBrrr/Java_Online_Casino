@@ -13,16 +13,17 @@ public class LogoutService extends Service {
 
     @Override
     public JsonObject toJson() {
-        // Szyfrujemy komendę logout i umieszczamy w polu "data"
         String encryptedLogout = keyManager.encryptAes(JsonFields.LOGOUT);
         JsonObject json = new JsonObject();
         json.addProperty(JsonFields.DATA, encryptedLogout);
+        System.out.println("[DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: " + json);
         return json;
     }
 
     @Override
     public boolean perform() throws IOException {
         String logoutUrl = ServerConfig.getApiPath() + JsonFields.LOGOUT;
+        System.out.println("[DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: " + logoutUrl);
 
         // Przygotowanie połączenia HTTP
         URL url = new URL(logoutUrl);
@@ -37,11 +38,28 @@ public class LogoutService extends Service {
         try (OutputStream os = conn.getOutputStream()) {
             byte[] input = requestBody.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
+            System.out.println("[DEBUG LOGOUT] Wysłano żądanie logout: " + requestBody);
+        } catch (Exception e) {
+            System.err.println("[DEBUG LOGOUT] Błąd podczas wysyłania żądania: " + e.getMessage());
+            return false;
         }
 
         // Odczyt odpowiedzi
         int responseCode = conn.getResponseCode();
-        InputStream is = responseCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+        System.out.println("[DEBUG LOGOUT] Kod odpowiedzi serwera: " + responseCode);
+
+        InputStream is;
+        try {
+            is = responseCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+            if (is == null) {
+                System.err.println("[DEBUG LOGOUT] Brak strumienia odpowiedzi od serwera.");
+                return false;
+            }
+        } catch (Exception e) {
+            System.err.println("[DEBUG LOGOUT] Błąd przy pobieraniu strumienia odpowiedzi: " + e.getMessage());
+            return false;
+        }
+
         String responseJson;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             StringBuilder sb = new StringBuilder();
@@ -50,20 +68,57 @@ public class LogoutService extends Service {
                 sb.append(line.trim());
             }
             responseJson = sb.toString();
+            System.out.println("[DEBUG LOGOUT] Otrzymano odpowiedź JSON: " + responseJson);
+        } catch (Exception e) {
+            System.err.println("[DEBUG LOGOUT] Błąd podczas odczytu odpowiedzi: " + e.getMessage());
+            return false;
         }
 
         // Deszyfrowanie odpowiedzi
-        JsonObject responseObj = com.google.gson.JsonParser.parseString(responseJson).getAsJsonObject();
-        if (!responseObj.has(JsonFields.DATA)) {
-            System.out.println("Brak pola 'data' w odpowiedzi: " + responseJson);
+        JsonObject responseObj;
+        try {
+            responseObj = com.google.gson.JsonParser.parseString(responseJson).getAsJsonObject();
+        } catch (Exception e) {
+            System.err.println("[DEBUG LOGOUT] Błąd parsowania odpowiedzi JSON: " + e.getMessage());
             return false;
         }
+
+        if (!responseObj.has(JsonFields.DATA)) {
+            System.err.println("[DEBUG LOGOUT] Brak pola 'data' w odpowiedzi: " + responseJson);
+            return false;
+        }
+
         String encryptedResponse = responseObj.get(JsonFields.DATA).getAsString();
-        String decryptedResponse = keyManager.decryptAes(encryptedResponse);
+        String decryptedResponse;
+        try {
+            decryptedResponse = keyManager.decryptAes(encryptedResponse);
+            System.out.println("[DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: " + decryptedResponse);
+        } catch (Exception e) {
+            System.err.println("[DEBUG LOGOUT] Błąd deszyfrowania odpowiedzi: " + e.getMessage());
+            return false;
+        }
 
         // Analiza statusu odpowiedzi
-        System.out.println("Odszyfrowana odpowiedź serwera: " + decryptedResponse);
-        JsonObject resp = com.google.gson.JsonParser.parseString(decryptedResponse).getAsJsonObject();
-        return "ok".equalsIgnoreCase(resp.get("status").getAsString());
+        JsonObject resp;
+        try {
+            resp = com.google.gson.JsonParser.parseString(decryptedResponse).getAsJsonObject();
+        } catch (Exception e) {
+            System.err.println("[DEBUG LOGOUT] Błąd parsowania odszyfrowanej odpowiedzi: " + e.getMessage());
+            return false;
+        }
+
+        boolean result = false;
+        if (resp.has("status")) {
+            String status = resp.get("status").getAsString();
+            if ("ok".equalsIgnoreCase(status)) {
+                System.out.println("[DEBUG LOGOUT] Wylogowanie zakończone sukcesem.");
+                result = true;
+            } else {
+                System.err.println("[DEBUG LOGOUT] Wylogowanie nie powiodło się. Status: " + status);
+            }
+        } else {
+            System.err.println("[DEBUG LOGOUT] Brak pola 'status' w odszyfrowanej odpowiedzi: " + decryptedResponse);
+        }
+        return result;
     }
 }

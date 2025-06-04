@@ -82,6 +82,7 @@ public class GameServer {
             // Pobierz sesję po UUID (do szyfrowania)
             session = sessionManager.getSessionByUUID(playerUUID);
             if (session == null) {
+                System.out.println("[DEBUG] nie uznano żadnej sesji ");
                 writer.println("{\"status\":\"error\",\"code\":404,\"message\":\"Session not found\"}");
                 return;
             }
@@ -90,6 +91,7 @@ public class GameServer {
 
 // Jeśli nie ma żadnej sesji z tym userId – błąd
             if (candidateSessions.isEmpty()) {
+                System.out.println("[DEBUG] Session not found");
                 writer.println("{\"status\":\"error\",\"code\":404,\"message\":\"No session found for this userId\"}");
                 return;
             }
@@ -114,13 +116,13 @@ public class GameServer {
                 currentSession.setGame(foundGame);
             }
 
-// Dalej korzystasz TYLKO z KeyManagera z currentSession!
             KeyManager currentKeyManager = currentSession.getKeyManager();
             // --- KONIEC KLUCZOWEJ LOGIKI ---
 
             // Próbuj zablokować dostęp do gry
             if (!session.tryLockGame()) {
                 if (tryPingPong(clientSocket,currentKeyManager)) {
+                    System.out.println("[DEBUG] Game already started by another client");
                     writer.println("{\"status\":\"error\",\"code\":409,\"message\":\"Game already in use by another client\"}");
                     return;
                 } else {
@@ -137,9 +139,11 @@ public class GameServer {
             if (session.getGame() == null) {
                 switch (request.game.toLowerCase()) {
                     case "blackjack":
+                        System.out.println("[DEBUG] Blackjack game");
                         session.setGame(new BlackJackController());
                         break;
                     case "poker":
+                        System.out.println("[DEBUG] Poker game");
                         session.setGame(new PokerController());
                         break;
                     // Dodaj kolejne gry tutaj
