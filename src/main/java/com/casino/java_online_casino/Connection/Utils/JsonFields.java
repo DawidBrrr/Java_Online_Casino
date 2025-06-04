@@ -20,6 +20,7 @@ public final class JsonFields {
     public static final String HTTP_CHECK = "check";
     public static final String TOKEN = "token";
     public static final String UUID = "uuid";
+    public static final String LOGOUT = "logout";
 
     // Prywatny konstruktor, by uniemożliwić tworzenie instancji
     private JsonFields() {}

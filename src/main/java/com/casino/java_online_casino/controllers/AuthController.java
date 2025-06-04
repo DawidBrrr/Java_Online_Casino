@@ -1,8 +1,6 @@
 package com.casino.java_online_casino.controllers;
 
-import com.casino.java_online_casino.Connection.Client.LoginService;
-import com.casino.java_online_casino.Connection.Client.RegisterService;
-import com.casino.java_online_casino.Connection.Client.UserDataService;
+import com.casino.java_online_casino.Connection.Client.*;
 import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
 import com.casino.java_online_casino.User.Gamer;
 import javafx.application.Platform;
@@ -77,6 +75,11 @@ public class AuthController {
 
     @FXML
     private void handleLogin() {
+        // Wykonaj wymianę kluczy przed otwarciem okien
+        Service keyService = new KeyExchangeService();
+        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
+        keyExchangeThread.start();
+
         String username = loginUsername.getText();
         String password = loginPassword.getText();
 
@@ -136,6 +139,12 @@ public class AuthController {
 
     @FXML
     private void handleRegister() {
+
+        // Wykonaj wymianę kluczy przed otwarciem okien
+        Service keyService = new KeyExchangeService();
+        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
+        keyExchangeThread.start();
+
         String firstName = registerFirstName.getText();
         String lastName = registerLastName.getText();
         String nickname = registerNickname.getText();

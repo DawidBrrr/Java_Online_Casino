@@ -9,7 +9,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+@Deprecated
 @Experimental
 public class ConnectHandler implements HttpHandler {
 

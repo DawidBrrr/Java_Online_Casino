@@ -1,13 +1,17 @@
 package com.casino.java_online_casino.controllers;
 
-import com.casino.java_online_casino.Database.GamerDAO;
-import com.casino.java_online_casino.User.Gamer;
+import com.casino.java_online_casino.Connection.Client.LogoutService;
+import com.casino.java_online_casino.Connection.Client.Service;
+import com.casino.java_online_casino.Connection.Client.UserDataService;
+import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
 import com.casino.java_online_casino.games.blackjack.gui.BlackJackGUIController;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -16,78 +20,99 @@ public class DashboardController {
     @FXML private Label usernameLabel;
     @FXML private Label balanceLabel;
 
+    private GamerDTO gamerDTO;
     private String currentUserEmail;
-    private int currentUserId;
-    private double balance;
-    private GamerDAO dao = GamerDAO.getInstance();
 
     // Wywołaj initialize(email) po zalogowaniu lub powrocie z gry!
     public void initialize(String email) {
         this.currentUserEmail = email;
-        Gamer gamer = dao.findByEmail(email);
+        refreshUserData();
+    }
 
-        if (gamer != null) {
-            this.currentUserId = gamer.getUserId();
-            this.balance = gamer.getCredits();
-            usernameLabel.setText("Witaj, " + gamer.getNickName() + "!");
+    private void refreshUserData() {
+        // Pobierz dane użytkownika asynchronicznie
+        new Thread(() -> {
+            GamerDTO dto = UserDataService.updateGamerDTO();
+            Platform.runLater(() -> {
+                if (dto != null) {
+                    this.gamerDTO = dto;
+                    updateDashboardFields();
+                } else {
+                    showError("Nie udało się pobrać danych użytkownika.");
+                }
+            });
+        }).start();
+    }
+
+    private void updateDashboardFields() {
+        if (gamerDTO != null) {
+            usernameLabel.setText("Witaj, " + gamerDTO.getNickName() + "!");
+            balanceLabel.setText(String.format("$%.2f", gamerDTO.getCredits()));
         } else {
             usernameLabel.setText("Witaj, użytkowniku!");
-            this.balance = 0.0;
+            balanceLabel.setText("$0.00");
         }
-        updateBalance();
     }
-
-    public void updateBalance() {
-        balanceLabel.setText(String.format("$%.2f", balance));
-    }
-
 
     @FXML
     private void handleLogout() {
         try {
-            // 1. Czyść token i klucz po stronie klienta (czyli Service)
-            com.casino.java_online_casino.Connection.Client.Service.token = null;
-            com.casino.java_online_casino.Connection.Client.Service.keyManager =
-                    new com.casino.java_online_casino.Connection.Tokens.KeyManager();
 
-            // 2. (Opcjonalnie, dobry zwyczaj) Wyczyść dane lokalne kontrolera
+            new Thread(UserDataService::new).start();
+            Service.token = null;
+            Service.keyManager = null ;
+
+
+            // Wyczyść dane lokalne
             currentUserEmail = null;
-            currentUserId = 0;
-            balance = 0.0;
+            gamerDTO = null;
             usernameLabel.setText("");
             balanceLabel.setText("");
 
-            // 3. (NAJWAŻNIEJSZE) Wyloguj sesję po stronie backendu, jeśli masz userId:
-            //    UWAGA: wyślij żądanie do backendu lub... (patrz niżej)
-            //    Jeśli obsługujesz userId jako String, przekazujemy jako String:
-            com.casino.java_online_casino.Connection.Session.SessionManager.getInstance()
-                    .deleteSessionByUserId(String.valueOf(currentUserId));
-
-            // 4. Przejdź do widoku logowania
+            // Przejdź do widoku logowania
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/auth.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) usernameLabel.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Sigma Kasyno - Logowanie");
         } catch (Exception e) {
+            showError("Błąd podczas wylogowywania: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @FXML
     private void handleDeposit() {
-        balance += 500;
-        updateBalance();
-        dao.updateCredits(currentUserId, (float) balance); // Zawsze aktualizuj w bazie!
+        setButtonsEnabled(false);
+        new Thread(() -> {
+            GamerDTO dto = UserDataService.depositCredits();
+            Platform.runLater(() -> {
+                if (dto != null) {
+                    this.gamerDTO = dto;
+                    updateDashboardFields();
+                } else {
+                    showError("Błąd podczas wpłaty.");
+                }
+                setButtonsEnabled(true);
+            });
+        }).start();
     }
 
     @FXML
     private void handleWithdraw() {
-        if (balance >= 500) {
-            balance -= 500;
-            updateBalance();
-            dao.updateCredits(currentUserId, (float) balance); // Zawsze aktualizuj w bazie!
-        }
+        setButtonsEnabled(false);
+        new Thread(() -> {
+            GamerDTO dto = UserDataService.withdrawCredits();
+            Platform.runLater(() -> {
+                if (dto != null) {
+                    this.gamerDTO = dto;
+                    updateDashboardFields();
+                } else {
+                    showError("Błąd podczas wypłaty.");
+                }
+                setButtonsEnabled(true);
+            });
+        }).start();
     }
 
     @FXML
@@ -95,9 +120,8 @@ public class DashboardController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/slots.fxml"));
             Parent root = loader.load();
-            // Przekazanie email do SlotsController:
             com.casino.java_online_casino.games.slots.controller.SlotsController slotsController = loader.getController();
-            slotsController.initWithUser(currentUserEmail); // <-- nowa funkcja inicjująca!
+            slotsController.initWithUser(gamerDTO != null ? gamerDTO.getEmail() : null);
             Stage stage = (Stage) usernameLabel.getScene().getWindow();
             Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
             Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
@@ -106,6 +130,7 @@ public class DashboardController {
             stage.setResizable(true);
             stage.setTitle("Sigma Kasyno - Gra w Sloty");
         } catch (Exception e) {
+            showError("Błąd podczas uruchamiania gry sloty: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -116,7 +141,7 @@ public class DashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/blackjack.fxml"));
             Parent root = loader.load();
             BlackJackGUIController controller = loader.getController();
-            controller.initWithUser(currentUserEmail); // <- przekazujesz email
+            controller.initWithUser(gamerDTO != null ? gamerDTO.getEmail() : null);
             Stage stage = (Stage) usernameLabel.getScene().getWindow();
             Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
             Scene scene = new Scene(root, screenBounds.getWidth(), screenBounds.getHeight());
@@ -126,6 +151,7 @@ public class DashboardController {
             stage.setResizable(true);
             stage.setTitle("Sigma Kasyno - Gra w Blackjacka");
         } catch (Exception e) {
+            showError("Błąd podczas uruchamiania gry blackjack: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -133,7 +159,6 @@ public class DashboardController {
     @FXML
     private void playPoker() {
         try {
-            System.out.println("[DEBUG DASHBOARD] Rozpoczynam inicjalizację widoku pokera");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/poker.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) usernameLabel.getScene().getWindow();
@@ -144,11 +169,12 @@ public class DashboardController {
             stage.setResizable(true);
             stage.setTitle("Sigma Kasyno - Texas Hold'em Poker");
             scene.getStylesheets().add(getClass().getResource("/com/casino/styles/poker.css").toExternalForm());
-            System.out.println("[DEBUG DASHBOARD] Widok pokera załadowany pomyślnie");
         } catch (Exception e) {
+            showError("Błąd podczas uruchamiania gry poker: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
     @FXML
     private void showRankings() {
         try {
@@ -160,10 +186,26 @@ public class DashboardController {
             stage.setResizable(false);
             stage.show();
         } catch (Exception e) {
+            showError("Błąd podczas wyświetlania rankingów: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    // Pomocnicze do blokowania przycisków podczas operacji
+    private void setButtonsEnabled(boolean enabled) {
+        // Jeśli masz przyciski jako pola @FXML, tutaj je blokuj/odblokowuj
+        // np. depositButton.setDisable(!enabled);
+        // np. withdrawButton.setDisable(!enabled);
+        // np. refreshButton.setDisable(!enabled);
+    }
 
-
+    private void showError(String msg) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Błąd");
+            alert.setHeaderText(null);
+            alert.setContentText(msg);
+            alert.showAndWait();
+        });
+    }
 }

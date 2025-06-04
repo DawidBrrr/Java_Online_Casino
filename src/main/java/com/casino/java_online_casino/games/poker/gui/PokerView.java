@@ -504,7 +504,7 @@ public class PokerView {
             DashboardController dashboardController = loader.getController();
             if (controller != null) {
              //   DashboardController.setBalance(controller.getBalance());
-                dashboardController.updateBalance();
+               // dashboardController.
             }
 
             Stage stage = (Stage) (balanceLabel != null ? balanceLabel.getScene().getWindow() :

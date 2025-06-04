@@ -11,11 +11,6 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Wykonaj wymianę kluczy przed otwarciem okien
-        Service keyService = new KeyExchangeService();
-        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
-        keyExchangeThread.start();
-
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
