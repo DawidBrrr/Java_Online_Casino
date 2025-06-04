@@ -3,6 +3,7 @@ package com.casino.java_online_casino.Connection.Client;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class KeyExchangeService extends Service {
         try {
             isStillWorking = true;
             String requestJsonString = toJson().toString();
+            LogManager.logToFile("[DEBUG] Key exchange JSON: " + requestJsonString);
             System.out.println("[DEBUG] Key exchange JSON: " + requestJsonString);
 
             HttpURLConnection connection = getConnection(keyExchangeUrl, ServiceHelper.METHOD_POST);
@@ -42,10 +44,12 @@ public class KeyExchangeService extends Service {
             }
 
             int responseCode = connection.getResponseCode();
+            LogManager.logToFile("[DEBUG] Key exchange responseCode: " + responseCode);
             System.out.println("[DEBUG] Key exchange response code: " + responseCode);
 
             InputStream is = (responseCode >= 200 && responseCode < 300) ? connection.getInputStream() : connection.getErrorStream();
             if (is == null) {
+                LogManager.logToFile("Brak strumienia odpowiedzi.");
                 System.err.println("Brak strumienia odpowiedzi.");
                 return false;
             }
@@ -60,6 +64,7 @@ public class KeyExchangeService extends Service {
             return result;
 
         } catch (Exception e) {
+            LogManager.logToFile("Brak strumienia odpowiedzi.");
             System.err.println("❌ Wyjątek podczas wymiany kluczy: " + e.getMessage());
             return false;
         }
@@ -68,6 +73,7 @@ public class KeyExchangeService extends Service {
     @Override
     public boolean handleResponse(JsonObject response) throws IOException {
         if (response == null || !response.has(JsonFields.HTTP_CODE)) {
+            LogManager.logToFile("Invalid response object: missing 'code'.");
             System.err.println("Invalid response object: missing 'code'.");
             return false;
         }
@@ -119,54 +125,65 @@ public class KeyExchangeService extends Service {
         }
         if (token != null) {
             Service.token = token;
+            LogManager.logToFile("[DEBUG] Token JWT: " + token);
             System.out.println("[DEBUG] Token JWT: " + token);
         }
     }
 
     @Override
     protected void badRequest400(JsonObject response) {
+        LogManager.logToFile("Bad request: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Bad request: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
+
     }
 
     @Override
     protected void unauthorized401(JsonObject response) throws IOException {
+        LogManager.logToFile("[DEBUG] Unauthorized key exchange.");
         System.out.println("[DEBUG] Unauthorized key exchange.");
         // Możesz tu dodać logikę ponowienia wymiany, jeśli to ma sens
     }
 
     @Override
     protected void denied403(JsonObject response) {
+        LogManager.logToFile("Access denied: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Access denied: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void denied404(JsonObject response) {
+        LogManager.logToFile("Not found: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Not found: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void notAllowed405(JsonObject response) {
+        LogManager.logToFile("Method not allowed: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Method not allowed: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void unsupported415(JsonObject response) {
+        LogManager.logToFile("Unsupported media type: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Unsupported media type: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void serverError500(JsonObject response) {
+        LogManager.logToFile("Internal server error: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Internal server error: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void databaseError503(JsonObject response) {
+        LogManager.logToFile("Database error: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Database error: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     @Override
     protected void unhandledCode(JsonObject response) {
         int code = response.get(JsonFields.HTTP_CODE).getAsInt();
+        LogManager.logToFile("Unhandled response code: " + code + " - " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
         System.out.println("Unhandled response code: " + code + " - " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 }

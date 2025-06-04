@@ -1,6 +1,7 @@
 package com.casino.java_online_casino.games.poker.controller;
 
 import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.games.poker.model.Card;
 import com.casino.java_online_casino.games.poker.model.PokerGame;
 
@@ -19,8 +20,10 @@ public class RemotePokerController {
         try {
             tcpClient.connect();
             System.out.println("[DEBUG POKER_CONTROLLER] Nawiązano połączenie z serwerem");
+            LogManager.logToFile("[DEBUG POKER_CONTROLLER] Nawiązano połączenie z serwerem");
         } catch (IOException e) {
             System.err.println("[ERROR POKER_CONTROLLER] Nie można połączyć z serwerem: " + e.getMessage());
+            LogManager.logToFile("[ERROR POKER_CONTROLLER] Nie można połączyć z serwerem: " + e.getMessage());
         }
     }
 
@@ -30,9 +33,11 @@ public class RemotePokerController {
                 tcpClient.connect();
             }
             System.out.println("[DEBUG POKER_CONTROLLER] Rozpoczynanie gry");
+            LogManager.logToFile("[DEBUG POKER_CONTROLLER] Rozpoczynanie gry");
             lastState = tcpClient.startGame();
         } catch (Exception e) {
             System.err.println("[ERROR POKER_CONTROLLER] Błąd podczas rozpoczynania gry: " + e.getMessage());
+            LogManager.logToFile("[ERROR POKER_CONTROLLER] Błąd podczas rozpoczynania gry: " + e.getMessage());
         }
     }
     private boolean isConnected() {
@@ -42,9 +47,11 @@ public class RemotePokerController {
     public void broadcastMessage(String message) {
         try {
             System.out.println("[DEBUG POKER_CONTROLLER] Wysyłanie wiadomości: " + message);
+            LogManager.logToFile("[DEBUG POKER_CONTROLLER] Wysyłanie wiadomości: " + message);
             tcpClient.broadcastMessage(message);
         } catch (Exception e) {
             System.err.println("[ERROR POKER_CONTROLLER] Błąd podczas wysyłania wiadomości: " + e.getMessage());
+            LogManager.logToFile("[ERROR POKER_CONTROLLER] Błąd podczas wysyłania wiadomości: " + e.getMessage());
         }
     }
 

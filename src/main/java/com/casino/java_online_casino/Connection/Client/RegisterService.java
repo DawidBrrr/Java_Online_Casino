@@ -3,6 +3,7 @@ package com.casino.java_online_casino.Connection.Client;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.User.Gamer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -41,11 +42,13 @@ public class RegisterService extends Service {
             isStillWorking = true;
             if (keyManager.getAesKey() == null) {
                 System.err.println("❌ Brak ustalonego klucza AES. Najpierw wykonaj wymianę kluczy.");
+                LogManager.logToFile("❌ Brak ustalonego klucza AES. Najpierw wykonaj wymianę kluczy.");
                 registerResult = false;
                 return false;
             }
             String registerJsonString = toJson().toString();
             System.out.println("[DEBUG] Dane rejestracji JSON: " + registerJsonString);
+            LogManager.logToFile("[DEBUG] Dane rejestracji JSON: " + registerJsonString);
 
             String requestJson = encode(registerJsonString);
             String registerUrl = ServerConfig.getApiPath() + "register";
@@ -60,10 +63,12 @@ public class RegisterService extends Service {
 
             int responseCode = connection.getResponseCode();
             System.out.println("[DEBUG] Kod odpowiedzi rejestracji: " + responseCode);
+            LogManager.logToFile("[DEBUG] Kod odpowiedzi rejestracji: " + responseCode);
 
             InputStream is = (responseCode >= 200 && responseCode < 300) ? connection.getInputStream() : connection.getErrorStream();
             if (is == null) {
                 System.err.println("Brak strumienia odpowiedzi.");
+                LogManager.logToFile("Brak strumienia odpowiedzi.");
                 registerResult = false;
                 return false;
             }
@@ -77,6 +82,7 @@ public class RegisterService extends Service {
                 String encryptedResponseBase64 = responseJson.get(JsonFields.DATA).getAsString();
                 String decryptedResponse = keyManager.decryptAes(encryptedResponseBase64);
                 System.out.println("[DEBUG] Odszyfrowana odpowiedź rejestracji: " + decryptedResponse);
+                LogManager.logToFile("[DEBUG] Odszyfrowana odpowiedź rejestracji: " + decryptedResponse);
                 JsonObject decryptedJson = JsonParser.parseString(decryptedResponse).getAsJsonObject();
                 registerResult = handleResponse(decryptedJson);
                 return registerResult;
@@ -87,6 +93,7 @@ public class RegisterService extends Service {
 
         } catch (Exception e) {
             System.err.println("❌ Wyjątek podczas rejestracji: " + e.getMessage());
+            LogManager.logToFile("❌ Wyjątek podczas rejestracji: " + e.getMessage());
             registerResult = false;
             return false;
         } finally {
@@ -98,6 +105,7 @@ public class RegisterService extends Service {
     public boolean handleResponse(JsonObject response) throws IOException {
         if (response == null || !response.has(JsonFields.HTTP_STATUS)) {
             System.err.println("Invalid response object: missing status.");
+            LogManager.logToFile("Invalid response object: missing status.");
             return false;
         }
 
@@ -107,6 +115,7 @@ public class RegisterService extends Service {
             return true;
         } else {
             System.err.println("❌ Rejestracja nie powiodła się: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
+            LogManager.logToFile("❌ Rejestracja nie powiodła się: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
             return false;
         }
     }
@@ -114,6 +123,7 @@ public class RegisterService extends Service {
     @Override
     protected void ok200(JsonObject response) {
         System.out.println("✅ Rejestracja powiodła się: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
+        LogManager.logToFile("✅ Rejestracja powiodła się: " + response.get(JsonFields.HTTP_MESSAGE).getAsString());
     }
 
     // Pozostałe metody obsługi błędów możesz zostawić jak w Service (np. badRequest400, unauthorized401 itd.)

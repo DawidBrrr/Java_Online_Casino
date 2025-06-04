@@ -1,6 +1,7 @@
 package com.casino.java_online_casino.Database;
 
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.User.Gamer;
 
 import java.sql.*;
@@ -18,6 +19,7 @@ public class GamerDAO {
                     ServerConfig.getDbPassword()
             );
             System.out.println("[GamerDAO] Połączono z bazą danych.");
+            LogManager.logToFile("[GamerDAO] Połączono z bazą danych.");
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException("[GamerDAO] Błąd połączenia z bazą: " + e.getMessage());
         }
@@ -49,6 +51,7 @@ public class GamerDAO {
             return true;
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd rejestracji gracza: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd rejestracji gracza: " + e.getMessage());
             return false;
         }
     }
@@ -65,6 +68,7 @@ public class GamerDAO {
             }
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd logowania: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd logowania: " + e.getMessage());
         }
         return null;
     }
@@ -80,6 +84,7 @@ public class GamerDAO {
             }
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd pobierania gracza po emailu: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd pobierania gracza po emailu: " + e.getMessage());
         }
         return null;
     }
@@ -95,6 +100,7 @@ public class GamerDAO {
             }
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd pobierania gracza po ID: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd pobierania gracza po ID: " + e.getMessage());
         }
         return null;
     }
@@ -109,6 +115,7 @@ public class GamerDAO {
             return rows > 0;
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd przy aktualizacji kredytów: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd przy aktualizacji kredytów: " + e.getMessage());
             return false;
         }
     }
@@ -132,6 +139,7 @@ public class GamerDAO {
                 connection.close();
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd podczas zamykania połączenia: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd podczas zamykania połączenia: " + e.getMessage());
         }
     }
 
@@ -144,11 +152,13 @@ public class GamerDAO {
                     return rs.getFloat("credits");
                 } else {
                     System.err.println("[GamerDAO] Nie znaleziono użytkownika o ID: " + userId);
+                    LogManager.logToFile("[GamerDAO] Nie znaleziono użytkownika o ID: " + userId);
                     return 0.0f;
                 }
             }
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd przy pobieraniu kredytów: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd przy pobieraniu kredytów: " + e.getMessage());
             return 0.0f;
         }
     }
@@ -180,6 +190,7 @@ public class GamerDAO {
             rs.close();
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd przy aktualizacji blackjack_wins: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd przy aktualizacji blackjack_wins: " + e.getMessage());
         }
     }
 
@@ -207,6 +218,7 @@ public class GamerDAO {
             rs.close();
         } catch (SQLException e) {
             System.err.println("[GamerDAO] Błąd przy aktualizacji poker_wins: " + e.getMessage());
+            LogManager.logToFile("[GamerDAO] Błąd przy aktualizacji poker_wins: " + e.getMessage());
         }
     }
 }

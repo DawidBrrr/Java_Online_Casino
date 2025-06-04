@@ -2,6 +2,7 @@
 package com.casino.java_online_casino.games.blackjack.controller;
 
 import com.casino.java_online_casino.Connection.Games.Game;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.games.blackjack.model.Card;
 import com.casino.java_online_casino.games.blackjack.model.Hand;
 
@@ -162,6 +163,7 @@ public class BlackJackController implements Game {
             return;
         }
         System.out.println("[DEBUG] Player left: " + userId + ", scheduling cleanup in 5 minutes...");
+        LogManager.logToFile("[DEBUG] Player left: " + userId + ", scheduling cleanup in 5 minutes...");
         inProgress.set(false);
         if (!cleanupScheduled.getAndSet(true)) {
             cleanupTimer = new Timer();
@@ -170,6 +172,7 @@ public class BlackJackController implements Game {
                 public void run() {
                     synchronized (BlackJackController.this) {
                         System.out.println("[DEBUG] Cleanup: closing game for user " + userId);
+                        LogManager.logToFile("[DEBUG] Cleanup: closing game for user " + userId);
                         cleanupScheduled.set(false);
                     }
                 }

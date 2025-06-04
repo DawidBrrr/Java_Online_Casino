@@ -5,10 +5,12 @@ import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Server.DTO.GameStateDTO;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mysql.cj.log.Log;
 
 import java.io.*;
 import java.net.Socket;
@@ -40,6 +42,7 @@ public class BlackjackTcpClient {
         writer.flush();
         socket.setSoTimeout(5000);
         System.out.println("[DEBUG JACK CLIENT] Połączono z serwerem i wysłano initRequest.");
+        LogManager.logToFile("[DEBUG JACK CLIENT] Połączono z serwerem i wysłano initRequest: " + initJson);
     }
 
     private GameStateDTO sendCommand(String command) throws Exception {
@@ -50,6 +53,7 @@ public class BlackjackTcpClient {
 
         String encryptedResp = reader.readLine();
         System.out.println("[DEBUG JACK CLIENT] Odebrano odpowiedź: " + encryptedResp);
+        LogManager.logToFile("[DEBUG JACK CLIENT] Odebrano odpowiedź: " + encryptedResp);
         if (encryptedResp == null) {
             throw new IOException("[DEBUG JACK CLIENT] Połączenie zamknięte przez serwer.");
         }
@@ -66,12 +70,14 @@ public class BlackjackTcpClient {
         // Odpowiedź wygląda na base64 – deszyfruj
         String jsonResp = keyManager.decryptAes(encryptedResp);
         System.out.println("[DEBUG JACK CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
+        LogManager.logToFile("[DEBUG JACK CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
 
         JsonObject wholeJson = JsonParser.parseString(jsonResp).getAsJsonObject();
 
         if (wholeJson.has(JsonFields.HTTP_STATUS) && wholeJson.has(JsonFields.HTTP_CODE) && wholeJson.has(JsonFields.HTTP_MESSAGE)) {
             String status = wholeJson.get(JsonFields.HTTP_STATUS).getAsString();
             if (status.equalsIgnoreCase(JsonFields.HTTP_ERROR)) {
+                LogManager.logToFile("[DEBUG JACK CLIENT] Serwer zwrócił błąd: " + wholeJson.get(JsonFields.HTTP_MESSAGE).getAsString());
                 throw new IOException("[DEBUG JACK CLIENT] Serwer zwrócił błąd: " + wholeJson.get(JsonFields.HTTP_MESSAGE).getAsString());
             } else if (status.equalsIgnoreCase(JsonFields.HTTP_CHECK)) {
                 // Odpowiadamy pongiem na ping/check serwera
@@ -79,6 +85,7 @@ public class BlackjackTcpClient {
                 writer.println(pong);
                 writer.flush();
                 System.out.println("[DEBUG JACK CLIENT] Odpowiedź pong na ping serwera: " + LocalDateTime.now());
+                LogManager.logToFile("[DEBUG JACK CLIENT] Odpowiedź pong na ping serwera: " + LocalDateTime.now());
                 // Możesz zwrócić null lub kontynuować oczekiwanie na kolejną odpowiedź, jeśli to część flow
                 return null;
             }
@@ -87,6 +94,7 @@ public class BlackjackTcpClient {
         if (wholeJson.has(JsonFields.DATA)) {
             return gson.fromJson(wholeJson.get(JsonFields.DATA).getAsString(), GameStateDTO.class);
         }
+        LogManager.logToFile("[DEBUG JACK CLIENT] Odpowiedź serwera nie zawiera pola 'data': " + jsonResp);
         throw new IOException("[DEBUG JACK CLIENT] Nieprawidłowy format odpowiedzi od serwera: " + jsonResp);
     }
 
@@ -116,8 +124,10 @@ public class BlackjackTcpClient {
                 socket.close();
             }
             System.out.println("[DEBUG JACK CLIENT] Zamknięto połączenie.");
+            LogManager.logToFile("[DEBUG JACK CLIENT] Zamknięto połączenie.");
         } catch (Exception e) {
             System.out.println("[DEBUG JACK CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
+            LogManager.logToFile("[DEBUG JACK CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
         }
     }
 
