@@ -33,6 +33,7 @@ public class ApiServer {
             server.createContext("/user", new UserHandler());
             server.createContext("/stat", new StatHandler());
             server.createContext("/key", new KeyHandler());
+            server.createContext("/api/stats/ranking", new StatHandler());
 
             // Dynamiczne zarządzanie wątkami (bez limitu)
             server.setExecutor(Executors.newCachedThreadPool());
