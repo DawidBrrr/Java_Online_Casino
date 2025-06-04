@@ -2,6 +2,7 @@ package com.casino.java_online_casino.games.poker.gui;
 import com.casino.java_online_casino.Connection.Client.Service;
 import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoom;
 import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoomManager;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.controllers.DashboardController;
 import com.casino.java_online_casino.games.poker.controller.PokerController;
 import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
@@ -60,16 +61,19 @@ public class PokerView {
     public void initialize() {
         try {
             System.out.println("[DEBUG POKER_VIEW] Inicjalizacja widoku pokera");
+            LogManager.logToFile("[DEBUG POKER_VIEW] Inicjalizacja widoku pokera");
 
             // Inicjalizacja klienta TCP z Service
             tcpClient = new PokerTCPClient(Service.getToken(), Service.getKeyManager());
             tcpClient.connect();
             System.out.println("[DEBUG POKER_VIEW] Połączono z serwerem TCP");
+            LogManager.logToFile("[DEBUG POKER_VIEW] Połączono z serwerem TCP");
 
             // Inicjalizacja kontrolera
             controller = new PokerController();
             controller.setView(this);
             System.out.println("[DEBUG POKER_VIEW] Kontroler zainicjalizowany");
+            LogManager.logToFile("[DEBUG POKER_VIEW] Kontroler zainicjalizowany");
 
             // Przygotowanie żądania dołączenia do pokera
             JsonObject request = new JsonObject();
@@ -80,10 +84,12 @@ public class PokerView {
             // Wysłanie żądania
             tcpClient.sendEncryptedMessage(request.toString());
             System.out.println("[DEBUG POKER_VIEW] Wysłano żądanie dołączenia do pokera");
+            LogManager.logToFile("[DEBUG POKER_VIEW] Wysłano żądanie dołączenia do pokera");
 
             // Czekaj na odpowiedź
             String response = tcpClient.readEncryptedMessage(1000);
             System.out.println("[DEBUG POKER_VIEW] Otrzymano odpowiedź: " + response);
+            LogManager.logToFile("[DEBUG POKER_VIEW] Otrzymano odpowiedź: " + response);
 
             JsonObject json = JsonParser.parseString(response).getAsJsonObject();
 
@@ -92,6 +98,7 @@ public class PokerView {
                 String roomId = json.get("roomId").getAsString();
 
                 System.out.println("[DEBUG POKER_VIEW] " + type + " do pokoju: " + roomId);
+                LogManager.logToFile("[DEBUG POKER_VIEW] " + type + " do pokoju: " + roomId);
 
                 // Konfiguracja UI
                 setupUI();
@@ -104,6 +111,7 @@ public class PokerView {
 
         } catch (Exception e) {
             System.err.println("[ERROR POKER_VIEW] Błąd inicjalizacji: " + e.getMessage());
+            LogManager.logToFile("[ERROR POKER_VIEW] Błąd inicjalizacji: " + e.getMessage());
             e.printStackTrace();
 
             // Obsługa UI w przypadku błędu

@@ -4,6 +4,7 @@ import com.casino.java_online_casino.Connection.Client.LogoutService;
 import com.casino.java_online_casino.Connection.Client.Service;
 import com.casino.java_online_casino.Connection.Client.UserDataService;
 import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.games.blackjack.gui.BlackJackGUIController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -62,8 +63,10 @@ public class DashboardController {
                 LogoutService logoutService = new LogoutService();
                 logoutOk = logoutService.perform();
                 System.out.println("[DEBUG LOGOUT] Wynik wylogowania: " + logoutOk);
+                LogManager.logToFile("[DEBUG LOGOUT] Wynik wylogowania: " + logoutOk);
             } catch (Exception e) {
                 System.err.println("[DEBUG LOGOUT] Błąd podczas wylogowywania: " + e.getMessage());
+                LogManager.logToFile("[DEBUG LOGOUT] Błąd podczas wylogowywania: " + e.getMessage());
                 e.printStackTrace();
             } finally {
                 // Zawsze czyść dane lokalne i wracaj do logowania

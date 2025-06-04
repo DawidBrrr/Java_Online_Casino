@@ -6,6 +6,7 @@ import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.Database.GamerDAO;
 import com.casino.java_online_casino.User.Gamer;
@@ -25,6 +26,7 @@ public class LoginHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         System.out.println("[DEBUG LOGIN] Otrzymano zapytanie HTTP: " + exchange.getRequestMethod() + " " + exchange.getRequestURI());
+        LogManager.logToFile("[DEBUG LOGIN] Otrzymano zapytanie HTTP: " + exchange.getRequestMethod() + " " + exchange.getRequestURI());
         try {
             if (!isPostMethod(exchange)) {
                 logAndSend(exchange, 405, ServerJsonMessage.methodNotAllowed());
@@ -33,6 +35,7 @@ public class LoginHandler implements HttpHandler {
 
             String token = exchange.getRequestHeaders().getFirst("Authorization");
             System.out.println("[DEBUG LOGIN] Authorization header: " + token);
+            LogManager.logToFile("[DEBUG LOGIN] Authorization header: " + token);
 
             if (token == null || token.isBlank()) {
                 logAndSend(exchange, 401, ServerJsonMessage.missingToken());
@@ -44,6 +47,7 @@ public class LoginHandler implements HttpHandler {
 
             if (!KeySessionManager.getInstance().contains(clientId)) {
                 System.out.println("[DEBUG LOGIN] Brak aktywnej sesji dla klienta: " + clientId);
+                LogManager.logToFile("[DEBUG LOGIN] Brak aktywnej sesji dla klienta: " + clientId);
                 logAndSend(exchange, 403, ServerJsonMessage.accessDenied());
             return;
             }
@@ -51,6 +55,7 @@ public class LoginHandler implements HttpHandler {
             JsonObject requestJson = readRequestJson(exchange);
             if (requestJson == null || !requestJson.has(JsonFields.DATA)) {
                 System.out.println("[DEBUG LOGIN] Brak pola 'data' w żądaniu.");
+                LogManager.logToFile("[DEBUG LOGIN] Brak pola 'data' w żądaniu.");
                 logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing field: '" + JsonFields.DATA + "'"));
                 return;
             }
@@ -62,6 +67,7 @@ public class LoginHandler implements HttpHandler {
             JsonObject credentials = JsonParser.parseString(decryptedJson).getAsJsonObject();
             if (!credentials.has(JsonFields.EMAIL) || !credentials.has(JsonFields.PASSWORD)) {
                 System.out.println("[DEBUG LOGIN] Brak wymaganych pól email/hasło.");
+                LogManager.logToFile("[DEBUG LOGIN] Brak wymaganych pól email/hasło.");
                 logAndSend(exchange, 400, ServerJsonMessage.badRequest("Missing fields: '" + JsonFields.EMAIL + "' and/or '" + JsonFields.PASSWORD + "'"));
                 return;
             }
@@ -69,12 +75,14 @@ public class LoginHandler implements HttpHandler {
             String email = credentials.get(JsonFields.EMAIL).getAsString();
             String password = credentials.get(JsonFields.PASSWORD).getAsString();
             System.out.println("[DEBUG LOGIN] Próba logowania email: " + email);
+            LogManager.logToFile("[DEBUG LOGIN] Próba logowania email: " + email);
 
             GamerDAO.getInstance();
             GamerDAO dao = GamerDAO.getInstance();
             Gamer gamer = dao.login(email, password);
             if (gamer == null) {
                 System.out.println("[DEBUG LOGIN] Nie znaleziono gracza lub błędne hasło.");
+                LogManager.logToFile("[DEBUG LOGIN] Nie znaleziono gracza lub błędne hasło.");
                 logAndSend(exchange, ServerJsonMessage.accessDenied().get(JsonFields.HTTP_CODE).getAsInt(), ServerJsonMessage.accessDenied());
                 return;
             }
@@ -88,6 +96,7 @@ public class LoginHandler implements HttpHandler {
 
             String jwt = session.getNewToken();
             System.out.println("[DEBUG LOGIN] Logowanie OK, wygenerowano token: " + jwt);
+            LogManager.logToFile("[DEBUG LOGIN] Logowanie OK, wygenerowano token: " + jwt);
 
             JsonObject response = ServerJsonMessage.ok("Zalogowano");
             response.addProperty(JsonFields.TOKEN, jwt);
@@ -99,8 +108,10 @@ public class LoginHandler implements HttpHandler {
             logAndSend(exchange, 200, encryptedWrapper);
 
             System.out.println("[DEBUG LOGIN] Odpowiedź OK wysłana i sesja zaktualizowana.");
+            LogManager.logToFile("[DEBUG LOGIN] Odpowiedź OK wysłana i sesja zaktualizowana.");
         } catch (Exception e) {
             System.err.println("[ERROR LOGIN] Wyjątek: " + e.getMessage());
+            LogManager.logToFile("[ERROR LOGIN] Wyjątek: " + e.getMessage());
             logAndSend(exchange, 500, ServerJsonMessage.internalServerError());
         }
     }
@@ -108,6 +119,7 @@ public class LoginHandler implements HttpHandler {
     private boolean isPostMethod(HttpExchange exchange) {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
             System.out.println("[DEBUG LOGIN] Nieobsługiwana metoda: " + exchange.getRequestMethod());
+            LogManager.logToFile("[DEBUG LOGIN] Nieobsługiwana metoda: " + exchange.getRequestMethod());
             return false;
         }
         return true;
@@ -122,9 +134,11 @@ public class LoginHandler implements HttpHandler {
                 return null;
             }
             System.out.println("[DEBUG LOGIN] Odczytano UUID z tokena: " + uuidStr);
+            LogManager.logToFile("[DEBUG LOGIN] Odczytano UUID z tokena: " + uuidStr);
             return UUID.fromString(uuidStr);
         } catch (Exception e) {
             System.out.println("[DEBUG LOGIN] Błąd walidacji tokena: " + e.getMessage());
+            LogManager.logToFile("[DEBUG LOGIN] Błąd walidacji tokena: " + e.getMessage());
             logAndSend(exchange, 401, ServerJsonMessage.invalidToken());
             return null;
         }
@@ -134,9 +148,11 @@ public class LoginHandler implements HttpHandler {
         try (InputStreamReader reader = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8)) {
             JsonObject obj = JsonUtil.parseJsonFromISReader(reader);
             System.out.println("[DEBUG LOGIN] Odczytano JSON z żądania: " + obj);
+            LogManager.logToFile("[DEBUG LOGIN] Odczytano JSON z żądania: " + obj);
             return obj;
         } catch (Exception e) {
             System.err.println("[ERROR LOGIN] Błąd parsowania JSON: " + e.getMessage());
+            LogManager.logToFile("[ERROR LOGIN] Błąd parsowania JSON: " + e.getMessage());
             return null;
         }
     }
@@ -145,9 +161,11 @@ public class LoginHandler implements HttpHandler {
         try {
             String decrypted = keyManager.decryptAes(encryptedData);
             System.out.println("[DEBUG LOGIN] Odszyfrowane dane logowania: " + decrypted);
+            LogManager.logToFile("[DEBUG LOGIN] Odszyfrowane dane logowania: " + decrypted);
             return decrypted;
         } catch (Exception e) {
             System.out.println("[DEBUG LOGIN] Błąd deszyfracji danych: " + e.getMessage());
+            LogManager.logToFile("[DEBUG LOGIN] Błąd deszyfracji danych: " + e.getMessage());
             logAndSend(exchange, 400, ServerJsonMessage.badRequest("Failed to decrypt data"));
             return null;
         }
@@ -155,6 +173,7 @@ public class LoginHandler implements HttpHandler {
 
     private void logAndSend(HttpExchange exchange, int status, JsonObject body) throws IOException {
         System.out.println("[DEBUG LOGIN] HTTP " + status + ": " + body);
+        LogManager.logToFile("[DEBUG LOGIN] HTTP " + status + ": " + body);
         byte[] responseBytes = body.toString().getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(status, responseBytes.length);

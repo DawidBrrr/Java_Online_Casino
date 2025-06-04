@@ -6,6 +6,7 @@ import com.casino.java_online_casino.Connection.Session.KeySessionManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.Database.GamerDAO;
 import com.casino.java_online_casino.User.Gamer;
@@ -38,6 +39,7 @@ public class UserHandler implements HttpHandler {
             String token = exchange.getRequestHeaders().getFirst("Authorization");
             if (token == null || token.isBlank()) {
                 System.err.println("[DEBUG] Brak tokenu w nagłówku Authorization.");
+                LogManager.logToFile("[DEBUG] Brak tokenu w nagłówku Authorization.");
                 sendJson(exchange, 401, ServerJsonMessage.missingToken());
                 return;
             }
@@ -45,12 +47,14 @@ public class UserHandler implements HttpHandler {
             UUID clientId = extractClientIdFromToken(exchange, token);
             if (clientId == null) {
                 System.err.println("[DEBUG] Błąd walidacji tokenu JWT.");
+                LogManager.logToFile("[DEBUG] Błąd walidacji tokenu JWT.");
                 return;
             }
 
             SessionManager.SessionToken session = KeySessionManager.getInstance().getOrCreateSession(clientId);
             if (session == null) {
                 System.err.println("[DEBUG] Brak aktywnej sesji dla klienta: " + clientId);
+                LogManager.logToFile("[DEBUG] Brak aktywnej sesji dla klienta: " + clientId);
                 sendJson(exchange, 403, ServerJsonMessage.accessDenied());
                 return;
             }
@@ -58,6 +62,7 @@ public class UserHandler implements HttpHandler {
             int userId = session.getUserId();
             if (userId < 0) {
                 System.err.println("[DEBUG] Brak powiązanego userId dla sesji klienta: " + clientId);
+                LogManager.logToFile("[DEBUG] Brak powiązanego userId dla sesji klienta: " + clientId);
                 sendJson(exchange, 403, ServerJsonMessage.accessDenied());
                 return;
             }
@@ -85,6 +90,7 @@ public class UserHandler implements HttpHandler {
 
                 } catch (Exception e) {
                     System.err.println("[DEBUG] Błąd odszyfrowywania/podziału JSON body: " + e.getMessage());
+                    LogManager.logToFile("[DEBUG] Błąd odszyfrowywania/podziału JSON body: " + e.getMessage());
                     sendJson(exchange, 400, ServerJsonMessage.badRequest("Nieprawidłowe zaszyfrowane dane wejściowe."));
                     return;
                 }
@@ -96,12 +102,14 @@ public class UserHandler implements HttpHandler {
                 gamer = dao.findById(userId);
             } catch (Exception e) {
                 System.err.println("[DEBUG] Błąd podczas pobierania gracza z bazy: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd podczas pobierania gracza z bazy: " + e.getMessage());
                 sendJson(exchange, 500, ServerJsonMessage.internalServerError());
                 return;
             }
 
             if (gamer == null) {
                 System.err.println("[DEBUG] Nie znaleziono gracza o userId: " + userId);
+                LogManager.logToFile("[DEBUG] Nie znaleziono gracza o userId: " + userId);
                 sendJson(exchange, 404, ServerJsonMessage.userNotFound());
                 return;
             }
@@ -115,6 +123,7 @@ public class UserHandler implements HttpHandler {
                         updated = dao.updateCredits(userId, gamer.getCredits());
                     } catch (Exception e) {
                         System.err.println("[DEBUG] Błąd przy wpłacie kredytów: " + e.getMessage());
+                        LogManager.logToFile("[DEBUG] Błąd przy wpłacie kredytów: " + e.getMessage());
                         sendJson(exchange, 500, ServerJsonMessage.internalServerError());
                         return;
                     }
@@ -126,11 +135,13 @@ public class UserHandler implements HttpHandler {
                             updated = dao.updateCredits(userId, gamer.getCredits());
                         } catch (Exception e) {
                             System.err.println("[DEBUG] Błąd przy wypłacie kredytów: " + e.getMessage());
+                            LogManager.logToFile("[DEBUG] Błąd przy wypłacie kredytów: " + e.getMessage());
                             sendJson(exchange, 500, ServerJsonMessage.internalServerError());
                             return;
                         }
                     } else {
                         System.err.println("[DEBUG] Próba wypłaty większej niż dostępne saldo: " + gamer.getCredits());
+                        LogManager.logToFile("[DEBUG] Próba wypłaty większej niż dostępne saldo: " + gamer.getCredits());
                         // Zwróć aktualne dane bez zmiany
                     }
                     break;
@@ -145,6 +156,7 @@ public class UserHandler implements HttpHandler {
                     gamer = dao.findById(userId);
                 } catch (Exception e) {
                     System.err.println("[DEBUG] Błąd przy ponownym pobieraniu gracza po aktualizacji: " + e.getMessage());
+                    LogManager.logToFile("[DEBUG] Błąd przy ponownym pobieraniu gracza po aktualizacji: " + e.getMessage());
                     sendJson(exchange, 500, ServerJsonMessage.internalServerError());
                     return;
                 }
@@ -163,6 +175,7 @@ public class UserHandler implements HttpHandler {
                 gamerJson = gson.toJson(gamerDTO);
             } catch (Exception e) {
                 System.err.println("[DEBUG] Błąd serializacji DTO: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd serializacji DTO: " + e.getMessage());
                 sendJson(exchange, 500, ServerJsonMessage.internalServerError());
                 return;
             }
@@ -172,6 +185,7 @@ public class UserHandler implements HttpHandler {
                 encrypted = session.getKeyManager().encryptAes(gamerJson);
             } catch (Exception e) {
                 System.err.println("[DEBUG] Błąd szyfrowania odpowiedzi: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd szyfrowania odpowiedzi: " + e.getMessage());
                 sendJson(exchange, 500, ServerJsonMessage.internalServerError());
                 return;
             }
@@ -183,6 +197,7 @@ public class UserHandler implements HttpHandler {
 
         } catch (Exception e) {
             System.err.println("[DEBUG] Wyjątek główny w handlerze: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Wyjątek główny w handlerze: " + e.getMessage());
             sendJson(exchange, 500, ServerJsonMessage.internalServerError());
         }
     }
@@ -193,12 +208,14 @@ public class UserHandler implements HttpHandler {
             String uuidStr = claims.get(JsonFields.UUID, String.class);
             if (uuidStr == null) {
                 System.err.println("[DEBUG] Token nie zawiera UUID.");
+                LogManager.logToFile("[DEBUG] Token nie zawiera UUID.");
                 sendJson(exchange, 400, ServerJsonMessage.badRequest("Token does not contain " + JsonFields.UUID));
                 return null;
             }
             return UUID.fromString(uuidStr);
         } catch (Exception e) {
             System.err.println("[DEBUG] Błąd walidacji tokenu JWT: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd walidacji tokenu JWT: " + e.getMessage());
             sendJson(exchange, 401, ServerJsonMessage.invalidToken());
             return null;
         }
@@ -221,6 +238,7 @@ public class UserHandler implements HttpHandler {
             }
         } catch (Exception e) {
             System.err.println("[DEBUG] Błąd podczas odczytu body żądania: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd podczas odczytu body żądania: " + e.getMessage());
         }
         return sb.toString();
     }

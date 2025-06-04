@@ -5,6 +5,7 @@ import com.casino.java_online_casino.Connection.Server.DTO.GameStateDTO;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.Database.GamerDAO;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
@@ -42,9 +43,11 @@ public class BlackjackTcpHandler implements Runnable {
             handleClientSession(reader, writer);
         } catch (Exception e) {
             System.err.println("[ERROR] Błąd w BlackjackTcpHandler: " + e.getMessage());
+            LogManager.logToFile("[ERROR] Błąd w BlackjackTcpHandler: " + e.getMessage());
             // Jeśli błąd dotyczy połączenia, natychmiast zwolnij sesję gracza
             if (userId != null) {
                 System.out.println("[INFO] Connection lost for user " + userId + " – releasing session immediately.");
+                LogManager.logToFile("[INFO] Connection lost for user " + userId + " – releasing session immediately.");
                 controller.onPlayerLeave(userId);
             }
             e.printStackTrace();
@@ -174,6 +177,7 @@ public class BlackjackTcpHandler implements Runnable {
         GameStateDTO state = GameStateDTO.fromController(controller);
         JsonObject okMessage = ServerJsonMessage.ok("Stan gry");
         okMessage.addProperty(JsonFields.DATA, gson.toJson(state));
+        System.out.println("[DEBUG] Odpowiedź " + okMessage);
         System.out.println("[DEBUG] Odpowiedź " + okMessage);
 
         try {

@@ -9,6 +9,7 @@ import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
 import com.casino.java_online_casino.games.poker.controller.PokerController;
@@ -35,6 +36,7 @@ public class GameServer {
     public void start() throws Exception {
         try (ServerSocket serverSocket = new ServerSocket(ServerConfig.getGameServerPort())) {
             System.out.println("[INFO] GameServer nasłuchuje na porcie " + ServerConfig.getGameServerPort());
+            LogManager.logToFile("[INFO] GameServer nasłuchuje na porcie " + ServerConfig.getGameServerPort());
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 executorService.submit(() -> handleClient(clientSocket));
@@ -52,9 +54,11 @@ public class GameServer {
                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8), true)
         ) {
             System.out.println("[DEBUG GAME SERVER] Nowe połączenie: " + clientSocket.getRemoteSocketAddress());
+            LogManager.logToFile("[DEBUG GAME SERVER] Nowe połączenie: " + clientSocket.getRemoteSocketAddress());
 
             String initRequest = reader.readLine();
             System.out.println("[DEBUG GAME SERVER] Odebrano initRequest: " + initRequest);
+            LogManager.logToFile("[DEBUG GAME SERVER] Odebrano initRequest: " + initRequest);
 
             if (initRequest == null || initRequest.isBlank()) {
                 writer.println("{\"status\":\"error\",\"code\":400,\"message\":\"Empty initial request\"}");
@@ -83,6 +87,7 @@ public class GameServer {
             session = sessionManager.getSessionByUUID(playerUUID);
             if (session == null) {
                 System.out.println("[DEBUG] nie uznano żadnej sesji ");
+                LogManager.logToFile("[DEBUG] nie uznano żadnej sesji dla UUID: " + playerUUID);
                 writer.println("{\"status\":\"error\",\"code\":404,\"message\":\"Session not found\"}");
                 return;
             }
@@ -92,6 +97,7 @@ public class GameServer {
 // Jeśli nie ma żadnej sesji z tym userId – błąd
             if (candidateSessions.isEmpty()) {
                 System.out.println("[DEBUG] Session not found");
+                LogManager.logToFile("[DEBUG] Session not found");
                 writer.println("{\"status\":\"error\",\"code\":404,\"message\":\"No session found for this userId\"}");
                 return;
             }
@@ -108,6 +114,7 @@ public class GameServer {
                     }
                     sessionManager.deleteSessionByUUID(s.getUuid());
                     System.out.println("[DEBUG GAME SERVER] Usunięto starą sesję: " + s.getUuid());
+                    LogManager.logToFile("[DEBUG GAME SERVER] Usunięto starą sesję: " + s.getUuid());
                 }
             }
 
@@ -140,10 +147,12 @@ public class GameServer {
                 switch (request.game.toLowerCase()) {
                     case "blackjack":
                         System.out.println("[DEBUG] Blackjack game");
+                        LogManager.logToFile("[DEBUG] Blackjack game");
                         session.setGame(new BlackJackController());
                         break;
                     case "poker":
                         System.out.println("[DEBUG] Poker game");
+                        LogManager.logToFile("[DEBUG] Poker game");
                         session.setGame(new PokerController());
                         break;
                     // Dodaj kolejne gry tutaj
@@ -163,6 +172,7 @@ public class GameServer {
                 case "poker":
                     JsonObject response = new JsonObject();
                     System.out.println("[DEBUG GAME SERVER] Gracz " + userId + " próbuje dołączyć do gry pokerowej");
+                    LogManager.logToFile("[DEBUG GAME SERVER] Gracz " + userId + " próbuje dołączyć do gry pokerowej");
                     // Sprawdź czy istnieje aktywny pokój z wolnym miejscem
                     Optional<PokerRoom> existingRoom = PokerRoomManager.getInstance().getAvailableRoom();
 
@@ -170,12 +180,14 @@ public class GameServer {
                     if (existingRoom.isPresent()) {
                         // Dołącz do istniejącego pokoju
                         System.out.println("[DEBUG GAME SERVER] Gracz " + userId + " dołącza do istniejącego pokoju: " + existingRoom.get().getRoomId());
+                        LogManager.logToFile("[DEBUG GAME SERVER] Gracz " + userId + " dołącza do istniejącego pokoju: " + existingRoom.get().getRoomId());
                         room = existingRoom.get();
                         room.addPlayer(userId);
                         response.addProperty("type", "room_joined");
                     } else {
                         // Utwórz nowy pokój
                         System.out.println("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
+                        LogManager.logToFile("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
                         room = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, currentKeyManager));
                         room.addPlayer(userId);
                         response.addProperty("type", "room_created");
@@ -201,6 +213,7 @@ public class GameServer {
 
         } catch (Exception e) {
             System.err.println("[ERROR] GameServer: " + e.getMessage());
+            LogManager.logToFile("[ERROR] GameServer: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (locked && session != null) {

@@ -1,5 +1,6 @@
 package com.casino.java_online_casino.games.poker.controller;
 import com.casino.java_online_casino.Connection.Games.Game;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.games.poker.model.*;
 import com.casino.java_online_casino.games.poker.gui.PokerView;
 
@@ -254,31 +255,37 @@ public class PokerController implements Game {
     @Override
     public synchronized void onPlayerJoin(String userId) {
         if (scheduler.isShutdown()) {
+            LogManager.logToFile("[DEBUG] Game is not accepting new players at the moment.");
             throw new IllegalStateException("Game is not accepting new players at the moment.");
         }
         Player player = game.getPlayerById(userId);
         if (player == null) {
+            LogManager.logToFile("[DEBUG] Player does not exist in the game: " + userId);
             throw new IllegalStateException("Player does not exist in the game.");
         }
         if (currentPlayerId == null) {
             currentPlayerId = userId;
         }
         System.out.println("[DEBUG] Player joined: " + userId);
+        LogManager.logToFile("[DEBUG] Player joined: " + userId);
     }
 
     @Override
     public synchronized void onPlayerLeave(String userId) {
         if (scheduler.isShutdown()) {
+            LogManager.logToFile("[DEBUG] Game is not accepting new players at the moment.");
             throw new IllegalStateException("Game is not accepting new players at the moment.");
         }
         Player player = game.getPlayerById(userId);
         if (player == null) {
+            LogManager.logToFile("[DEBUG] Player does not exist in the game: " + userId);
             throw new IllegalStateException("Player does not exist in the game.");
         }
         if (currentPlayerId == null) {
             currentPlayerId = userId;
         }
         System.out.println("[DEBUG] Player joined: " + userId);
+        LogManager.logToFile("[DEBUG] Player joined: " + userId);
     }
 
     @Override

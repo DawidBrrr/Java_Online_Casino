@@ -1,5 +1,6 @@
 package com.casino.java_online_casino.Connection.Server.Rooms;
 
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.games.poker.controller.RemotePokerController;
 import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
 import com.google.gson.JsonObject;
@@ -35,9 +36,12 @@ public class PokerRoom {
 
     public boolean addPlayer(int userId) {
         System.out.println("[DEBUG POKER_ROOM] Próba dodania gracza ID: " + userId + " do pokoju: " + roomId);
+        LogManager.logToFile("[DEBUG POKER_ROOM] Próba dodania gracza ID: " + userId + " do pokoju: " + roomId);
         if (players.size() < maxPlayers) {
             boolean added = players.add(userId);
             System.out.println("[DEBUG POKER_ROOM] " + (added ? "Dodano gracza" : "Gracz już istnieje") +
+                    ". Liczba graczy: " + players.size());
+            LogManager.logToFile("[DEBUG POKER_ROOM] " + (added ? "Dodano gracza" : "Gracz już istnieje") +
                     ". Liczba graczy: " + players.size());
 
             if (added) {
@@ -58,22 +62,28 @@ public class PokerRoom {
             return added;
         }
         System.out.println("[DEBUG POKER_ROOM] Nie można dodać gracza - pokój pełny");
+        LogManager.logToFile("[DEBUG POKER_ROOM] Nie można dodać gracza - pokój pełny");
         return false;
     }
 
     public boolean removePlayer(int userId) {  // Zmiana parametru na int
         System.out.println("[DEBUG POKER_ROOM] Próba usunięcia gracza ID: " + userId + " z pokoju: " + roomId);
+        LogManager.logToFile("[DEBUG POKER_ROOM] Próba usunięcia gracza ID: " + userId + " z pokoju: " + roomId);
         boolean removed = players.remove(userId);
         System.out.println("[DEBUG POKER_ROOM] " + (removed ? "Usunięto gracza" : "Nie znaleziono gracza") +
+                ". Pozostało graczy: " + players.size());
+        LogManager.logToFile("[DEBUG POKER_ROOM] " + (removed ? "Usunięto gracza" : "Nie znaleziono gracza") +
                 ". Pozostało graczy: " + players.size());
         return removed;
     }
 
     public void closeRoom() {
         System.out.println("[DEBUG POKER_ROOM] Zamykanie pokoju: " + roomId);
+        LogManager.logToFile("[DEBUG POKER_ROOM] Zamykanie pokoju: " + roomId);
         isActive = false;
         tcpClient.close();
         System.out.println("[DEBUG POKER_ROOM] Pokój zamknięty");
+        LogManager.logToFile("[DEBUG POKER_ROOM] Pokój zamknięty");
     }
 
     public boolean isActive() {
@@ -82,6 +92,7 @@ public class PokerRoom {
 
     public int getPlayerCount() {
         System.out.println("[DEBUG POKER_ROOM] Liczba graczy w pokoju " + roomId + ": " + players.size());
+        LogManager.logToFile("[DEBUG POKER_ROOM] Liczba graczy w pokoju " + roomId + ": " + players.size());
         return players.size();
     }
     public void setRoomId(String roomId) {

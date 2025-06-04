@@ -5,6 +5,7 @@ import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.Database.GamerDAO;
 import com.casino.java_online_casino.User.Gamer;
@@ -24,6 +25,7 @@ public class RegisterHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         System.out.println("[DEBUG REGISTER] Odebrano zapytanie do RegisterHandler");
+        LogManager.logToFile("[DEBUG REGISTER] Zapytanie do RegisterHandler");
         try {
             if (!isPostMethod(exchange)) {
                 logAndSend(exchange, 405, ServerJsonMessage.methodNotAllowed());
@@ -32,6 +34,8 @@ public class RegisterHandler implements HttpHandler {
 
             String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
             System.out.println("[DEBUG REGISTER] Nagłówek Authorization: " + authHeader);
+            LogManager.logToFile("[DEBUG REGISTER] Nagłówek Authorization: " + authHeader);
+
 
             if (authHeader == null || authHeader.isBlank()) {
                 logAndSend(exchange, 401, ServerJsonMessage.missingToken());
@@ -41,6 +45,7 @@ public class RegisterHandler implements HttpHandler {
             Claims claims = ServerTokenManager.validateJwt(authHeader);
             String uuidStr = claims.get(JsonFields.UUID, String.class);
             System.out.println("[DEBUG REGISTER] Odczytane UUID z tokena JWT: " + uuidStr);
+            LogManager.logToFile("[DEBUG REGISTER] Odczytane UUID z tokena JWT: " + uuidStr);
 
             if (uuidStr == null) {
                 logAndSend(exchange, 400, ServerJsonMessage.badRequest("Token nie zawiera UUID"));
@@ -51,6 +56,7 @@ public class RegisterHandler implements HttpHandler {
             try {
                 clientId = UUID.fromString(uuidStr);
                 System.out.println("[DEBUG REGISTER] Parsowanie UUID zakończone sukcesem: " + clientId);
+                LogManager.logToFile("[DEBUG REGISTER] Parsowanie UUID zakończone sukcesem: " + clientId);
             } catch (IllegalArgumentException e) {
                 logAndSend(exchange, 400, ServerJsonMessage.badRequest("Niepoprawny format UUID w tokenie"));
                 return;
@@ -58,6 +64,7 @@ public class RegisterHandler implements HttpHandler {
 
             KeyManager keyManager = KeySessionManager.getInstance().getOrCreateSession(clientId).getKeyManager();
             System.out.println("[DEBUG REGISTER] Pobranie KeyManager dla klienta: " + clientId);
+            LogManager.logToFile("[DEBUG REGISTER] Pobranie KeyManager dla klienta: " + clientId);
             if (keyManager == null) {
                 logAndSend(exchange, 403, ServerJsonMessage.accessDenied());
                 return;
@@ -68,6 +75,7 @@ public class RegisterHandler implements HttpHandler {
                 requestJson = JsonUtil.parseJsonFromISReader(reader);
             }
             System.out.println("[DEBUG REGISTER] Parsowanie JSON z żądania zakończone");
+            LogManager.logToFile("[DEBUG REGISTER] Parsowanie JSON z żądania zakończone");
 
             if (!requestJson.has(JsonFields.DATA)) {
                 logAndSend(exchange, 400, ServerJsonMessage.badRequest("Brak pola '" + JsonFields.DATA + "'"));
@@ -76,11 +84,13 @@ public class RegisterHandler implements HttpHandler {
 
             String encryptedPayload = requestJson.get(JsonFields.DATA).getAsString();
             System.out.println("[DEBUG REGISTER] Otrzymano zaszyfrowane dane: " + encryptedPayload);
+            LogManager.logToFile("[DEBUG REGISTER] Otrzymano zaszyfrowane dane: " + encryptedPayload);
 
             String decryptedJson;
             try {
                 decryptedJson = keyManager.decryptAes(encryptedPayload);
                 System.out.println("[DEBUG REGISTER] Dane po odszyfrowaniu AES: " + decryptedJson);
+                LogManager.logToFile("[DEBUG REGISTER] Dane po odszyfrowaniu AES: " + decryptedJson);
             } catch (IllegalStateException e) {
                 logAndSend(exchange, 400, ServerJsonMessage.badRequest("Nie udało się odszyfrować danych"));
                 return;
@@ -110,6 +120,7 @@ public class RegisterHandler implements HttpHandler {
                 registered = dao.register(gamer); // ✅ używamy instancji
             } catch (Exception e) {
                 System.out.println("[DEBUG REGISTER] Błąd podczas rejestracji: " + e.getMessage());
+                LogManager.logToFile("[DEBUG REGISTER] Błąd podczas rejestracji: " + e.getMessage());
                 logAndSend(exchange, 500, ServerJsonMessage.internalServerError());
                 return;
             }
@@ -130,6 +141,7 @@ public class RegisterHandler implements HttpHandler {
             responseWrapper.addProperty(JsonFields.DATA, encryptedResponseBase64);
             logAndSend(exchange, 200, responseWrapper);
             System.out.println("[DEBUG REGISTER] Rejestracja zakończona sukcesem.");
+            LogManager.logToFile("[DEBUG REGISTER] Rejestracja zakończona sukcesem.");
         } catch (Exception e) {
             System.err.println("[ERROR REGISTER] Wyjątek: " + e.getMessage());
             logAndSend(exchange, 500, ServerJsonMessage.internalServerError());
@@ -138,6 +150,7 @@ public class RegisterHandler implements HttpHandler {
 
     private void logAndSend(HttpExchange exchange, int status, JsonObject body) throws IOException {
         System.out.println("[DEBUG REGISTER] HTTP " + status + ": " + body);
+        LogManager.logToFile("[DEBUG REGISTER] HTTP " + status + ": " + body);
         byte[] bytes = body.toString().getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
         exchange.sendResponseHeaders(status, bytes.length);
@@ -148,6 +161,7 @@ public class RegisterHandler implements HttpHandler {
     private boolean isPostMethod(HttpExchange exchange) {
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
             System.out.println("[DEBUG REGISTER] Nieobsługiwana metoda: " + exchange.getRequestMethod());
+            LogManager.logToFile("[DEBUG REGISTER] Nieobsługiwana metoda: " + exchange.getRequestMethod());
             return false;
         }
         return true;

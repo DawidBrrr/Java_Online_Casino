@@ -3,6 +3,7 @@ package com.casino.java_online_casino.games.poker.controller;
 import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -56,7 +57,9 @@ public class PokerTCPClient {
             writer.println(encrypted);
             writer.flush();
             System.out.println("[DEBUG POKER CLIENT] Wysłano zaszyfrowaną wiadomość");
+            LogManager.logToFile("[DEBUG POKER CLIENT] Wysłano zaszyfrowaną wiadomość: " + message);
         } catch (Exception e) {
+            LogManager.logToFile("[BŁĄD POKER CLIENT] Błąd podczas szyfrowania/wysyłania wiadomości: " + e.getMessage());
             throw new IOException("Błąd podczas szyfrowania/wysyłania wiadomości: " + e.getMessage());
         }
     }
@@ -68,12 +71,14 @@ public class PokerTCPClient {
             if (reader.ready()) {
                 String encryptedMessage = reader.readLine();
                 if (encryptedMessage == null) {
+                    LogManager.logToFile("[BŁĄD POKER CLIENT] Połączenie zamknięte przez serwer");
                     throw new IOException("Połączenie zamknięte przez serwer");
                 }
 
                 try {
                     return keyManager.decryptAes(encryptedMessage);
                 } catch (Exception e) {
+                    LogManager.logToFile("[BŁĄD POKER CLIENT] Błąd deszyfrowania: " + e.getMessage());
                     throw new IOException("Błąd deszyfrowania: " + e.getMessage());
                 }
             }
@@ -82,16 +87,18 @@ public class PokerTCPClient {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                LogManager.logToFile("[BŁĄD POKER CLIENT] Przerwano oczekiwanie na wiadomość: " + e.getMessage());
                 throw new IOException("Przerwano oczekiwanie na wiadomość");
             }
         }
-
+        LogManager.logToFile("[BŁĄD POKER CLIENT] Timeout: brak odpowiedzi w ciągu " + timeoutMillis + "ms");
         throw new IOException("Timeout: brak odpowiedzi w ciągu " + timeoutMillis + "ms");
     }
     private String readMessage() throws IOException {
         try {
             String message = reader.readLine();
             if (message == null) {
+                LogManager.logToFile("[BŁĄD POKER CLIENT] Połączenie zamknięte przez serwer");
                 throw new IOException("Połączenie zamknięte przez serwer");
             }
 
@@ -100,6 +107,7 @@ public class PokerTCPClient {
             }
             return message;
         } catch (Exception e) {
+            LogManager.logToFile("[BŁĄD POKER CLIENT] Błąd podczas odczytu wiadomości: " + e.getMessage());
             throw new IOException("Błąd podczas odczytu wiadomości: " + e.getMessage());
         }
     }
@@ -117,10 +125,12 @@ public class PokerTCPClient {
         writer.println(initJson);
         writer.flush();
         System.out.println("[DEBUG POKER CLIENT] Połączono z serwerem i wysłano initRequest: " + initJson);
+        LogManager.logToFile("[DEBUG POKER CLIENT] Połączono z serwerem i wysłano initRequest: " + initJson);
     }
 
     private PokerDTO sendCommand(String command, int amount) throws Exception {
         if (!isConnected()) {
+            LogManager.logToFile("[BŁĄD POKER CLIENT] Brak połączenia z serwerem");
             throw new IOException("Brak połączenia z serwerem");
         }
 
@@ -130,11 +140,14 @@ public class PokerTCPClient {
         writer.println(encryptedReq);
         writer.flush();
         System.out.println("[DEBUG POKER CLIENT] Wysłano komendę: " + command);
+        LogManager.logToFile("[DEBUG POKER CLIENT] Wysłano komendę: " + command + ", amount: " + amount + ", roomId: " + roomId);
 
         String encryptedResp = reader.readLine();
         System.out.println("[DEBUG POKER CLIENT] Odebrano odpowiedź: " + encryptedResp);
+        LogManager.logToFile("[DEBUG POKER CLIENT] Odebrano odpowiedź: " + encryptedResp);
 
         if (encryptedResp == null) {
+            LogManager.logToFile("[BŁĄD POKER CLIENT] Połączenie zamknięte przez serwer");
             throw new IOException("Połączenie zamknięte przez serwer");
         }
 
@@ -150,6 +163,7 @@ public class PokerTCPClient {
         // Deszyfrujemy odpowiedź base64
         String jsonResp = keyManager.decryptAes(encryptedResp);
         System.out.println("[DEBUG POKER CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
+        LogManager.logToFile("[DEBUG POKER CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
         return gson.fromJson(jsonResp, PokerDTO.class);
     }
 
@@ -183,8 +197,10 @@ public class PokerTCPClient {
                 socket.close();
             }
             System.out.println("[DEBUG POKER CLIENT] Zamknięto połączenie");
+            LogManager.logToFile("[DEBUG POKER CLIENT] Zamknięto połączenie");
         } catch (Exception e) {
             System.out.println("[DEBUG POKER CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
+            LogManager.logToFile("[BŁĄD POKER CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
         }
     }
 

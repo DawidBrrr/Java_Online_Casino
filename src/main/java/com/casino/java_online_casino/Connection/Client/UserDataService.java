@@ -4,6 +4,7 @@ import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.JsonUtil;
 import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -52,6 +53,7 @@ public class UserDataService extends Service {
                     return gamerDTO;
                 } catch (Exception e) {
                     System.err.println("[DEBUG] Błąd wątku FutureTask: " + e.getMessage());
+                    LogManager.logToFile("[DEBUG] Błąd wątku FutureTask: " + e.getMessage());
                     e.printStackTrace();
                     return null;
                 }
@@ -63,14 +65,17 @@ public class UserDataService extends Service {
             return task.get(15, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
             System.err.println("[DEBUG] Timeout podczas oczekiwania na odpowiedź serwera.");
+            LogManager.logToFile("[DEBUG] Timeout podczas oczekiwania na odpowiedź serwera.");
             t.interrupt();
             return null;
         } catch (InterruptedException e) {
             System.err.println("[DEBUG] Wątek został przerwany: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Wątek został przerwany: " + e.getMessage());
             t.interrupt();
             return null;
         } catch (ExecutionException e) {
             System.err.println("[DEBUG] Błąd wykonania zadania: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd wykonania zadania: " + e.getMessage());
             t.interrupt();
             return null;
         }
@@ -93,8 +98,10 @@ public class UserDataService extends Service {
         try {
             connection = getConnection(userUrl, ServiceHelper.METHOD_POST);
             System.out.println("[DEBUG] Nzwiązano połączenie");
+            LogManager.logToFile("[DEBUG] Nawiązano połączenie");
         } catch (IOException e) {
             System.err.println("[DEBUG] Błąd podczas nawiązywania połączenia: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd podczas nawiązywania połączenia: " + e.getMessage());
             throw e;
         }
 
@@ -105,8 +112,10 @@ public class UserDataService extends Service {
             try {
                 requestJson = encode(json.toString());
                 System.out.println("[DEBUG] Zaszyfrowano dane JSON: " + requestJson);
+                LogManager.logToFile("[DEBUG] Zaszyfrowano dane JSON" + requestJson);
             } catch (Exception e) {
                 System.err.println("[DEBUG] Błąd podczas szyfrowania payloadu: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd podczas szyfrowania payloadu: " + e.getMessage());
                 return false;
             }
             try (OutputStream os = connection.getOutputStream()) {
@@ -114,6 +123,7 @@ public class UserDataService extends Service {
                 os.flush();
             } catch (IOException e) {
                 System.err.println("[DEBUG] Błąd podczas wysyłania danych do serwera: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd podczas wysyłania danych do serwera: " + e.getMessage());
                 return false;
             }
         } else {
@@ -126,6 +136,7 @@ public class UserDataService extends Service {
             responseCode = connection.getResponseCode();
         } catch (IOException e) {
             System.err.println("[DEBUG] Błąd podczas pobierania kodu odpowiedzi serwera: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd podczas pobierania kodu odpowiedzi serwera: " + e.getMessage());
             return false;
         }
 
@@ -136,11 +147,13 @@ public class UserDataService extends Service {
                     : connection.getErrorStream();
         } catch (IOException e) {
             System.err.println("[DEBUG] Błąd podczas pobierania strumienia odpowiedzi: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd podczas pobierania strumienia odpowiedzi: " + e.getMessage());
             return false;
         }
 
         if (is == null) {
             System.err.println("[DEBUG] Brak strumienia odpowiedzi.");
+            LogManager.logToFile("[DEBUG] Brak strumienia odpowiedzi.");
             return false;
         }
 
@@ -149,6 +162,7 @@ public class UserDataService extends Service {
             responseJson = JsonUtil.parseJsonFromISReader(reader);
         } catch (Exception e) {
             System.err.println("[DEBUG] Błąd podczas parsowania odpowiedzi JSON: " + e.getMessage());
+            LogManager.logToFile("[DEBUG] Błąd podczas parsowania odpowiedzi JSON: " + e.getMessage());
             return false;
         }
 
@@ -158,19 +172,23 @@ public class UserDataService extends Service {
             try {
                 decryptedJson = keyManager.decryptAes(encryptedData);
                 System.out.println("[DEBUG] odszyfrowana wiadomośc " + decryptedJson);
+                LogManager.logToFile("[DEBUG] odszyfrowana wiadomośc " + decryptedJson);
             } catch (Exception e) {
                 System.err.println("[DEBUG] Błąd podczas odszyfrowywania danych: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd podczas odszyfrowywania danych: " + e.getMessage());
                 return false;
             }
             try {
                 gamerDTO = new Gson().fromJson(decryptedJson, GamerDTO.class);
             } catch (Exception e) {
                 System.err.println("[DEBUG] Błąd podczas deserializacji GamerDTO: " + e.getMessage());
+                LogManager.logToFile("[DEBUG] Błąd podczas deserializacji GamerDTO: " + e.getMessage());
                 return false;
             }
             return true;
         } else {
             System.err.println("[DEBUG] Brak pola 'data' w odpowiedzi serwera.");
+            LogManager.logToFile("[DEBUG] Brak pola 'data' w odpowiedzi serwera.");
             return false;
         }
     }

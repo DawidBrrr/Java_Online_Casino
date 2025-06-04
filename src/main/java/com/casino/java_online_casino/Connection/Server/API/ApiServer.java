@@ -4,6 +4,7 @@ import com.casino.java_online_casino.Connection.Server.API.Handlers.*;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
 import com.casino.java_online_casino.Experimental;
 import com.sun.net.httpserver.HttpServer;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -40,8 +41,10 @@ public class ApiServer {
             server.start();
             isActive = true;
             System.out.println("API działa na " + ServerConfig.getApiServerHost() + ":" + ServerConfig.getApiServerHost());
+            LogManager.logToFile("API działa na " + ServerConfig.getApiServerHost() + ":" + ServerConfig.getApiServerHost());
         } catch (IOException e) {
             isActive = false;
+            LogManager.logToFile("Błąd startu servera");
             throw new RuntimeException("Błąd startu servera");
         }
     }

@@ -1,5 +1,6 @@
 package com.casino.java_online_casino.Database;
 
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.User.Gamer;
 
 import java.sql.*;
@@ -15,6 +16,7 @@ public class DatabaseManager {
     public DatabaseManager() throws SQLException {
         connection = DriverManager.getConnection(DB_URL, USER, PASSWORD);
         System.out.println("Połączenie z bazą danych nawiązane.");
+        LogManager.logToFile("Połączenie z bazą danych nawiązane.");
     }
 
     // Tworzenie nowego użytkownika
@@ -32,6 +34,7 @@ public class DatabaseManager {
             return true;
         } catch (SQLException e) {
             System.err.println("Błąd przy dodawaniu gracza: " + e.getMessage());
+            LogManager.logToFile("Błąd przy dodawaniu gracza: " + e.getMessage());
             return false;
         }
     }
@@ -58,6 +61,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.err.println("Błąd podczas pobierania gracza: " + e.getMessage());
+            LogManager.logToFile("Błąd podczas pobierania gracza: " + e.getMessage());
         }
         return null;
     }
@@ -72,6 +76,7 @@ public class DatabaseManager {
             return rows > 0;
         } catch (SQLException e) {
             System.err.println("Błąd przy aktualizacji kredytów: " + e.getMessage());
+            LogManager.logToFile("Błąd przy aktualizacji kredytów: " + e.getMessage());
             return false;
         }
     }
@@ -83,6 +88,7 @@ public class DatabaseManager {
                 connection.close();
         } catch (SQLException e) {
             System.err.println("Błąd podczas zamykania połączenia: " + e.getMessage());
+            LogManager.logToFile("Błąd podczas zamykania połączenia: " + e.getMessage());
         }
     }
 }

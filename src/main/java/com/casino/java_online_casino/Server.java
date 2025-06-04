@@ -2,6 +2,7 @@ package com.casino.java_online_casino;
 
 import com.casino.java_online_casino.Connection.Server.API.ApiServer;
 import com.casino.java_online_casino.Connection.Server.GameServer.GameServer;
+import com.casino.java_online_casino.Connection.Utils.LogManager;
 
 public class Server {
     public static void main(String[] args) {
