@@ -14,7 +14,6 @@ public class LogManager {
         String serverName = Thread.currentThread().getName().replace("-Thread", "");
         String fileName = String.format("%s/%s_%s.txt", LOG_DIR, serverName, DATE_FORMATTER.format(now));
 
-        // Tworzenie katalogu logs jeśli nie istnieje
         File directory = new File(LOG_DIR);
         if (!directory.exists()) {
             directory.mkdir();

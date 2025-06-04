@@ -58,7 +58,7 @@ public class BlackjackTcpClient {
             throw new IOException("[DEBUG JACK CLIENT] Połączenie zamknięte przez serwer.");
         }
 
-        // Jeśli odpowiedź wygląda na plain JSON (nie base64), nie próbuj jej deszyfrować!
+
         if (encryptedResp.strip().startsWith("{")) {
             JsonObject errorObj = JsonParser.parseString(encryptedResp).getAsJsonObject();
             if (errorObj.has(JsonFields.HTTP_STATUS) && errorObj.has(JsonFields.HTTP_CODE) && errorObj.has(JsonFields.HTTP_MESSAGE)) {
@@ -67,7 +67,7 @@ public class BlackjackTcpClient {
             throw new IOException("[DEBUG JACK CLIENT] Serwer zwrócił nieoczekiwany plain JSON: " + encryptedResp);
         }
 
-        // Odpowiedź wygląda na base64 – deszyfruj
+
         String jsonResp = keyManager.decryptAes(encryptedResp);
         System.out.println("[DEBUG JACK CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
         LogManager.logToFile("[DEBUG JACK CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
@@ -86,7 +86,6 @@ public class BlackjackTcpClient {
                 writer.flush();
                 System.out.println("[DEBUG JACK CLIENT] Odpowiedź pong na ping serwera: " + LocalDateTime.now());
                 LogManager.logToFile("[DEBUG JACK CLIENT] Odpowiedź pong na ping serwera: " + LocalDateTime.now());
-                // Możesz zwrócić null lub kontynuować oczekiwanie na kolejną odpowiedź, jeśli to część flow
                 return null;
             }
         }

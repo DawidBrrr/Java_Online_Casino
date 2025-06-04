@@ -1,0 +1,5 @@
+[15:03:16] Thread-44: [DEBUG] Nawiązano połączenie
+[15:03:16] Thread-44: [DEBUG] Zaszyfrowano dane JSON{"data":"zvkoNA/pJhJ9xQ8NFd3zFrrPwewBnBkRFDsiT2wgHjRDOSjUkb/njIzMUZ9IdztSHDdmLQ=="}
+[15:03:16] Thread-44: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1450.0}
+[15:19:38] Thread-44: [DEBUG] Nawiązano połączenie
+[15:19:38] Thread-44: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1900.0}

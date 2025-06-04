@@ -198,8 +198,8 @@
                 <archive>
                     <manifest>
                         <addClasspath>true</addClasspath>
-                        <mainClass>com/casino/java_online_casino/Server</mainClass>
-                    <!--    <mainClass>com/casino/java_online_casino/ClientLauncher/mainClass>  -->
+<!--                        <mainClass>com/casino/java_online_casino/Server</mainClass>-->
+                        <mainClass>com/casino/java_online_casino/ClientLauncher</mainClass>
                     </manifest>
                 </archive>
             </configuration>

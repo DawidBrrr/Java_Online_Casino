@@ -49,15 +49,11 @@ public class AuthController {
 
     @FXML
     public void initialize() {
-        // Bindowanie rozmiaru obrazu do rozmiaru rodzica (StackPane)
         backgroundImage.fitWidthProperty().bind(rootPane.widthProperty());
         backgroundImage.fitHeightProperty().bind(rootPane.heightProperty());
 
-        // Nasłuchiwanie zmian wysokości i szerokości dla dynamicznych marginesów
         rootPane.widthProperty().addListener((obs, oldVal, newVal) -> updateMargins());
         rootPane.heightProperty().addListener((obs, oldVal, newVal) -> updateMargins());
-
-        // Pierwsze ustawienie marginesów
         Platform.runLater(this::updateMargins);
     }
 
@@ -75,7 +71,6 @@ public class AuthController {
 
     @FXML
     private void handleLogin() {
-        // Wykonaj wymianę kluczy przed otwarciem okien
 //        Service keyService = new KeyExchangeService();
 //        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
 //        keyExchangeThread.start();
@@ -88,7 +83,6 @@ public class AuthController {
             return;
         }
 
-        // >>> DODAJ HANDSHAKE ZAWSZE PRZED logowaniem <<<
         try {
             com.casino.java_online_casino.Connection.Client.Service.keyManager =
                     new com.casino.java_online_casino.Connection.Tokens.KeyManager();
@@ -104,7 +98,6 @@ public class AuthController {
             loginError.setText("Błąd podczas nawiązywania połączenia szyfrowanego.");
             return;
         }
-        // <<< KONIEC: handshake
 
         LoginService service = new LoginService(username, password);
         boolean result = service.perform();
@@ -139,8 +132,6 @@ public class AuthController {
 
     @FXML
     private void handleRegister() {
-
-        // Wykonaj wymianę kluczy przed otwarciem okien
         Service keyService = new KeyExchangeService();
         Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
         keyExchangeThread.start();
@@ -175,7 +166,6 @@ public class AuthController {
             return;
         }
 
-        // >>> HANDSHAKE tuż przed próbą rejestracji!
         try {
             com.casino.java_online_casino.Connection.Client.Service.keyManager =
                     new com.casino.java_online_casino.Connection.Tokens.KeyManager();
@@ -191,11 +181,9 @@ public class AuthController {
             registerError.setText("Błąd podczas nawiązywania połączenia szyfrowanego.");
             return;
         }
-        // <<< KONIEC handshake
 
         Date birth = Date.from(birthDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        // Domyślne kredyty: 0 (lub inna logika)
         Gamer gamer = new Gamer(-1, firstName, lastName, nickname, email, password, 0.0f, birth);
 
         RegisterService service = new RegisterService(gamer);
@@ -223,7 +211,6 @@ public class AuthController {
     }
 
     private boolean isValidEmail(String email) {
-        // Prosty regex dla e-maila
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         return Pattern.matches(emailRegex, email);
     }

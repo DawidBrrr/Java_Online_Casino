@@ -49,12 +49,12 @@ public class BlackJackGUIController {
 
     private int currentBet = 50;
 
-    // Nowe pola
+
     private String currentUserEmail;
     private double balance;
     GamerDTO gamerDto;
 
-    // INICJALIZACJA z emaila użytkownika (wywołuj z Dashboardu!)
+
     public void initWithUser(String email) {
         gamerDto = UserDataService.updateGamerDTO();
         this.currentUserEmail = email;
@@ -67,7 +67,7 @@ public class BlackJackGUIController {
         initializeGame();
     }
 
-    // Zamień initialize na initializeGame (tylko własna logika UI)
+
     public void initializeGame() {
         tcpClient = new BlackjackTcpClient(Service.getToken(), Service.getKeyManager());
         try {

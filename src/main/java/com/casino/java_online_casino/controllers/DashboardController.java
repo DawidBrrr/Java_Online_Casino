@@ -24,14 +24,12 @@ public class DashboardController {
     private GamerDTO gamerDTO;
     private String currentUserEmail;
 
-    // Wywołaj initialize(email) po zalogowaniu lub powrocie z gry!
     public void initialize(String email) {
         this.currentUserEmail = email;
         refreshUserData();
     }
 
     private void refreshUserData() {
-        // Pobierz dane użytkownika asynchronicznie
         new Thread(() -> {
             GamerDTO dto = UserDataService.updateGamerDTO();
             Platform.runLater(() -> {
@@ -69,7 +67,6 @@ public class DashboardController {
                 LogManager.logToFile("[DEBUG LOGOUT] Błąd podczas wylogowywania: " + e.getMessage());
                 e.printStackTrace();
             } finally {
-                // Zawsze czyść dane lokalne i wracaj do logowania
                 Platform.runLater(() -> {
                     Service.token = null;
                     Service.keyManager = null;

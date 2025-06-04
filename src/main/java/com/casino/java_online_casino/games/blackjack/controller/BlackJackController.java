@@ -21,7 +21,6 @@ public class BlackJackController implements Game {
     private boolean gameOver;
     private int betValue;
 
-    // Zarządzanie sesją gracza
     private volatile String currentUserId = null;
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
     private final AtomicBoolean cleanupScheduled = new AtomicBoolean(false);

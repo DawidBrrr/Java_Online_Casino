@@ -29,7 +29,6 @@ public class RankingsController {
         ObservableList<RankingEntry> rankings = FXCollections.observableArrayList();
 
         try {
-            // Podmień PORT jeśli Twój backend działa na innym!
             URL url = new URL("http://localhost:12346/api/stats/ranking");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");

@@ -1,0 +1,5 @@
+[15:01:18] Thread-8: [DEBUG] Nawiązano połączenie
+[15:01:18] Thread-8: [DEBUG] Zaszyfrowano dane JSON{"data":"wkamwZCZK0UTBXdxMp6AnGQaMd+TmxeEu1p0Y+GC7LK2+eiI9kiHklICuYnRm3PNaimk"}
+[15:01:18] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1500.0}
+[15:18:16] Thread-8: [DEBUG] Nawiązano połączenie
+[15:18:16] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1450.0}

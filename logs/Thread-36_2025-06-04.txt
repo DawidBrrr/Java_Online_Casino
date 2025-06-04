@@ -1,0 +1,4 @@
+[15:03:00] Thread-36: [DEBUG] Nawiązano połączenie
+[15:03:00] Thread-36: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1500.0}
+[15:19:26] Thread-36: [DEBUG] Nawiązano połączenie
+[15:19:26] Thread-36: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1900.0}

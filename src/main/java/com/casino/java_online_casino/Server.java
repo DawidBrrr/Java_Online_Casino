@@ -9,7 +9,6 @@ public class Server {
         ApiServer apiServer = new ApiServer();
         GameServer gameServer = new GameServer();
 
-        // Uruchom ApiServer w osobnym wątku
         Thread apiThread = new Thread(() -> {
             try {
                 apiServer.start();
@@ -20,7 +19,6 @@ public class Server {
         }, "ApiServer-Thread");
         apiThread.start();
 
-        // Uruchom GameServer w osobnym wątku
         Thread gameThread = new Thread(() -> {
             try {
                 gameServer.start();
@@ -30,13 +28,5 @@ public class Server {
             }
         }, "GameServer-Thread");
         gameThread.start();
-
-        // Jeśli chcesz poczekać aż serwery się rozkręcą
-        try {
-            Thread.sleep(1000); // wystarczy na "rozgrzanie" serwerów
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 }

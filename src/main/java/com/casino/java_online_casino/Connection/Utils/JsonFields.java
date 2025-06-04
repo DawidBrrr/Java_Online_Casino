@@ -22,6 +22,5 @@ public final class JsonFields {
     public static final String UUID = "uuid";
     public static final String LOGOUT = "logout";
 
-    // Prywatny konstruktor, by uniemożliwić tworzenie instancji
     private JsonFields() {}
 }

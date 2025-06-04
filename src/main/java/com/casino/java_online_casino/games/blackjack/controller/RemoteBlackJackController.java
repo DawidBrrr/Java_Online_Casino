@@ -13,7 +13,6 @@ public class RemoteBlackJackController {
     private final BlackjackTcpClient tcpClient;
     int bet = -1;
 
-    // Ostatni znany stan, aktualizujesz po każdej akcji!
     private GameStateDTO lastState;
 
     public RemoteBlackJackController(BlackjackTcpClient tcpClient)  {

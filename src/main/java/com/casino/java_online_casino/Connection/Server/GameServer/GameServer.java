@@ -102,10 +102,10 @@ public class GameServer {
                 return;
             }
 
-// Zidentyfikuj bieżącą sesję (playerUUID)
+
             SessionManager.SessionToken currentSession = sessionManager.getSessionByUUID(playerUUID);
 
-// Zamknij wszystkie inne sesje (oprócz obecnej)
+
             Game foundGame = null;
             for (SessionManager.SessionToken s : candidateSessions) {
                 if (!s.getUuid().equals(playerUUID)) {
@@ -118,7 +118,6 @@ public class GameServer {
                 }
             }
 
-// Przypisz znalezioną grę (jeśli była) do obecnej sesji
             if (foundGame != null) {
                 currentSession.setGame(foundGame);
             }
@@ -142,7 +141,6 @@ public class GameServer {
             }
             locked = true;
 
-            // Pobierz lub utwórz obiekt gry w sesji, jeśli jeszcze nie istnieje
             if (session.getGame() == null) {
                 switch (request.game.toLowerCase()) {
                     case "blackjack":
@@ -162,7 +160,6 @@ public class GameServer {
                 }
             }
 
-            // Uruchom handler gry, przekazując kontroler z sesji i KeyManager z bieżącej sesji!
             Game gameInstance = session.getGame();
             Runnable gameHandler;
             switch (request.game.toLowerCase()) {
@@ -234,7 +231,6 @@ public class GameServer {
         new GameServer().start();
     }
 
-    // Ping-pong do sprawdzania aktywności sesji
     boolean tryPingPong(Socket clientSocket, KeyManager keyManager) {
         try {
             String encryptedPing = keyManager.encryptAes(ServerJsonMessage.ping().toString());
