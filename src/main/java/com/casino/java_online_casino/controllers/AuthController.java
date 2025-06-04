@@ -2,6 +2,8 @@ package com.casino.java_online_casino.controllers;
 
 import com.casino.java_online_casino.Connection.Client.LoginService;
 import com.casino.java_online_casino.Connection.Client.RegisterService;
+import com.casino.java_online_casino.Connection.Client.UserDataService;
+import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
 import com.casino.java_online_casino.User.Gamer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -127,6 +129,9 @@ public class AuthController {
         } else {
             loginError.setText("Błędne dane logowania lub problem z serwerem.");
         }
+        new Thread(() -> {
+            GamerDTO gamer = UserDataService.updateGamerDTO();
+        }).start();
     }
 
     @FXML

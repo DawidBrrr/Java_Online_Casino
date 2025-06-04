@@ -45,7 +45,7 @@ public class LoginHandler implements HttpHandler {
             if (!KeySessionManager.getInstance().contains(clientId)) {
                 System.out.println("[DEBUG LOGIN] Brak aktywnej sesji dla klienta: " + clientId);
                 logAndSend(exchange, 403, ServerJsonMessage.accessDenied());
-                return;
+            return;
             }
 
             JsonObject requestJson = readRequestJson(exchange);

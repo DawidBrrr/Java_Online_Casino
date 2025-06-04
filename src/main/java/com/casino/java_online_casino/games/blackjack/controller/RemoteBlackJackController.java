@@ -1,3 +1,4 @@
+
 package com.casino.java_online_casino.games.blackjack.controller;
 
 import com.casino.java_online_casino.Connection.Server.DTO.GameStateDTO;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 public class RemoteBlackJackController {
 
     private final BlackjackTcpClient tcpClient;
+    int bet = -1;
 
     // Ostatni znany stan, aktualizujesz po każdej akcji!
     private GameStateDTO lastState;
@@ -24,6 +26,7 @@ public class RemoteBlackJackController {
     }
 
     public void startNewGame() throws Exception {
+        tcpClient.setBetValue(bet);
         lastState = tcpClient.newGame();
     }
 
@@ -50,18 +53,26 @@ public class RemoteBlackJackController {
     public List<Card> getPlayerHand() {
         if (lastState == null || lastState.playerHand == null) return Collections.emptyList();
         return lastState.playerHand.stream()
-            .map(dto -> new Card(dto.suit, dto.rank, dto.value))
-            .collect(Collectors.toList());
+                .map(dto -> new Card(dto.suit, dto.rank, dto.value))
+                .collect(Collectors.toList());
     }
 
     public List<Card> getDealerHand() {
         if (lastState == null || lastState.dealerHand == null) return Collections.emptyList();
         return lastState.dealerHand.stream()
-            .map(dto -> new Card(dto.suit, dto.rank, dto.value))
-            .collect(Collectors.toList());
+                .map(dto -> new Card(dto.suit, dto.rank, dto.value))
+                .collect(Collectors.toList());
     }
 
     public String getGameResult() {
         return (lastState != null && lastState.gameOver) ? lastState.result : "";
+    }
+
+    public int getBet() {
+        return bet;
+    }
+
+    public void setBet(int bet) {
+        this.bet = bet;
     }
 }

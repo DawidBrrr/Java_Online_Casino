@@ -134,4 +134,22 @@ public class GamerDAO {
             System.err.println("[GamerDAO] Błąd podczas zamykania połączenia: " + e.getMessage());
         }
     }
+
+    public float getCredits(int userId) {
+        String sql = "SELECT credits FROM gamers WHERE user_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getFloat("credits");
+                } else {
+                    System.err.println("[GamerDAO] Nie znaleziono użytkownika o ID: " + userId);
+                    return 0.0f;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[GamerDAO] Błąd przy pobieraniu kredytów: " + e.getMessage());
+            return 0.0f;
+        }
+    }
 }

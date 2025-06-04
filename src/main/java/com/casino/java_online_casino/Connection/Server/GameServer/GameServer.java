@@ -154,7 +154,7 @@ public class GameServer {
             Runnable gameHandler;
             switch (request.game.toLowerCase()) {
                 case "blackjack":
-                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) gameInstance, currentKeyManager);
+                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) gameInstance, session);
                     break;
                 case "poker":
                     JsonObject response = new JsonObject();

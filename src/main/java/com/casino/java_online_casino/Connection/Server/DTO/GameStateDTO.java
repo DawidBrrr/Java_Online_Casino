@@ -2,8 +2,8 @@ package com.casino.java_online_casino.Connection.Server.DTO;
 
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
 import com.casino.java_online_casino.games.blackjack.model.Card;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GameStateDTO {
     public List<CardDTO> playerHand;
@@ -12,6 +12,7 @@ public class GameStateDTO {
     public int dealerScore;
     public boolean gameOver;
     public String result;
+    public int balance;
 
     public static class CardDTO {
         public String suit;
@@ -30,13 +31,16 @@ public class GameStateDTO {
     public static GameStateDTO fromController(BlackJackController controller) {
         GameStateDTO dto = new GameStateDTO();
         dto.playerHand = controller.getPlayerHand().stream()
-            .map(CardDTO::new).collect(Collectors.toList());
+                .map(c -> new CardDTO(new Card(c.getSuit(), c.getRank(), c.getValue())))
+                .toList();
         dto.dealerHand = controller.getDealerHand().stream()
-            .map(CardDTO::new).collect(Collectors.toList());
+                .map(c -> new CardDTO(new Card(c.getSuit(), c.getRank(), c.getValue())))
+                .toList();
         dto.playerScore = controller.getPlayerScore();
         dto.dealerScore = controller.getDealerScore();
         dto.gameOver = controller.isGameOver();
-        dto.result = controller.isGameOver() ? controller.getGameResult() : null;
+        dto.result = controller.getGameResult();
+        dto.balance = controller.getCurrentBalance();
         return dto;
     }
 }

@@ -80,6 +80,7 @@ public class LoginService extends Service {
                 System.out.println("[DEBUG] Odszyfrowana odpowiedź logowania: " + decryptedResponse);
                 JsonObject decryptedJson = JsonParser.parseString(decryptedResponse).getAsJsonObject();
                 loginResult = handleResponse(decryptedJson);
+                new UserDataService().perform();
                 return loginResult;
             } else {
                 loginResult = handleResponse(responseJson);

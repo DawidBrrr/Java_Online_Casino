@@ -1,6 +1,9 @@
+
 package com.casino.java_online_casino.games.blackjack.gui;
 
 import com.casino.java_online_casino.Connection.Client.Service;
+import com.casino.java_online_casino.Connection.Client.UserDataService;
+import com.casino.java_online_casino.Connection.Server.DTO.GamerDTO;
 import com.casino.java_online_casino.Database.GamerDAO;
 import com.casino.java_online_casino.User.Gamer;
 import com.casino.java_online_casino.controllers.DashboardController;
@@ -50,17 +53,15 @@ public class BlackJackGUIController {
 
     // Nowe pola
     private String currentUserEmail;
-    private int currentUserId;
     private double balance;
-    private GamerDAO gamerDAO = GamerDAO.getInstance();
+    GamerDTO gamerDto;
 
     // INICJALIZACJA z emaila użytkownika (wywołuj z Dashboardu!)
     public void initWithUser(String email) {
+        gamerDto = UserDataService.updateGamerDTO();
         this.currentUserEmail = email;
-        Gamer gamer = gamerDAO.findByEmail(email);
-        if (gamer != null) {
-            this.currentUserId = gamer.getUserId();
-            this.balance = gamer.getCredits();
+        if (gamerDto != null) {
+            this.balance = gamerDto.getCredits();
         } else {
             this.balance = 0.0;
         }
@@ -92,12 +93,7 @@ public class BlackJackGUIController {
     }
 
     private void updateBalance() {
-        balanceLabel.setText(String.format("Saldo: $%.2f", balance));
-    }
-
-    private void updateDBBalance() {
-        if (currentUserId > 0)
-            gamerDAO.updateCredits(currentUserId, (float) balance);
+        balanceLabel.setText(String.format("Saldo: $%.2f", UserDataService.updateGamerDTO().getCredits()));
     }
 
     @FXML
@@ -139,10 +135,10 @@ public class BlackJackGUIController {
             return;
         }
 
-        balance -= currentBet;
-        updateBalance();
-        updateDBBalance();
+
+        controller.setBet(currentBet);
         controller.startNewGame();
+        updateBalance();
         updateUI();
         statusLabel.setText("Rozdano karty.");
 
@@ -185,11 +181,11 @@ public class BlackJackGUIController {
             // Przegrana – brak zwrotu
         }
         updateBalance();
-        updateDBBalance();
         statusLabel.setText(result);
-
-        hitButton.setDisable(true);
-        standButton.setDisable(true);
+        if(controller.isGameOver()){
+            hitButton.setDisable(true);
+            standButton.setDisable(true);
+        }
     }
 
     private ImageView createCardImage(Card card) {

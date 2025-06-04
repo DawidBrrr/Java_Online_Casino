@@ -41,6 +41,7 @@ public class DashboardController {
         balanceLabel.setText(String.format("$%.2f", balance));
     }
 
+
     @FXML
     private void handleLogout() {
         try {
@@ -148,7 +149,6 @@ public class DashboardController {
             e.printStackTrace();
         }
     }
-
     @FXML
     private void showRankings() {
         try {

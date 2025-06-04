@@ -1,3 +1,4 @@
+
 package com.casino.java_online_casino.games.blackjack.controller;
 
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
@@ -22,7 +23,7 @@ public class BlackjackTcpClient {
     private BufferedReader reader;
     private PrintWriter writer;
     private final Gson gson = new Gson();
-
+    private int  betValue;
     public BlackjackTcpClient(String token, KeyManager keyManager) {
         this.token = token;
         this.keyManager = keyManager;
@@ -90,7 +91,7 @@ public class BlackjackTcpClient {
     }
 
     public GameStateDTO newGame() throws Exception {
-        return sendCommand("newgame");
+        return sendCommand("newgame,"+betValue);
     }
 
     public GameStateDTO hit() throws Exception {
@@ -136,5 +137,17 @@ public class BlackjackTcpClient {
         CommandRequest(String command) {
             this.command = command;
         }
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public int getBetValue() {
+        return betValue;
+    }
+
+    public void setBetValue(int betValue) {
+        this.betValue = betValue;
     }
 }
