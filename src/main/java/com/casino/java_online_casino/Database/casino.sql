@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Maj 28, 2025 at 08:23 PM
+-- Generation Time: Cze 04, 2025 at 01:50 AM
 -- Wersja serwera: 10.4.32-MariaDB
--- Wersja PHP: 8.0.30
+-- Wersja PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -38,6 +38,18 @@ CREATE TABLE `gamers` (
   `credits` float DEFAULT 1000
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Struktura tabeli dla tabeli `stats`
+--
+
+CREATE TABLE `stats` (
+  `user_id` int(11) NOT NULL,
+  `blackjack_wins` int(11) DEFAULT 0,
+  `poker_wins` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indeksy dla zrzutów tabel
 --
@@ -50,6 +62,12 @@ ALTER TABLE `gamers`
   ADD UNIQUE KEY `email` (`email`);
 
 --
+-- Indeksy dla tabeli `stats`
+--
+ALTER TABLE `stats`
+  ADD PRIMARY KEY (`user_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -57,7 +75,17 @@ ALTER TABLE `gamers`
 -- AUTO_INCREMENT for table `gamers`
 --
 ALTER TABLE `gamers`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `stats`
+--
+ALTER TABLE `stats`
+  ADD CONSTRAINT `stats_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `gamers` (`user_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
