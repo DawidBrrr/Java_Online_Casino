@@ -152,4 +152,61 @@ public class GamerDAO {
             return 0.0f;
         }
     }
+
+    // Aktualizuje liczbę zwycięstw w blackjacku dla danego gracza
+    public void addBlackjackWin(int userId) {
+        String checkSql = "SELECT user_id FROM stats WHERE user_id = ?";
+        String insertSql = "INSERT INTO stats (user_id, blackjack_wins, poker_wins) VALUES (?, 1, 0)";
+        String updateSql = "UPDATE stats SET blackjack_wins = blackjack_wins + 1 WHERE user_id = ?";
+        try {
+            // Sprawdź czy rekord istnieje
+            PreparedStatement checkStmt = connection.prepareStatement(checkSql);
+            checkStmt.setInt(1, userId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                // Rekord istnieje – update
+                PreparedStatement updateStmt = connection.prepareStatement(updateSql);
+                updateStmt.setInt(1, userId);
+                updateStmt.executeUpdate();
+                updateStmt.close();
+            } else {
+                // Brak rekordu – insert
+                PreparedStatement insertStmt = connection.prepareStatement(insertSql);
+                insertStmt.setInt(1, userId);
+                insertStmt.executeUpdate();
+                insertStmt.close();
+            }
+            checkStmt.close();
+            rs.close();
+        } catch (SQLException e) {
+            System.err.println("[GamerDAO] Błąd przy aktualizacji blackjack_wins: " + e.getMessage());
+        }
+    }
+
+    // Analogicznie dla pokera:
+    public void addPokerWin(int userId) {
+        String checkSql = "SELECT user_id FROM stats WHERE user_id = ?";
+        String insertSql = "INSERT INTO stats (user_id, blackjack_wins, poker_wins) VALUES (?, 0, 1)";
+        String updateSql = "UPDATE stats SET poker_wins = poker_wins + 1 WHERE user_id = ?";
+        try {
+            PreparedStatement checkStmt = connection.prepareStatement(checkSql);
+            checkStmt.setInt(1, userId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                PreparedStatement updateStmt = connection.prepareStatement(updateSql);
+                updateStmt.setInt(1, userId);
+                updateStmt.executeUpdate();
+                updateStmt.close();
+            } else {
+                PreparedStatement insertStmt = connection.prepareStatement(insertSql);
+                insertStmt.setInt(1, userId);
+                insertStmt.executeUpdate();
+                insertStmt.close();
+            }
+            checkStmt.close();
+            rs.close();
+        } catch (SQLException e) {
+            System.err.println("[GamerDAO] Błąd przy aktualizacji poker_wins: " + e.getMessage());
+        }
+    }
 }

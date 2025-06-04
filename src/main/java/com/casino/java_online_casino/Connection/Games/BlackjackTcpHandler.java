@@ -126,9 +126,10 @@ public class BlackjackTcpHandler implements Runnable {
                         if(controller.getGameResult().contains("Wygrałeś")){
                             float value = gamerDAO.getCredits(sessionToken.getUserId());
                             gamerDAO.updateCredits(sessionToken.getUserId(), value+2*betValue);
+                            gamerDAO.addBlackjackWin(sessionToken.getUserId());
                         } else if (controller.getGameResult().contains("Remis")) {
                             float value = gamerDAO.getCredits(sessionToken.getUserId());
-                            gamerDAO.updateCredits(sessionToken.getUserId(), value*betValue);
+                            gamerDAO.updateCredits(sessionToken.getUserId(), value + betValue);
                         }
                     }
                     sendGameState(writer);
@@ -140,9 +141,10 @@ public class BlackjackTcpHandler implements Runnable {
                         if(controller.getGameResult().contains("Wygrałeś")){
                             float value = gamerDAO.getCredits(sessionToken.getUserId());
                             gamerDAO.updateCredits(sessionToken.getUserId(), value+2*betValue);
+                            gamerDAO.addBlackjackWin(sessionToken.getUserId());
                         } else if (controller.getGameResult().contains("Remis")) {
                             float value = gamerDAO.getCredits(sessionToken.getUserId());
-                            gamerDAO.updateCredits(sessionToken.getUserId(), value*betValue);
+                            gamerDAO.updateCredits(sessionToken.getUserId(), value + betValue);
                         }
                     }
                     sendGameState(writer);
