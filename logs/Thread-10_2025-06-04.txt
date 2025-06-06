@@ -2,3 +2,19 @@
 [15:01:26] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1500.0}
 [15:18:25] Thread-10: [DEBUG] Nawiązano połączenie
 [15:18:25] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1450.0}
+[16:40:02] Thread-10: [DEBUG] Nawiązano połączenie
+[16:40:02] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":950.0}
+[16:53:53] Thread-10: [DEBUG] Nawiązano połączenie
+[16:53:53] Thread-10: [DEBUG] Zaszyfrowano dane JSON{"data":"eHIE9+Ys+wrEbNcDbifZEF+kla8UN1l/XCxTWFDT0yXyNyJwjtSH4L3CwFk0n18K5WBJ"}
+[16:53:54] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"dominik","lastName":"koralik","nickName":"dominikk","email":"dominik@gmail.com","credits":1000.0}
+[16:55:01] Thread-10: [DEBUG] Nawiązano połączenie
+[16:55:01] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"dominik","lastName":"koralik","nickName":"dominikk","email":"dominik@gmail.com","credits":1100.0}
+[16:58:46] Thread-10: [DEBUG] Nawiązano połączenie
+[16:58:46] Thread-10: [DEBUG] Zaszyfrowano dane JSON{"data":"VEObZS3SX5cg4zTJimtMmit0s5lQqPJxqFcwDpbqbwo3wcr2XFUZIAtfQAkjjglAOkpG"}
+[16:58:46] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":500.0}
+[17:05:31] Thread-10: [DEBUG] Nawiązano połączenie
+[17:05:31] Thread-10: [DEBUG] Zaszyfrowano dane JSON{"data":"HXdWmkGhuVM5O91jSGDTa7YfTrnyhflVB+QNOMied1OwFkjZSoJ+bbLjk17bwsBcuekeKw=="}
+[17:05:31] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":7950.0}
+[17:06:18] Thread-10: [DEBUG] Nawiązano połączenie
+[17:06:18] Thread-10: [DEBUG] Zaszyfrowano dane JSON{"data":"G6NerqrSlyV7NwhFTFCQKrkYiiFgFFhXjJpfoSNS5lM/YjmIqJybYHJofELu3qCqZJR4"}
+[17:06:18] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":8950.0}

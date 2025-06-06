@@ -132,9 +132,9 @@ public class AuthController {
 
     @FXML
     private void handleRegister() {
-        Service keyService = new KeyExchangeService();
-        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
-        keyExchangeThread.start();
+//        Service keyService = new KeyExchangeService();
+//        Thread keyExchangeThread = new Thread(keyService, "KeyExchange-Thread");
+//        keyExchangeThread.start();
 
         String firstName = registerFirstName.getText();
         String lastName = registerLastName.getText();

@@ -8,3 +8,10 @@
 [15:02:36] Thread-26: [DEBUG LOGOUT] Wynik wylogowania: true
 [15:18:53] Thread-26: [DEBUG] Nawiązano połączenie
 [15:18:53] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1400.0}
+[16:43:29] Thread-26: [DEBUG] Nawiązano połączenie
+[16:43:29] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":850.0}
+[16:58:48] Thread-26: [DEBUG] Nawiązano połączenie
+[16:58:48] Thread-26: [DEBUG] Zaszyfrowano dane JSON{"data":"vMEdyr2bi0Q2rxhm2+WJflDEiAIJJGq6gLLDpji3N5ZfJ6nwq0MCoX2Od4nifD82babs"}
+[16:58:48] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":4500.0}
+[17:06:23] Thread-26: [DEBUG] Nawiązano połączenie
+[17:06:23] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":9450.0}

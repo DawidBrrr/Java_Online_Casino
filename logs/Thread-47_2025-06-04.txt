@@ -2,3 +2,11 @@
 [15:03:21] Thread-47: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1450.0}
 [15:19:41] Thread-47: [DEBUG] Nawiązano połączenie
 [15:19:41] Thread-47: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1900.0}
+[17:15:48] Thread-47: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://192.168.216.79:12346/logout
+[17:15:48] Thread-47: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"v0wXcBpcN8mjnFkvpjYq574hFvs8R95UxASn+VAhXMne5A=="}
+[17:15:48] Thread-47: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"v0wXcBpcN8mjnFkvpjYq574hFvs8R95UxASn+VAhXMne5A=="}
+[17:15:48] Thread-47: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[17:15:48] Thread-47: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"qakcwDH2E1bQ2lcpuk34lqxO1nxX8fUdoqbXY++cS5JJq2vE28lwQ2KcsIdwDn9ZTfaeXQrluMkpyWoKm/P8LEVlauoi7cavp8J9Av4="}
+[17:15:48] Thread-47: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[17:15:48] Thread-47: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[17:15:48] Thread-47: [DEBUG LOGOUT] Wynik wylogowania: true

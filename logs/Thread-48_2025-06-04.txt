@@ -6,3 +6,6 @@
 [15:19:59] Thread-48: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
 [15:19:59] Thread-48: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
 [15:19:59] Thread-48: [DEBUG LOGOUT] Wynik wylogowania: true
+[16:58:49] Thread-48: [DEBUG] Nawiązano połączenie
+[16:58:49] Thread-48: [DEBUG] Zaszyfrowano dane JSON{"data":"mE8YsBOr5s2znal82nYGQAl/mIwRq01NzeGyGJQIKSTl1khTyYrhtGwxkwf1eV/BjEVN"}
+[16:58:49] Thread-48: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":10000.0}

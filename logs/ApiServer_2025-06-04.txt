@@ -1,3 +1,4 @@
 [15:00:38] ApiServer: API działa na localhost:localhost
 [15:15:35] ApiServer: API działa na localhost:localhost
 [15:17:59] ApiServer: API działa na localhost:localhost
+[16:35:25] ApiServer: API działa na localhost:localhost

@@ -1,2 +1,14 @@
 [15:18:43] Thread-20: [DEBUG] Nawiązano połączenie
 [15:18:43] Thread-20: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1400.0}
+[16:40:30] Thread-20: [DEBUG] Nawiązano połączenie
+[16:40:30] Thread-20: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":950.0}
+[16:54:29] Thread-20: [DEBUG] Nawiązano połączenie
+[16:54:29] Thread-20: [DEBUG] odszyfrowana wiadomośc {"name":"dominik","lastName":"koralik","nickName":"dominikk","email":"dominik@gmail.com","credits":1000.0}
+[16:58:47] Thread-20: [DEBUG] Nawiązano połączenie
+[16:58:47] Thread-20: [DEBUG] Zaszyfrowano dane JSON{"data":"TkQt8eCd0DmSuq4XhY4KXFGYr+R/7hon81GC2VIgxDdYkV/JKo6doHWYAXLncqtIptyX"}
+[16:58:47] Thread-20: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":3000.0}
+[17:05:45] Thread-20: [DEBUG] Nawiązano połączenie
+[17:05:45] Thread-20: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":7950.0}
+[17:06:19] Thread-20: [DEBUG] Nawiązano połączenie
+[17:06:19] Thread-20: [DEBUG] Zaszyfrowano dane JSON{"data":"hVHszUWEa/IwFxFShed20fTqNqNUo/Zzd8erhGRwNASWesInWV/9m1cij1E3KIUgobgVlQ=="}
+[17:06:20] Thread-20: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":10450.0}

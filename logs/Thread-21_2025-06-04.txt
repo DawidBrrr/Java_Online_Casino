@@ -2,3 +2,15 @@
 [15:02:21] Thread-21: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1500.0}
 [15:18:45] Thread-21: [DEBUG] Nawiązano połączenie
 [15:18:45] Thread-21: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1400.0}
+[16:40:30] Thread-21: [DEBUG] Nawiązano połączenie
+[16:40:30] Thread-21: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":950.0}
+[16:54:31] Thread-21: [DEBUG] Nawiązano połączenie
+[16:54:31] Thread-21: [DEBUG] odszyfrowana wiadomośc {"name":"dominik","lastName":"koralik","nickName":"dominikk","email":"dominik@gmail.com","credits":1100.0}
+[17:05:46] Thread-21: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://192.168.216.79:12346/logout
+[17:05:46] Thread-21: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"qd/GgdGQX5CAFc15I3NA/2B0lK5dcWxBFIgn+C3aAq76zA=="}
+[17:05:46] Thread-21: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"qd/GgdGQX5CAFc15I3NA/2B0lK5dcWxBFIgn+C3aAq76zA=="}
+[17:05:46] Thread-21: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[17:05:46] Thread-21: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"za3VK6+zZUP7UYboL5VcER4QSCFjSjayMHUVUNH1qts3G/RO/28u3PmtEHKZ3erCBaAT4rYxpfjyZOUYAcM3XY1wbfqDyphJDpKS5fc="}
+[17:05:46] Thread-21: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[17:05:46] Thread-21: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[17:05:46] Thread-21: [DEBUG LOGOUT] Wynik wylogowania: true

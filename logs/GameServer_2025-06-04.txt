@@ -1,3 +1,4 @@
 [15:00:38] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
 [15:15:35] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
 [15:17:59] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[16:35:25] GameServer: [INFO] GameServer nasłuchuje na porcie 12345

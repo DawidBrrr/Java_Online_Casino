@@ -505,6 +505,7 @@ public class PokerView {
             if (controller != null) {
                 controller.shutdown();
             }
+            tcpClient.close();
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/casino/java_online_casino/dashboard.fxml"));
             Parent root = loader.load();

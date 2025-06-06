@@ -2,3 +2,11 @@
 [15:02:31] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1500.0}
 [15:18:45] Thread-22: [DEBUG] Nawiązano połączenie
 [15:18:45] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1400.0}
+[16:40:30] Thread-22: [DEBUG] Nawiązano połączenie
+[16:40:30] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":950.0}
+[16:58:47] Thread-22: [DEBUG] Nawiązano połączenie
+[16:58:47] Thread-22: [DEBUG] Zaszyfrowano dane JSON{"data":"PPogciZwWxAydqnlGAQ8wKNZIEqZP6z9QnpLcojz3Tab26paV5EeXYYwKfAReIUmN07D"}
+[16:58:47] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":3500.0}
+[17:06:20] Thread-22: [DEBUG] Nawiązano połączenie
+[17:06:20] Thread-22: [DEBUG] Zaszyfrowano dane JSON{"data":"Dg/8+ncGTuY+lHPVMys3puybQHIwgH0uUdy1GhWi1C9r7bxUXm/oOowtHHvRH06ypdQeVA=="}
+[17:06:20] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":9950.0}
