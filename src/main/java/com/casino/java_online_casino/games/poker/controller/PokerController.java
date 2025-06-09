@@ -1,308 +1,217 @@
 package com.casino.java_online_casino.games.poker.controller;
-import com.casino.java_online_casino.Connection.Games.Game;
-import com.casino.java_online_casino.Connection.Utils.LogManager;
-import com.casino.java_online_casino.games.poker.model.*;
-import com.casino.java_online_casino.games.poker.gui.PokerView;
 
-import javafx.application.Platform;
+import com.casino.java_online_casino.Connection.Games.Game;
+import com.casino.java_online_casino.Connection.Server.Rooms.Room;
+import com.casino.java_online_casino.games.poker.model.*;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-public class PokerController implements Game {
-    private PokerGame game;
-    private PokerView view;
-    private String currentPlayerId;
-    private ScheduledExecutorService scheduler;
-
-    // Komunikacja z serwerem - interfejsy do implementacji
-    public interface ServerCommunication {
-        void sendPlayerAction(String playerId, Player.playerAction action, int amount);
-        void sendGameState(PokerGame.GameState state);
-        void sendPlayerUpdate(Player player);
-        void broadcastMessage(String message);
-    }
-
-    private ServerCommunication serverComm;
-
-    public PokerController() {
-        this.game = new PokerGame();
-        this.scheduler = Executors.newScheduledThreadPool(1);
-    }
-
-    public void setView(PokerView view) {
-        this.view = view;
-    }
-
-    public void setServerCommunication(ServerCommunication serverComm) {
-        this.serverComm = serverComm;
-    }
-
-    // Metody obsługi graczy
-    public boolean joinGame(String playerId, String playerName) {
-        Player newPlayer = new Player(playerId, playerName, 1000); // Starting balance
-        boolean added = game.addPlayer(newPlayer);
-
-        if (added) {
-            updateView();
-            if (serverComm != null) {
-                serverComm.sendPlayerUpdate(newPlayer);
-                serverComm.broadcastMessage(playerName + " joined the game");
-            }
-
-            // Auto-start game if enough players
-            if (game.getPlayers().size() >= 2 && game.getGameState() == PokerGame.GameState.WAITING_FOR_PLAYERS) {
-                startNewHand();
-            }
-        }
-
-        return added;
-    }
-
-    public void leaveGame(String playerId) {
-        Player player = game.getPlayerById(playerId);
-        if (player != null) {
-            game.removePlayer(playerId);
-            updateView();
-
-            if (serverComm != null) {
-                serverComm.broadcastMessage(player.getName() + " left the game");
-            }
-        }
-    }
-
-    public void setCurrentPlayer(String playerId) {
-        this.currentPlayerId = playerId;
-        updateView();
-    }
-
-    // Akcje gracza
-    public void playerFold() {
-        if (canPlayerAct()) {
-            game.processPlayerAction(currentPlayerId, Player.playerAction.FOLD, 0);
-            updateView();
-            broadcastAction("folded");
-        }
-    }
-
-    public void playerCall() {
-        if (canPlayerAct()) {
-            Player player = game.getPlayerById(currentPlayerId);
-            int callAmount = game.getCurrentBet() - player.getCurrentBet();
-            game.processPlayerAction(currentPlayerId, Player.playerAction.CALL, callAmount);
-            updateView();
-            broadcastAction("called $" + callAmount);
-        }
-    }
-
-    public void playerRaise(int amount) {
-        if (canPlayerAct() && amount > 0) {
-            game.processPlayerAction(currentPlayerId, Player.playerAction.RAISE, amount);
-            updateView();
-            broadcastAction("raised $" + amount);
-        }
-    }
-
-    public void playerCheck() {
-        if (canPlayerAct()) {
-            Player player = game.getPlayerById(currentPlayerId);
-            if (player.getCurrentBet() >= game.getCurrentBet()) {
-                game.processPlayerAction(currentPlayerId, Player.playerAction.CHECK, 0);
-                updateView();
-                broadcastAction("checked");
-            }
-        }
-    }
-
-    public void playerAllIn() {
-        if (canPlayerAct()) {
-            Player player = game.getPlayerById(currentPlayerId);
-            game.processPlayerAction(currentPlayerId, Player.playerAction.ALL_IN, player.getBalance());
-            updateView();
-            broadcastAction("went all-in!");
-        }
-    }
-
-    private boolean canPlayerAct() {
-        return currentPlayerId != null &&
-                game.isPlayerTurn(currentPlayerId) &&
-                game.getGameState() != PokerGame.GameState.WAITING_FOR_PLAYERS &&
-                game.getGameState() != PokerGame.GameState.SHOWDOWN &&
-                game.getGameState() != PokerGame.GameState.GAME_OVER;
-    }
-
-    private void broadcastAction(String action) {
-        if (serverComm != null) {
-            Player player = game.getPlayerById(currentPlayerId);
-            if (player != null) {
-                serverComm.broadcastMessage(player.getName() + " " + action);
-            }
-        }
-    }
-
-    // Kontrola gry
-    public void startNewHand() {
-        game.startNewHand();
-        updateView();
-
-        if (serverComm != null) {
-            serverComm.sendGameState(game.getGameState());
-            serverComm.broadcastMessage("New hand started!");
-        }
-
-        // Auto-advance if current player is AI or disconnected
-        scheduleNextAction();
-    }
-
-    private void scheduleNextAction() {
-        if (game.getGameState() == PokerGame.GameState.GAME_OVER) {
-            // Auto-start next hand after delay
-            scheduler.schedule(() -> {
-                Platform.runLater(() -> {
-                    if (game.getPlayers().size() >= 2) {
-                        startNewHand();
-                    }
-                });
-            }, 3, TimeUnit.SECONDS);
-        }
-    }
-
-    // Pomocne metody dla view
-    public boolean isCurrentPlayerTurn() {
-        return currentPlayerId != null && game.isPlayerTurn(currentPlayerId);
-    }
-
-    public Player getCurrentPlayerObject() {
-        return currentPlayerId != null ? game.getPlayerById(currentPlayerId) : null;
-    }
-
-    public boolean canCall() {
-        Player player = getCurrentPlayerObject();
-        return player != null && !player.isFolded() &&
-                player.getCurrentBet() < game.getCurrentBet() &&
-                player.getBalance() > 0;
-    }
-
-    public boolean canRaise() {
-        Player player = getCurrentPlayerObject();
-        return player != null && !player.isFolded() &&
-                player.getBalance() > (game.getCurrentBet() - player.getCurrentBet());
-    }
-
-    public boolean canCheck() {
-        Player player = getCurrentPlayerObject();
-        return player != null && !player.isFolded() &&
-                player.getCurrentBet() >= game.getCurrentBet();
-    }
-
-    public int getCallAmount() {
-        Player player = getCurrentPlayerObject();
-        return player != null ? Math.min(game.getCurrentBet() - player.getCurrentBet(), player.getBalance()) : 0;
-    }
-
-    public int getMinRaise() {
-        return game.getCurrentBet() * 2;
-    }
-
-    public int getMaxRaise() {
-        Player player = getCurrentPlayerObject();
-        return player != null ? player.getBalance() : 0;
-    }
-
-    // Aktualizacja widoku
-    private void updateView() {
-        if (view != null) {
-            Platform.runLater(() -> {
-                view.updateGameState(game);
-                view.updatePlayerActions(isCurrentPlayerTurn());
-            });
-        }
-
-        if (serverComm != null) {
-            serverComm.sendGameState(game.getGameState());
-        }
-    }
-
-    // Gettery dla widoku
-    public PokerGame getGame() {
-        return game;
-    }
-
-    public List<Player> getPlayers() {
-        return game.getPlayers();
-    }
-
-    public List<Card> getCommunityCards() {
-        return game.getCommunityCards();
-    }
-
-    public int getPot() {
-        return game.getPot();
-    }
-    public int getBalance(){
-        Player player = getCurrentPlayerObject();
-        return player != null ? player.getBalance() : 0;
-    }
-
-    public PokerGame.GameState getGameState() {
-        return game.getGameState();
-    }
-
-    public String getCurrentPlayerId() {return currentPlayerId;}
-
-    @Override
-    public synchronized void onPlayerJoin(String userId) {
-        if (scheduler.isShutdown()) {
-            LogManager.logToFile("[DEBUG] Game is not accepting new players at the moment.");
-            throw new IllegalStateException("Game is not accepting new players at the moment.");
-        }
-        Player player = game.getPlayerById(userId);
-        if (player == null) {
-            LogManager.logToFile("[DEBUG] Player does not exist in the game: " + userId);
-            throw new IllegalStateException("Player does not exist in the game.");
-        }
-        if (currentPlayerId == null) {
-            currentPlayerId = userId;
-        }
-        System.out.println("[DEBUG] Player joined: " + userId);
-        LogManager.logToFile("[DEBUG] Player joined: " + userId);
-    }
-
-    @Override
-    public synchronized void onPlayerLeave(String userId) {
-        if (scheduler.isShutdown()) {
-            LogManager.logToFile("[DEBUG] Game is not accepting new players at the moment.");
-            throw new IllegalStateException("Game is not accepting new players at the moment.");
-        }
-        Player player = game.getPlayerById(userId);
-        if (player == null) {
-            LogManager.logToFile("[DEBUG] Player does not exist in the game: " + userId);
-            throw new IllegalStateException("Player does not exist in the game.");
-        }
-        if (currentPlayerId == null) {
-            currentPlayerId = userId;
-        }
-        System.out.println("[DEBUG] Player joined: " + userId);
-        LogManager.logToFile("[DEBUG] Player joined: " + userId);
-    }
-
-    @Override
-    public synchronized boolean isInProgress() {
-        return game.getGameState() != PokerGame.GameState.WAITING_FOR_PLAYERS &&
-                game.getGameState() != PokerGame.GameState.GAME_OVER;
-    }
-
-    @Override
-    public synchronized boolean canJoin(String userId) {
-        return game.getGameState() == PokerGame.GameState.WAITING_FOR_PLAYERS ||
-                (currentPlayerId != null && currentPlayerId.equals(userId));
-    }
-
-    public void shutdown() {
-        if (scheduler != null) {
-            scheduler.shutdown();
-        }
-    }
-}
+import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
+//
+///**
+// * PokerController zarządza logiką gry pokera w kontekście pokoju.
+// * Implementuje interfejs Game, zapewniając obsługę dołączania, opuszczania, sprawdzania statusu gry.
+// * Synchronizacja zapewnia bezpieczeństwo w środowisku wielowątkowym.
+// */
+//public class PokerController implements Game {
+//    private final Room room;
+//    private final PokerGame pokerGame;
+//    private final ReentrantLock lock = new ReentrantLock();
+//
+//    public PokerController(Room room, int maxPlayers) {
+//        this.room = room;
+//        this.pokerGame = new PokerGame(maxPlayers);
+//    }
+//
+//    @Override
+//    public void onPlayerJoin(String userId) {
+//        lock.lock();
+//        try {
+//            // Sprawdzamy czy gracz jest już w grze
+//            if (containsPlayer(userId)) return;
+//            // Pobierz gracza z pokoju
+//            Player player = room.getPlayer(userId);
+//            if (player != null && canJoin(userId)) {
+//                pokerGame.addPlayer(player);
+//                // Automatycznie uruchom grę jeśli jest wystarczająca liczba graczy
+//                if (pokerGame.getPlayers().size() >= 2 && !isInProgress()) {
+//                    pokerGame.startNewHand();
+//                    room.notifyGameStart(); // powiadom wszystkich graczy
+//                }
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public void onPlayerLeave(String userId) {
+//        lock.lock();
+//        try {
+//            // Usuwamy gracza z gry
+//            pokerGame.removePlayer(userId);
+//            // Jeśli jest to aktualny gracz, to kończymy jego turę lub kończymy grę
+//            if (pokerGame.isPlayerTurn(userId)) {
+//                pokerGame.advanceTurn();
+//            }
+//            // Jeśli zostali tylko jeden lub zero graczy, kończymy grę
+//            if (pokerGame.getPlayers().size() < 2) {
+//                pokerGame.endGame();
+//                room.notifyGameCanceled(); // powiadom wszystkich
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean isInProgress() {
+//        lock.lock();
+//        try {
+//            return pokerGame.getGameState() == PokerGame.GameState.IN_PROGRESS;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    @Override
+//    public boolean canJoin(String userId) {
+//        lock.lock();
+//        try {
+//            return (pokerGame.getGameState() == PokerGame.GameState.WAITING_FOR_PLAYERS ||
+//                    pokerGame.getGameState() == PokerGame.GameState.PRE_FLOP ||
+//                    pokerGame.getGameState() == PokerGame.GameState.FLOP ||
+//                    pokerGame.getGameState() == PokerGame.GameState.TURN ||
+//                    pokerGame.getGameState() == PokerGame.GameState.RIVER)
+//                    && !containsPlayer(userId)
+//                    && pokerGame.getPlayers().size() < pokerGame.getMaxPlayers();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public boolean addPlayer(Player player) {
+//        lock.lock();
+//        try {
+//            boolean added = pokerGame.addPlayer(player);
+//            // Jeśli po dodaniu jest wystarczająca liczba graczy, rozpocznij grę
+//            if (added && pokerGame.getPlayers().size() >= 2 && !isInProgress()) {
+//                pokerGame.startNewHand();
+//                room.notifyGameStart();
+//            }
+//            return added;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public void removePlayer(String playerId) {
+//        lock.lock();
+//        try {
+//            pokerGame.removePlayer(playerId);
+//            if (pokerGame.getPlayers().size() < 2) {
+//                pokerGame.endGame();
+//                room.notifyGameCanceled();
+//            } else if (pokerGame.isPlayerTurn(playerId)) {
+//                pokerGame.advanceTurn();
+//            }
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public void startNewHand() {
+//        lock.lock();
+//        try {
+//            pokerGame.startNewHand();
+//            room.notifyGameStart();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public boolean processPlayerAction(String playerId, Player.playerAction action, int amount) {
+//        lock.lock();
+//        try {
+//            boolean result = pokerGame.processPlayerAction(playerId, action, amount);
+//            if (pokerGame.getGameState() == PokerGame.GameState.SHOWDOWN || pokerGame.getGameState() == PokerGame.GameState.GAME_OVER) {
+//                // После шоудауна или окончания игры, можно запустить новую руку или завершить
+//                // В зависимости od логики, например:
+//                // pokerGame.startNewHand();
+//            }
+//            return result;
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public boolean isPlayerTurn(String playerId) {
+//        lock.lock();
+//        try {
+//            return pokerGame.isPlayerTurn(playerId);
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public Player getCurrentPlayer() {
+//        lock.lock();
+//        try {
+//            return pokerGame.getCurrentPlayer();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public List<Player> getPlayers() {
+//        lock.lock();
+//        try {
+//            return pokerGame.getPlayers();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//    public Player getPlayer(String playerId) {
+//        return getPlayers().stream().filter(player -> player.getId().equals(playerId)).findFirst().orElse(null);
+//    }
+//
+//    public boolean containsPlayer(String userId) {
+//        lock.lock();
+//        try {
+//            return pokerGame.getPlayers().stream()
+//                    .anyMatch(p -> Objects.equals(p.getId(), userId));
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public int getMaxPlayers() {
+//        return pokerGame.getMaxPlayers();
+//    }
+//
+//    public PokerGame.GameState getGameState() {
+//        lock.lock();
+//        try {
+//            return pokerGame.getGameState();
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//    public Object getCurrentShift(String userId) {
+//        return isPlayerTurn(userId);
+//    }
+//
+//    public Player getWinner() {
+//        lock.lock();
+//        try {
+//            return pokerGame.getWinner(); // POPRAWKA: dodano .getWinner()
+//        } finally {
+//            lock.unlock();
+//        }
+//    }
+//
+//
+//
+//
+//}

@@ -1,11 +1,13 @@
 package com.casino.java_online_casino.games.poker.model;
 
+import com.casino.java_online_casino.Database.GamerDAO;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
     private String name;
-    private int balance;
+    private float balance;
     private int currentBet;
     private List<Card> hand;
     private boolean folded;
@@ -17,10 +19,10 @@ public class Player {
         CHECK, CALL, RAISE, FOLD, ALL_IN
     }
 
-    public Player(String id, String name, int initialBalance) {
+    public Player(String id) {
         this.id = id;
-        this.name = name;
-        this.balance = initialBalance;
+        this.name =  GamerDAO.getInstance().findById(Integer.parseInt(id)).getName();
+        this.balance = GamerDAO.getInstance().getCredits(Integer.parseInt(id));
         this.currentBet = 0;
         this.hand = new ArrayList<>();
         this.folded = false;
@@ -44,7 +46,7 @@ public class Player {
         return balance >= amount && !folded && !allIn;
     }
 
-    public void placeBet(int amount) {
+    public void placeBet(float amount) {
         if(amount >= balance){
             currentBet += amount;
             balance = 0;
@@ -70,7 +72,7 @@ public class Player {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public int getBalance() { return balance; }
+    public float getBalance() { return balance; }
     public void setBalance(int balance) { this.balance = balance; }
 
     public int getCurrentBet() { return currentBet; }

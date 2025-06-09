@@ -2,9 +2,9 @@ package com.casino.java_online_casino.Connection.Server.GameServer;
 
 import com.casino.java_online_casino.Connection.Games.BlackjackTcpHandler;
 import com.casino.java_online_casino.Connection.Games.Game;
+import com.casino.java_online_casino.Connection.Server.Rooms.Room;
+import com.casino.java_online_casino.Connection.Server.Rooms.RoomManager;
 import com.casino.java_online_casino.Connection.Server.ServerConfig;
-import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoom;
-import com.casino.java_online_casino.Connection.Server.Rooms.PokerRoomManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Tokens.ServerTokenManager;
@@ -12,8 +12,7 @@ import com.casino.java_online_casino.Connection.Utils.JsonFields;
 import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.Connection.Utils.ServerJsonMessage;
 import com.casino.java_online_casino.games.blackjack.controller.BlackJackController;
-import com.casino.java_online_casino.games.poker.controller.PokerController;
-import com.casino.java_online_casino.games.poker.controller.PokerTCPClient;
+import com.casino.java_online_casino.games.poker.model.Player;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -141,6 +140,8 @@ public class GameServer {
             }
             locked = true;
 
+            Game gameInstance = session.getGame();
+            Runnable gameHandler;
             if (session.getGame() == null) {
                 switch (request.game.toLowerCase()) {
                     case "blackjack":
@@ -151,7 +152,7 @@ public class GameServer {
                     case "poker":
                         System.out.println("[DEBUG] Poker game");
                         LogManager.logToFile("[DEBUG] Poker game");
-                        session.setGame(new PokerController());
+                        // Nie ustawiamy Room w sesji, bo RoomManager zarządza pokojami
                         break;
                     // Dodaj kolejne gry tutaj
                     default:
@@ -159,48 +160,50 @@ public class GameServer {
                         return;
                 }
             }
-
-            Game gameInstance = session.getGame();
-            Runnable gameHandler;
             switch (request.game.toLowerCase()) {
                 case "blackjack":
-                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) gameInstance, session);
+                    if (session.getGame() == null) {
+                        session.setGame(new BlackJackController());
+                    }
+                    gameHandler = new BlackjackTcpHandler(clientSocket, (BlackJackController) session.getGame(), session);
                     break;
+
                 case "poker":
-                    JsonObject response = new JsonObject();
-                    System.out.println("[DEBUG GAME SERVER] Gracz " + userId + " próbuje dołączyć do gry pokerowej");
-                    LogManager.logToFile("[DEBUG GAME SERVER] Gracz " + userId + " próbuje dołączyć do gry pokerowej");
-                    // Sprawdź czy istnieje aktywny pokój z wolnym miejscem
-                    Optional<PokerRoom> existingRoom = PokerRoomManager.getInstance().getAvailableRoom();
+                    System.out.println("[DEBUG] Poker game");
+                    LogManager.logToFile("[DEBUG] Poker game");
 
-                    PokerRoom room;
-                    if (existingRoom.isPresent()) {
-                        // Dołącz do istniejącego pokoju
-                        System.out.println("[DEBUG GAME SERVER] Gracz " + userId + " dołącza do istniejącego pokoju: " + existingRoom.get().getRoomId());
-                        LogManager.logToFile("[DEBUG GAME SERVER] Gracz " + userId + " dołącza do istniejącego pokoju: " + existingRoom.get().getRoomId());
-                        room = existingRoom.get();
-                        room.addPlayer(userId);
-                        response.addProperty("type", "room_joined");
+                    RoomManager pokerRoomManager = RoomManager.getInstance();
+                    Player pokerPlayer = new Player(String.valueOf(userId));
+
+                    // Szukaj pierwszego wolnego pokoju
+                    Optional<Room> freeRoom = pokerRoomManager.firstFreeRoom(RoomManager.DEFAULT_MAX_PLAYERS);
+                    Room room;
+                    if (freeRoom.isPresent()) {
+                        room = freeRoom.get();
+                        room.addPlayer(pokerPlayer);
                     } else {
-                        // Utwórz nowy pokój
-                        System.out.println("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
-                        LogManager.logToFile("[DEBUG GAME SERVER] Tworzę nowy pokój pokerowy dla gracza: " + playerUUID);
-                        room = PokerRoomManager.getInstance().createRoom(new PokerTCPClient(request.token, currentKeyManager));
-                        room.addPlayer(userId);
-                        response.addProperty("type", "room_created");
-                    }
-                    if (room == null) {
-                        throw new RuntimeException("Nie udało się utworzyć/znaleźć pokoju");
+                        room = pokerRoomManager.createRoom(RoomManager.DEFAULT_MAX_PLAYERS);
+                        room.addPlayer(pokerPlayer);
                     }
 
+                    if (room == null) {
+                        writer.println("{\"status\":\"error\",\"code\":500,\"message\":\"Nie udało się utworzyć/znaleźć pokoju pokerowego\"}");
+                        return;
+                    }
+
+                    JsonObject response = new JsonObject();
                     response.addProperty("roomId", room.getRoomId());
+                    response.addProperty("type", room.getPlayers().size() == 1 ? "room_created" : "room_joined");
 
                     String encryptedResponse = currentKeyManager.encryptAes(response.toString());
                     writer.println(encryptedResponse);
                     writer.flush();
 
-                    gameHandler = new PokerTCPHandler(clientSocket, room, currentKeyManager);
+                    gameHandler = new PokerTCPHandler(clientSocket, room, currentSession);
                     break;
+
+                // Dodaj kolejne gry tutaj
+
                 default:
                     writer.println("{\"error\":\"Unknown game type\"}");
                     clientSocket.close();
