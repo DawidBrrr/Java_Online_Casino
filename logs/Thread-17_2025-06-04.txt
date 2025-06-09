@@ -1,8 +1,0 @@
-[15:02:12] Thread-17: [DEBUG] Nawiązano połączenie
-[15:02:12] Thread-17: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1500.0}
-[15:18:35] Thread-17: [DEBUG] Nawiązano połączenie
-[15:18:35] Thread-17: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1400.0}
-[16:54:20] Thread-17: [DEBUG] Nawiązano połączenie
-[16:54:20] Thread-17: [DEBUG] odszyfrowana wiadomośc {"name":"dominik","lastName":"koralik","nickName":"dominikk","email":"dominik@gmail.com","credits":1000.0}
-[17:05:39] Thread-17: [DEBUG] Nawiązano połączenie
-[17:05:39] Thread-17: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":7950.0}

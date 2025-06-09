@@ -1,0 +1,16 @@
+[09:48:05] ApiServer: API działa na localhost:localhost
+[10:15:51] ApiServer: API działa na localhost:localhost
+[10:23:35] ApiServer: API działa na localhost:localhost
+[10:33:39] ApiServer: API działa na localhost:localhost
+[10:35:46] ApiServer: API działa na localhost:localhost
+[10:50:53] ApiServer: API działa na localhost:localhost
+[10:52:58] ApiServer: API działa na localhost:localhost
+[11:00:55] ApiServer: API działa na localhost:localhost
+[11:06:10] ApiServer: API działa na localhost:localhost
+[11:08:28] ApiServer: API działa na localhost:localhost
+[11:12:38] ApiServer: API działa na localhost:localhost
+[11:24:06] ApiServer: API działa na localhost:localhost
+[11:36:00] ApiServer: API działa na localhost:localhost
+[11:39:15] ApiServer: API działa na localhost:localhost
+[11:48:47] ApiServer: API działa na localhost:localhost
+[12:15:43] ApiServer: API działa na localhost:localhost

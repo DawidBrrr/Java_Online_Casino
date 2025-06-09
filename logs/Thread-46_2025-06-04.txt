@@ -1,8 +1,0 @@
-[15:03:21] Thread-46: [DEBUG] Nawiązano połączenie
-[15:03:21] Thread-46: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1450.0}
-[16:58:49] Thread-46: [DEBUG] Nawiązano połączenie
-[16:58:49] Thread-46: [DEBUG] Zaszyfrowano dane JSON{"data":"JF8udUjKtt0c/KVyNossaywjDyEPSZYxFMlao3PkNcZYrrYSy9rzWVTmU7KMZctHrTaB"}
-[16:58:49] Thread-46: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":9500.0}
-[17:14:54] Thread-46: [DEBUG] Nawiązano połączenie
-[17:14:54] Thread-46: [DEBUG] Zaszyfrowano dane JSON{"data":"ZdOzrs8UBzcrMMG93akaC4kT8L2ohdfM5TATdGbJ9o6EP/KMsT8Hynia1JeTOXO98Lov"}
-[17:14:54] Thread-46: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@lab.com","credits":10350.0}

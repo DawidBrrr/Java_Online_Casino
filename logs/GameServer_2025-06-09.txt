@@ -1,0 +1,16 @@
+[09:48:05] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[10:15:50] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[10:23:35] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[10:33:39] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[10:35:45] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[10:50:53] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[10:52:58] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:00:55] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:06:10] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:08:28] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:12:37] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:24:06] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:36:00] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:39:15] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[11:48:47] GameServer: [INFO] GameServer nasłuchuje na porcie 12345
+[12:15:42] GameServer: [INFO] GameServer nasłuchuje na porcie 12345

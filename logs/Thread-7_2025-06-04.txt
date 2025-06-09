@@ -1,6 +1,0 @@
-[15:18:16] Thread-7: [DEBUG] Nawiązano połączenie
-[15:18:16] Thread-7: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j","credits":1450.0}
-[16:39:59] Thread-7: [DEBUG] Nawiązano połączenie
-[16:39:59] Thread-7: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":1000.0}
-[16:55:00] Thread-7: [DEBUG] Nawiązano połączenie
-[16:55:00] Thread-7: [DEBUG] odszyfrowana wiadomośc {"name":"dominik","lastName":"koralik","nickName":"dominikk","email":"dominik@gmail.com","credits":1100.0}

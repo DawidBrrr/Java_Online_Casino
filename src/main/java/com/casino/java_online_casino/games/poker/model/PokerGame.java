@@ -1,5 +1,7 @@
 package com.casino.java_online_casino.games.poker.model;
 
+import javafx.application.Platform;
+
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -53,7 +55,16 @@ public class PokerGame {
             if (players.size() >= maxPlayers) {
                 return false;
             }
+
             players.add(player);
+
+            // Jeśli gra jest w toku, od razu rozdaj karty nowemu graczowi
+            if (gameState == GameState.IN_PROGRESS) {
+                for (int i = 0; i < 2; i++) {
+                    player.receiveCard(deck.dealCard());
+                }
+            }
+
             if (players.size() >= 2) {
                 gameState = GameState.IN_PROGRESS;
             }

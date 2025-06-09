@@ -1,0 +1,30 @@
+[09:49:18] Thread-10: [DEBUG] Nawiązano połączenie
+[09:49:18] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[10:16:17] Thread-10: [DEBUG] Nawiązano połączenie
+[10:16:17] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[10:23:55] Thread-10: [DEBUG] Nawiązano połączenie
+[10:23:55] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[10:34:10] Thread-10: [DEBUG] Nawiązano połączenie
+[10:34:10] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[10:36:09] Thread-10: [DEBUG] Nawiązano połączenie
+[10:36:09] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[10:51:16] Thread-10: [DEBUG] Nawiązano połączenie
+[10:51:16] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[10:53:15] Thread-10: [DEBUG] Nawiązano połączenie
+[10:53:15] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[11:01:16] Thread-10: [DEBUG] Nawiązano połączenie
+[11:01:16] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[11:06:31] Thread-10: [DEBUG] Nawiązano połączenie
+[11:06:31] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[11:08:48] Thread-10: [DEBUG] Nawiązano połączenie
+[11:08:48] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[11:12:57] Thread-10: [DEBUG] Nawiązano połączenie
+[11:12:57] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[11:37:11] Thread-10: [DEBUG] Nawiązano połączenie
+[11:37:11] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[11:39:38] Thread-10: [DEBUG] Nawiązano połączenie
+[11:39:38] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[11:49:09] Thread-10: [DEBUG] Nawiązano połączenie
+[11:49:09] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a3","lastName":"a3","nickName":"a3","email":"a3@gmail.com","credits":5000.0}
+[12:16:00] Thread-10: [DEBUG] Nawiązano połączenie
+[12:16:00] Thread-10: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}

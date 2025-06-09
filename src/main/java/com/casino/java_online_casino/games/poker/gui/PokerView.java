@@ -7,6 +7,7 @@ import com.casino.java_online_casino.controllers.DashboardController;
 import com.casino.java_online_casino.games.poker.controller.PokerTcpClient;
 import com.casino.java_online_casino.games.poker.controller.RemotePokerController;
 import com.casino.java_online_casino.games.poker.model.Card;
+import com.casino.java_online_casino.games.poker.model.PokerGame;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class PokerView {
+public class PokerView{
     @FXML
     private HBox communityCardsArea;
     @FXML
@@ -71,7 +72,6 @@ public class PokerView {
     private RemotePokerController controller;
     private PokerTcpClient tcpClient;
     private PokerDTO pokerDTO;
-
     @FXML
     public void initialize() {
         try {
@@ -120,7 +120,6 @@ public class PokerView {
         }
     }
 
-    @FXML
     public void handleJoinGame() {
         if (playerNameField != null && !playerNameField.getText().trim().isEmpty()) {
             try {
@@ -136,7 +135,6 @@ public class PokerView {
         }
     }
 
-    @FXML
     public void handleStartGame() {
         try {
             controller.updateState();

@@ -62,7 +62,12 @@ public class Room implements Game {
 
             if (players.size() >= 2 && !gameInProgress) {
                 System.out.println("[DEBUG ROOM " + roomId + "] Wystarczająca liczba graczy, START gry.");
-                startGame();
+                try {
+                    pokerGame.startNewHand();
+                } catch (Exception e) {
+                    System.out.println("[DEBUG ROOM " + roomId + "] Błąd przy uruchamianiu gry: " + e.getMessage());
+                    gameInProgress = false;
+                }
             }
         } finally {
             lock.unlock();
@@ -118,10 +123,21 @@ public class Room implements Game {
                 System.out.println("[DEBUG ROOM " + roomId + "] NIE dodano gracza " + player.getId() + " - już w pokoju.");
                 return false;
             }
+
+            // Dodaj gracza bez sessionId - nie będziemy używać mapy playerSessions
             players.put(player.getId(), player);
             playerOrder.add(player.getId());
             pokerGame.addPlayer(player);
-            System.out.println("[DEBUG ROOM " + roomId + "] Dodano gracza " + player.getId() + ", obecnych=" + players.size());
+
+            if (players.size() >= 2 && !gameInProgress) {
+                System.out.println("[DEBUG ROOM " + roomId + "] Wystarczająca liczba graczy, START gry.");
+                startGame();
+            }
+
+            System.out.println("[DEBUG ROOM " + roomId + "] Dodano gracza " + player.getId() + " przez addPlayer");
+            if (gameInProgress) {
+                broadcastGameState();
+            }
             return true;
         } finally {
             lock.unlock();
