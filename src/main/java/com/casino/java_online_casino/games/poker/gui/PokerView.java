@@ -161,8 +161,10 @@ public class PokerView{
             controller.check();
             updateUIFromState();
             showMessage("You checked.");
+            System.out.println("[DEBUG POKER_VIEW] Check.");
         } catch (Exception e) {
             showMessage("Błąd: " + e.getMessage());
+            System.out.println("[DEBUG POKER_VIEW] Błąd podczas sprawdzania: " + e.getMessage());
         }
     }
 
@@ -203,49 +205,56 @@ public class PokerView{
     public void updateUIFromState() {
         Platform.runLater(() -> {
             try {
+                System.out.println("[DEBUG UI] Rozpoczęcie aktualizacji UI");
+
                 controller.updateState();
                 PokerDTO.PokerPlayerDTO me = controller.getMyPlayer();
+                System.out.println("[DEBUG UI] Pobrano gracza: " + (me != null ? me.name : "null"));
 
-                if (potLabel != null) potLabel.setText("Pot: $" + controller.getPot());
-                if (currentBetLabel != null) currentBetLabel.setText("Current Bet: $" + controller.getCurrentBet());
-                if (balanceLabel != null && me != null) balanceLabel.setText("Balance: $" + me.balance);
-                if (gameStateLabel != null) gameStateLabel.setText("Game State: " + controller.getGameStatus());
+                // Aktualizacja etykiet
+                if (potLabel != null) {
+                    potLabel.setText("Pot: $" + controller.getPot());
+                    System.out.println("[DEBUG UI] Aktualizacja puli: " + controller.getPot());
+                }
 
-                if (currentPlayerLabel != null) {
-                    String activeId = controller.getActivePlayerId();
-                    Map<String, PokerDTO.PokerPlayerDTO> players = controller.getPlayers();
-                    currentPlayerLabel.setText("Current Turn: " +
-                            (players.containsKey(activeId) ? players.get(activeId).name : "N/A"));
+                // Pobranie i wyświetlenie graczy
+                Map<String, PokerDTO.PokerPlayerDTO> players = controller.getPlayers();
+                System.out.println("[DEBUG UI] Liczba graczy: " + players.size());
+                players.forEach((id, player) -> {
+                    System.out.println("[DEBUG UI] Gracz: " + player.name + ", Status: " + player.status + ", ID: " + id);
+                });
+
+                // Stan aktywnego gracza
+                String activeId = controller.getActivePlayerId();
+                System.out.println("[DEBUG UI] Aktywny gracz ID: " + activeId);
+
+                // Aktualizacja listy graczy
+                if (playersListArea != null) {
+                    System.out.println("[DEBUG UI] Aktualizacja listy graczy w UI");
+                    playersListArea.getChildren().clear();
+                    players.values().forEach(player -> {
+                        VBox playerBox = createPlayerBox(player);
+                        playersListArea.getChildren().add(playerBox);
+                        System.out.println("[DEBUG UI] Dodano do UI gracza: " + player.name);
+                    });
+                } else {
+                    System.out.println("[DEBUG UI] playersListArea jest null!");
                 }
-                if(!me.canAct){
-                    allInButton.setDisable(true);
-                    callButton.setDisable(true);
-                    checkButton.setDisable(true);
-                    raiseButton.setDisable(true);
-                    foldButton.setDisable(true);
-                }
-               else if(me.canAct){
-                    allInButton.setDisable(false);
-                    callButton.setDisable(false);
-                    checkButton.setDisable(false);
-                    raiseButton.setDisable(false);
-                    foldButton.setDisable(false);
+
+                // Status przycisków
+                if (me != null) {
+                    System.out.println("[DEBUG UI] Status gracza - może działać: " + me.canAct);
                 }
 
                 updateCommunityCards(controller.getCommunityCards());
                 updatePlayerCards(controller.getMyCards());
-                updatePlayersList(controller.getPlayers());
                 updateRaiseSlider();
 
-                // Przyciski aktywne tylko jeśli to tura gracza
-                boolean myTurn = controller.isMyTurn();
-                foldButton.setDisable(!myTurn);
-                checkButton.setDisable(!myTurn || !controller.getAvailableActions().contains("CHECK"));
-                callButton.setDisable(!myTurn || !controller.getAvailableActions().contains("CALL"));
-                raiseButton.setDisable(!myTurn || !controller.getAvailableActions().contains("RAISE"));
-                allInButton.setDisable(!myTurn || !controller.getAvailableActions().contains("ALL_IN"));
-                actionButtons.setDisable(!myTurn);
+                System.out.println("[DEBUG UI] Zakończono aktualizację UI");
+
             } catch (Exception e) {
+                System.err.println("[ERROR UI] Błąd podczas aktualizacji UI: " + e.getMessage());
+                e.printStackTrace();
                 showMessage("Błąd aktualizacji stanu: " + e.getMessage());
             }
         });

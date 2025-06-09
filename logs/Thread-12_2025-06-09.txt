@@ -1,0 +1,2 @@
+[12:58:17] Thread-12: [DEBUG] Nawiązano połączenie
+[12:58:17] Thread-12: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
