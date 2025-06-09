@@ -1,0 +1,2 @@
+[15:43:01] Thread-62: [DEBUG] Nawiązano połączenie
+[15:43:01] Thread-62: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}

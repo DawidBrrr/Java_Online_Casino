@@ -1,0 +1,10 @@
+[15:40:37] Thread-25: [DEBUG] Nawiązano połączenie
+[15:40:37] Thread-25: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5450.0}
+[23:44:05] Thread-25: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://localhost:12346/logout
+[23:44:05] Thread-25: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"Yxh41gqtgu81tm0sE76YIKzQNfagHVhfweA264YU+3/mCA=="}
+[23:44:05] Thread-25: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"Yxh41gqtgu81tm0sE76YIKzQNfagHVhfweA264YU+3/mCA=="}
+[23:44:05] Thread-25: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[23:44:05] Thread-25: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"rKfa09KxR/tRaDRp3rl6qoL+d8p0Sj7V8jZ8CvoNvnQ7T3jKeNKzsXGcZxs9zJRhDRG3gkgv1eV/OzaWFES4AVqROuJaOPVNqo++ark="}
+[23:44:05] Thread-25: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[23:44:05] Thread-25: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[23:44:05] Thread-25: [DEBUG LOGOUT] Wynik wylogowania: true

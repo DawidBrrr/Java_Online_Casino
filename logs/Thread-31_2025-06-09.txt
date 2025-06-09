@@ -1,0 +1,3 @@
+[15:40:52] Thread-31: [DEBUG] Nawiązano połączenie
+[15:40:52] Thread-31: [DEBUG] Zaszyfrowano dane JSON{"data":"UIokxPaf0XSBNtBy0nHqSBnfV3mvpvr2CBn8DMeX1490kNUEFyOqJKBQPn4JwGtvlWZLPg=="}
+[15:40:52] Thread-31: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5450.0}

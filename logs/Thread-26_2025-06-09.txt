@@ -1,0 +1,6 @@
+[15:40:41] Thread-26: [DEBUG] Nawiązano połączenie
+[15:40:41] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5450.0}
+[16:12:32] Thread-26: [DEBUG] Nawiązano połączenie
+[16:12:32] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}
+[16:56:40] Thread-26: [DEBUG] Nawiązano połączenie
+[16:56:40] Thread-26: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5900.0}

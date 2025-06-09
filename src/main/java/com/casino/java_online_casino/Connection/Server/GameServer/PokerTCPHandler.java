@@ -2,6 +2,7 @@ package com.casino.java_online_casino.Connection.Server.GameServer;
 
 import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
 import com.casino.java_online_casino.Connection.Server.Rooms.Room;
+import com.casino.java_online_casino.Connection.Server.Rooms.RoomManager;
 import com.casino.java_online_casino.Connection.Session.SessionManager;
 import com.casino.java_online_casino.Connection.Tokens.KeyManager;
 import com.casino.java_online_casino.Connection.Utils.JsonFields;
@@ -19,21 +20,20 @@ import java.nio.charset.StandardCharsets;
 public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
 
     private final Socket clientSocket;
-    private final Room room;
+    private final String roomId;
     private final SessionManager.SessionToken sessionToken;
     private final KeyManager keyManager;
     private final Gson gson = new Gson();
     private GamerDAO gamerDAO = GamerDAO.getInstance();
     private PrintWriter writer;
     private String userId;
-    public PokerTCPHandler(Socket clientSocket, Room room, SessionManager.SessionToken sessionToken) {
+    public PokerTCPHandler(Socket clientSocket, String roomId, SessionManager.SessionToken sessionToken) {
         this.clientSocket = clientSocket;
-        this.room = room;
+        this.roomId =  roomId;
         this.sessionToken = sessionToken;
         this.keyManager = sessionToken.getKeyManager();
         this.userId = String.valueOf(sessionToken.getUserId());
-        // Rejestracja handlera jako listenera
-        room.setEventListener(this);
+        RoomManager.getInstance().findRoom(roomId).setEventListener(this);
     }
 
     @Override
@@ -50,12 +50,12 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
             System.err.println("[ERROR] Błąd w PokerTcpHandler: " + e.getMessage());
             LogManager.logToFile("[ERROR] Błąd w PokerTcpHandler: " + e.getMessage());
             if (userId != null) {
-                room.onPlayerLeave(userId);
+                RoomManager.getInstance().findRoom(roomId).onPlayerLeave(userId);
             }
             e.printStackTrace();
         } finally {
             if (userId != null) {
-                room.onPlayerLeave(userId);
+                RoomManager.getInstance().findRoom(roomId).onPlayerLeave(userId);
             }
             closeSocketQuietly();
         }
@@ -77,7 +77,7 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
 
             String command = commandRequest.command == null ? "" : commandRequest.command.trim().toLowerCase();
             if ("exit".equals(command) || "quit".equals(command)) {
-                room.onPlayerLeave(userId);
+                RoomManager.getInstance().findRoom(roomId).onPlayerLeave(userId);
                 break;
             }
 
@@ -85,7 +85,7 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
                 continue;
             }
         }
-        room.onPlayerLeave(userId);
+        RoomManager.getInstance().findRoom(roomId).onPlayerLeave(userId);
     }
 
     private String decryptRequest(String base64Request, PrintWriter writer) {
@@ -117,40 +117,40 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
         int initialBalance = cmd.initialBalance > 0 ? cmd.initialBalance : 1000;
 
         System.out.println("[NEW COMMAND] " + command + " [userId: " + userId + "]");
-        synchronized (room) {
+        synchronized (RoomManager.getInstance().findRoom(roomId)) {
             switch (command) {
                 case "join":
                     // Tworzymy gracza tylko jeśli nie istnieje
-                    Player player = room.getPlayer(userId);
+                    Player player =  RoomManager.getInstance().findRoom(roomId).getPlayer(userId);
                     if (player == null) {
                         System.out.println("DEBUG POKER HANDLER] Utworzono nowego gracza o id "+ userId);
                         player = new Player(userId);
                     }
-                    room.onPlayerJoin(userId);
+                    RoomManager.getInstance().findRoom(roomId).onPlayerJoin(userId);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "leave":
-                    room.onPlayerLeave(userId);
+                    RoomManager.getInstance().findRoom(roomId).onPlayerLeave(userId);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "fold":
-                    room.handlePlayerAction(userId, Player.playerAction.FOLD);
+                    RoomManager.getInstance().findRoom(roomId).handlePlayerAction(userId, Player.playerAction.FOLD);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "call":
-                    room.handlePlayerAction(userId, Player.playerAction.CALL);
+                    RoomManager.getInstance().findRoom(roomId).handlePlayerAction(userId, Player.playerAction.CALL);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "raise":
-                    room.handlePlayerAction(userId, Player.playerAction.RAISE);
+                    RoomManager.getInstance().findRoom(roomId).handlePlayerAction(userId, Player.playerAction.RAISE);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "check":
-                    room.handlePlayerAction(userId, Player.playerAction.CHECK);
+                    RoomManager.getInstance().findRoom(roomId).handlePlayerAction(userId, Player.playerAction.CHECK);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "allin":
-                    room.handlePlayerAction(userId, Player.playerAction.ALL_IN);
+                    RoomManager.getInstance().findRoom(roomId).handlePlayerAction(userId, Player.playerAction.ALL_IN);
                     sendPlayerDTO(writer, userId);
                     break;
                 case "get_state":
@@ -185,7 +185,7 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
 
     // Wysyła DTO z pełnymi danymi tylko dla klienta, reszta graczy tylko podstawowe info
     private void sendPlayerDTO(PrintWriter writer, String userId) {
-        PokerDTO dto = room.createPokerDTOByUserId(userId);
+        PokerDTO dto =  RoomManager.getInstance().findRoom(roomId).createPokerDTOByUserId(userId);
         JsonObject okMessage = ServerJsonMessage.ok("Stan gry");
         okMessage.addProperty(JsonFields.DATA, gson.toJson(dto));
         try {
@@ -199,7 +199,7 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
 
     // Wysyła DTO z pełnymi danymi wszystkich graczy (np. po SHOWDOWN)
     private void sendAdminDTO(PrintWriter writer) {
-        PokerDTO dto = room.createPokerDTOAll();
+        PokerDTO dto =  RoomManager.getInstance().findRoom(roomId).createPokerDTOAll();
         JsonObject okMessage = ServerJsonMessage.ok("Stan gry końcowy");
         okMessage.addProperty(JsonFields.DATA, gson.toJson(dto));
         try {

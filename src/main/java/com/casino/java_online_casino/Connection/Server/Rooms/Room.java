@@ -343,6 +343,7 @@ public class Room implements Game {
     public void setEventListener(RoomEventListener listener) {
         this.eventListener = listener;
     }
+
     public PokerDTO createPokerDTOByUserId(String userId) {
         PokerDTO dto = PokerDTO.fromRoomForPlayer(this, userId);
         dto.yourUserId = userId; // Ustawiamy jawnie pole yourUserId (jeśli nie robi tego już fromRoomForPlayer)

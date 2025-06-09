@@ -1,0 +1,6 @@
+[15:40:20] Thread-18: [DEBUG] Nawiązano połączenie
+[15:40:20] Thread-18: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5450.0}
+[16:11:31] Thread-18: [DEBUG] Nawiązano połączenie
+[16:11:31] Thread-18: [DEBUG] Zaszyfrowano dane JSON{"data":"rG29VdH6DecMf2nLGQcKTxr9RmA4s88sxxPRuvTq6amCUA/2c1Mse97Il3pa8bzHgg8usA=="}
+[16:11:31] Thread-18: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}
+[23:28:09] Thread-18: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Illegal base64 character 7b

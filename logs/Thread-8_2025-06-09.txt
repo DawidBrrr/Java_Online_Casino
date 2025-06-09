@@ -12,3 +12,5 @@
 [16:10:07] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}
 [16:54:22] Thread-8: [DEBUG] Nawiązano połączenie
 [16:54:22] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}
+[22:19:23] Thread-8: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"9631efd4-c1e7-4823-8048-1eaceea4d635","type":"room_created"}
+[22:19:23] Thread-8: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null

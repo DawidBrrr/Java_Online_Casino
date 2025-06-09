@@ -1,0 +1,6 @@
+[16:12:07] Thread-24: [DEBUG] Nawiązano połączenie
+[16:12:07] Thread-24: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":1900.0}
+[16:56:40] Thread-24: [DEBUG] Nawiązano połączenie
+[16:56:40] Thread-24: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5900.0}
+[23:28:47] Thread-24: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"8cd017f3-0996-433f-a4f1-a1d0f8eb8997","type":"room_created"}
+[23:28:47] Thread-24: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null

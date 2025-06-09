@@ -176,14 +176,15 @@ public class GameServer {
                     Player pokerPlayer = new Player(String.valueOf(userId));
 
                     // Szukaj pierwszego wolnego pokoju
-                    Optional<Room> freeRoom = pokerRoomManager.firstFreeRoom(RoomManager.DEFAULT_MAX_PLAYERS);
+                    Optional<String> freeRoom = pokerRoomManager.firstFreeRoomId(RoomManager.DEFAULT_MAX_PLAYERS);
                     Room room;
                     if (freeRoom.isPresent()) {
-                        room = freeRoom.get();
+                        room = pokerRoomManager.findRoom(freeRoom.get());
                         room.addPlayer(pokerPlayer);
                     } else {
-                        room = pokerRoomManager.createRoom(RoomManager.DEFAULT_MAX_PLAYERS);
+                        room = RoomManager.getInstance().findRoom(pokerRoomManager.createRoom(RoomManager.DEFAULT_MAX_PLAYERS));
                         room.addPlayer(pokerPlayer);
+                        RoomManager.getInstance().addRoom(room);
                     }
 
                     if (room == null) {
@@ -199,7 +200,7 @@ public class GameServer {
                     writer.println(encryptedResponse);
                     writer.flush();
 
-                    gameHandler = new PokerTCPHandler(clientSocket, room, currentSession);
+                    gameHandler = new PokerTCPHandler(clientSocket, room.getRoomId(), currentSession);
                     break;
 
                 // Dodaj kolejne gry tutaj

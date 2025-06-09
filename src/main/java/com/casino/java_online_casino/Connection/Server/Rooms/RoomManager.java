@@ -6,42 +6,48 @@ import java.util.*;
 import java.util.concurrent.locks.*;
 
 public class RoomManager {
-    public static final int DEFAULT_MAX_PLAYERS = 4 ;
+    public static final int DEFAULT_MAX_PLAYERS = 4;
     private static final RoomManager INSTANCE = new RoomManager();
     private final Map<String, Room> rooms = new HashMap<>();
     private final Lock lock = new ReentrantLock();
 
-    private RoomManager() {}
+    private RoomManager() {
+    }
 
     public static RoomManager getInstance() {
         return INSTANCE;
     }
 
-    public Room findOrCreateRoom(Player player, int maxPlayers) {
+    public Room findRoom(String roomName) {
+        return rooms.get(roomName);
+    }
+
+    public String findOrCreateRoom(Player player, int maxPlayers) {
         lock.lock();
         try {
             for (Room room : rooms.values()) {
                 if (room.isActive() && room.getPlayers().size() < maxPlayers) {
                     if (room.addPlayer(player)) {
-                        return room;
+                        return room.getRoomId();
                     }
                 }
             }
-            Room newRoom = createRoom(maxPlayers);
+            Room newRoom = rooms.get(createRoom(maxPlayers));
             newRoom.addPlayer(player);
-            return newRoom;
+            rooms.put(newRoom.getRoomId(), newRoom);
+            return newRoom.getRoomId();
         } finally {
             lock.unlock();
         }
     }
 
-    public Room createRoom(int maxPlayers) {
+    public String createRoom(int maxPlayers) {
         lock.lock();
         try {
             String roomId = UUID.randomUUID().toString();
             Room newRoom = new Room(roomId, maxPlayers);
             rooms.put(roomId, newRoom);
-            return newRoom;
+            return newRoom.getRoomId();
         } finally {
             lock.unlock();
         }
@@ -87,11 +93,13 @@ public class RoomManager {
         Collection<Room> allRooms = rooms.values();
         return allRooms.isEmpty() ? Optional.empty() : Optional.of(new ArrayList<>(allRooms));
     }
-    public Optional<Room> firstFreeRoom(int maxPlayers) {
+
+    public Optional<String> firstFreeRoomId(int maxPlayers) {
         lock.lock();
         try {
             return rooms.values().stream()
                     .filter(room -> room.isActive() && room.getPlayers().size() < maxPlayers)
+                    .map(Room::getRoomId)
                     .findFirst();
         } finally {
             lock.unlock();

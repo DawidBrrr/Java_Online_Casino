@@ -93,6 +93,24 @@ public class PokerView{
             LogManager.logToFile("[ERROR POKER_VIEW] Błąd inicjalizacji: " + e.getMessage());
         }
     }
+    public void startBackgroundUiRefresher() {
+        Thread refresherThread = new Thread(() -> {
+            try {
+                while (true) {
+                    Thread.sleep(15_000); // 10 sekund
+                    controller.updateState();
+                    Platform.runLater(this::updateUIFromState);
+                }
+            } catch (InterruptedException e) {
+                // Obsługa przerwania wątku (np. przy zamykaniu aplikacji)
+                System.out.println("Wątek odświeżania UI został przerwany.");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        refresherThread.setDaemon(true); // Wątek zakończy się wraz z aplikacją
+        refresherThread.start();
+    }
 
     private void setupUI() {
         if (raiseSlider != null) {

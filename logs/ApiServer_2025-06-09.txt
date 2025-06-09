@@ -11,3 +11,8 @@
 [16:09:23] ApiServer: API działa na localhost:localhost
 [16:39:33] ApiServer: API działa na localhost:localhost
 [17:30:01] ApiServer: API działa na localhost:localhost
+[17:48:17] ApiServer: Błąd startu servera
+[22:18:44] ApiServer: API działa na localhost:localhost
+[23:06:04] ApiServer: API działa na localhost:localhost
+[23:18:34] ApiServer: API działa na localhost:localhost
+[23:47:33] ApiServer: API działa na localhost:localhost

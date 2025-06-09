@@ -1,0 +1,20 @@
+[15:40:23] Thread-19: [DEBUG] Nawiązano połączenie
+[15:40:23] Thread-19: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5450.0}
+[16:11:42] Thread-19: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://localhost:12346/logout
+[16:11:42] Thread-19: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"P8Xa/HUhWxf91qsXaxVjk5QY4PvaPYrdKNzaT6IMNsLdgw=="}
+[16:11:42] Thread-19: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"P8Xa/HUhWxf91qsXaxVjk5QY4PvaPYrdKNzaT6IMNsLdgw=="}
+[16:11:42] Thread-19: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[16:11:42] Thread-19: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"U3qXBRkAWmHllPUvSdf/0ycf15xrujbui/t9txkcjqw9XeLD7LeP4isOsvYoZPKvgfc3mjyfno09QncYfCaztepjr2yJXk0bGEK76es="}
+[16:11:42] Thread-19: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[16:11:42] Thread-19: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[16:11:42] Thread-19: [DEBUG LOGOUT] Wynik wylogowania: true
+[16:56:16] Thread-19: [DEBUG] Nawiązano połączenie
+[16:56:16] Thread-19: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":1900.0}
+[23:28:32] Thread-19: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://localhost:12346/logout
+[23:28:32] Thread-19: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"CPHRwpsWGNVsyTlehHGFWPGpFF/1YEhFDMOOtBgnz6lPYg=="}
+[23:28:32] Thread-19: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"CPHRwpsWGNVsyTlehHGFWPGpFF/1YEhFDMOOtBgnz6lPYg=="}
+[23:28:32] Thread-19: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[23:28:32] Thread-19: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"j80ZIWmUA0YbjCu2Hzc/nKIinG7++3JHHxzprif9cei90fNkvEVga4n+v/L5/slN9vHADU8VJzNSSAusKfymFVJJL/H65K0PQF6ehDM="}
+[23:28:32] Thread-19: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[23:28:32] Thread-19: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[23:28:32] Thread-19: [DEBUG LOGOUT] Wynik wylogowania: true

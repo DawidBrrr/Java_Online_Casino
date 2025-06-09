@@ -1,0 +1,2 @@
+[16:11:53] Thread-20: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://localhost:12346/logout
+[16:11:53] Thread-20: [DEBUG LOGOUT] Błąd podczas wylogowywania: Cannot invoke "com.casino.java_online_casino.Connection.Tokens.KeyManager.encryptAes(String)" because "com.casino.java_online_casino.Connection.Client.LogoutService.keyManager" is null

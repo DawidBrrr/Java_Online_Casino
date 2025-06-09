@@ -1,0 +1,8 @@
+[15:40:15] Thread-16: [DEBUG] Nawiązano połączenie
+[15:40:15] Thread-16: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5500.0}
+[16:11:30] Thread-16: [DEBUG] Nawiązano połączenie
+[16:11:30] Thread-16: [DEBUG] Zaszyfrowano dane JSON{"data":"GInRKW3JTKNxtgf588GET4D1fqPNVLJ6MCTwCski8UlE2dnhNcy4dmwJTQKHr8xg6opL"}
+[16:11:30] Thread-16: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5900.0}
+[16:55:16] Thread-16: [DEBUG] Nawiązano połączenie
+[16:55:16] Thread-16: [DEBUG] Zaszyfrowano dane JSON{"data":"L0BQVB/jF468RK4DS0zT+TtsIa5peTw4Dcm11/rnZguw5W3hehZnBTCUK0SvnBJFQSSR+w=="}
+[16:55:16] Thread-16: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5900.0}

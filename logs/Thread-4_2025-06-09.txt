@@ -26,3 +26,11 @@
 [16:54:03] Thread-4: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":1900.0}
 [17:30:20] Thread-4: [DEBUG] Nawiązano połączenie
 [17:30:20] Thread-4: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":1900.0}
+[22:19:10] Thread-4: [DEBUG] Nawiązano połączenie
+[22:19:10] Thread-4: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":3850.0}
+[23:06:24] Thread-4: [DEBUG] Nawiązano połączenie
+[23:06:24] Thread-4: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":3850.0}
+[23:18:55] Thread-4: [DEBUG] Nawiązano połączenie
+[23:18:55] Thread-4: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":3850.0}
+[23:47:57] Thread-4: [DEBUG] Nawiązano połączenie
+[23:47:57] Thread-4: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":5350.0}

@@ -1,0 +1,12 @@
+[15:40:29] Thread-22: [DEBUG] Nawiązano połączenie
+[15:40:29] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5450.0}
+[16:12:07] Thread-22: [DEBUG] Nawiązano połączenie
+[16:12:07] Thread-22: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":1900.0}
+[16:56:26] Thread-22: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://localhost:12346/logout
+[16:56:26] Thread-22: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"W/Lt8qX9EaS8FCJyDg2kFWoWF2AymTSc1e9luRIzrYnNlQ=="}
+[16:56:26] Thread-22: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"W/Lt8qX9EaS8FCJyDg2kFWoWF2AymTSc1e9luRIzrYnNlQ=="}
+[16:56:26] Thread-22: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[16:56:26] Thread-22: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"FTeLWHcHZpO/OYgmrhFAPEJ2kUae53P+R9cCzsLZAfViuLdKKtYunL07E6sMlNZ/Ry/YX1rWlQN8O+4lLa4SGYQbUJFvwIkSK4RvMK8="}
+[16:56:26] Thread-22: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[16:56:26] Thread-22: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[16:56:26] Thread-22: [DEBUG LOGOUT] Wynik wylogowania: true

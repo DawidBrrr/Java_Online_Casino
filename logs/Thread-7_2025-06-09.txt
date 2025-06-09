@@ -1,0 +1,8 @@
+[17:30:22] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"f09b505b-be42-401e-9ea5-7c41c2d6587e","type":"room_created"}
+[17:30:22] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null
+[22:19:11] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"ced0110e-6e0d-4482-919b-d9b338978962","type":"room_created"}
+[22:19:11] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null
+[23:18:57] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"fca0750c-4a15-4f80-b609-8f1674e2b95c","type":"room_created"}
+[23:18:57] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null
+[23:47:58] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"ebe8a296-4fda-4399-ab36-e1e4b7be9fe5","type":"room_created"}
+[23:47:58] Thread-7: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null

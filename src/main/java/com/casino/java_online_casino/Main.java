@@ -22,7 +22,7 @@ public class Main extends Application {
         // Tworzymy pierwsze okno
         createClientWindow("Klient 1");
 
-        createClientWindow("Klient 2");
+//        createClientWindow("Klient 2");
         // Tworzymy drugie okno
         // Możesz dodać kolejne okna...
     }

@@ -1,0 +1,13 @@
+[15:40:15] Thread-17: [DEBUG] Nawiązano połączenie
+[15:40:15] Thread-17: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5500.0}
+[16:56:07] Thread-17: [DEBUG LOGOUT] Rozpoczynam wylogowanie pod URL: http://localhost:12346/logout
+[16:56:07] Thread-17: [DEBUG LOGOUT] Wygenerowano zaszyfrowany JSON logout: {"data":"QEZEZ51bt2QbsIsKtiKPKGwNtX0ln0A1dtOBU1EXpka3FA=="}
+[16:56:07] Thread-17: [DEBUG LOGOUT] Wysłano żądanie logout: {"data":"QEZEZ51bt2QbsIsKtiKPKGwNtX0ln0A1dtOBU1EXpka3FA=="}
+[16:56:07] Thread-17: [DEBUG LOGOUT] Kod odpowiedzi serwera: 200
+[16:56:07] Thread-17: [DEBUG LOGOUT] Otrzymano odpowiedź JSON: {"data":"Tivhb06VHoSLrvRQ75cpMhqJuXO2TXhaC3TP9LNA5bDvdIZ9pLfSMnDLlzNCfKHzmpi8UFwU9azcNxAVONJH5My3uelja5a4wEGQbIs="}
+[16:56:07] Thread-17: [DEBUG LOGOUT] Odszyfrowana odpowiedź serwera: {"status":"ok","code":200,"message":"Wylogowano"}
+[16:56:07] Thread-17: [DEBUG LOGOUT] Wylogowanie zakończone sukcesem.
+[16:56:07] Thread-17: [DEBUG LOGOUT] Wynik wylogowania: true
+[23:28:08] Thread-17: [DEBUG] Nawiązano połączenie
+[23:28:08] Thread-17: [DEBUG] Zaszyfrowano dane JSON{"data":"gatmvd9d1ljsB3hr5Q3A1yfjuFMToJ1KlcQZopRPgqXGB15pW2NrQgGCcmtrAlBb/Yi0"}
+[23:28:08] Thread-17: [DEBUG] odszyfrowana wiadomośc {"name":"Dominik","lastName":"Koralik","nickName":"Kowal","email":"java@j.com","credits":5350.0}
