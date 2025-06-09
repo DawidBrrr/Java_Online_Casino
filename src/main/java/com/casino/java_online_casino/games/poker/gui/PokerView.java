@@ -82,6 +82,9 @@ public class PokerView{
             tcpClient = new PokerTcpClient();
             controller = new RemotePokerController(tcpClient);
 
+            tcpClient.setGameStateListener(dto -> {
+                Platform.runLater(() -> updateUIFromState());
+            });
             setupUI();
             updateUIFromState();
             showMessage("Dołączono do gry. Oczekiwanie na innych graczy...");
@@ -321,7 +324,7 @@ public class PokerView{
             playerBox.setStyle("-fx-background-color: #f0f8f0; -fx-border-color: #c8e6c9; -fx-border-radius: 5px; -fx-background-radius: 5px;");
         }
 
-        if (controller != null && controller.getActivePlayerId().equals(player.id)) {
+        if (controller != null && controller.getActivePlayerId() != null &&controller.getActivePlayerId().equals(player.id)) {
             playerBox.setStyle(playerBox.getStyle() + "; -fx-border-width: 3px; -fx-border-color: #2196f3;");
         }
 

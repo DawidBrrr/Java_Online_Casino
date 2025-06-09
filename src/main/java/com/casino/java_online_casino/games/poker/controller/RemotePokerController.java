@@ -5,7 +5,6 @@ import com.casino.java_online_casino.Connection.Utils.LogManager;
 import com.casino.java_online_casino.games.poker.model.Card;
 import com.casino.java_online_casino.games.poker.model.PokerGame;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ public class RemotePokerController {
 
     private final PokerTcpClient tcpClient;
     private PokerDTO lastState;
-
 
     public RemotePokerController(PokerTcpClient tcpClient) {
         this.tcpClient = tcpClient;
@@ -30,17 +28,14 @@ public class RemotePokerController {
         }
     }
 
-    // Rozpoczyna nową grę (dołączenie do stołu)
     public void join() throws Exception {
         lastState = tcpClient.join();
     }
 
-    // Opuszcza stół
     public void leave() throws Exception {
         lastState = tcpClient.leave();
     }
 
-    // Akcje gracza
     public void fold() throws Exception {
         lastState = tcpClient.fold();
     }
@@ -61,7 +56,6 @@ public class RemotePokerController {
         lastState = tcpClient.allIn();
     }
 
-    // Pobierz najnowszy stan gry z serwera (np. do odświeżenia GUI)
     public void updateState() throws Exception {
         System.out.println("[DEBUG CONTROLLER] Aktualizacja stanu...");
         PokerDTO newState = tcpClient.getState();
@@ -75,12 +69,10 @@ public class RemotePokerController {
         lastState = newState;
     }
 
-    // Pobierz pełny stan po zakończeniu partii (showdown)
     public void updateFinalState() throws Exception {
         lastState = tcpClient.getFinalState();
     }
 
-    // Reconnect (np. po utracie połączenia)
     public void reconnect() throws Exception {
         lastState = tcpClient.reconnect();
     }
@@ -110,24 +102,10 @@ public class RemotePokerController {
     }
 
     public Map<String, PokerDTO.PokerPlayerDTO> getPlayers() {
-        System.out.println("[DEBUG CONTROLLER] Pobieranie graczy...");
-        if (lastState == null) {
-            System.out.println("[DEBUG CONTROLLER] lastState jest null!");
-            return Collections.emptyMap();
-        }
-        if (lastState.players == null) {
-            System.out.println("[DEBUG CONTROLLER] lastState.players jest null!");
-            return Collections.emptyMap();
-        }
-        System.out.println("[DEBUG CONTROLLER] Znaleziono graczy: " + lastState.players.size());
-        lastState.players.forEach((id, player) -> {
-            System.out.println("[DEBUG CONTROLLER] Gracz: " + id +
-                    " Nazwa: " + player.name +
-                    " Status: " + player.status +
-                    " CanAct: " + player.canAct);
-        });
+        if (lastState == null || lastState.players == null) return Collections.emptyMap();
         return lastState.players;
     }
+
 
     public String getActivePlayerId() {
         return lastState != null ? lastState.activePlayerId : "";
@@ -174,28 +152,15 @@ public class RemotePokerController {
         return lastState != null ? lastState.bigBlindId : "";
     }
 
+    // --- NOWA LOGIKA: identyfikacja własnego gracza po yourUserId ---
 
     public PokerDTO.PokerPlayerDTO getMyPlayer() {
-        System.out.println("[DEBUG CONTROLLER] Szukam mojego gracza...");
-        if (lastState == null || lastState.players == null) {
-            System.out.println("[DEBUG CONTROLLER] Brak stanu lub graczy!");
-            return null;
+        if (lastState == null || lastState.players == null || lastState.yourUserId == null) return null;
+        PokerDTO.PokerPlayerDTO me = lastState.players.get(lastState.yourUserId);
+        if (me == null) {
+            System.out.println("[DEBUG CONTROLLER] Nie znaleziono gracza o id=" + lastState.yourUserId);
         }
-
-        for (PokerDTO.PokerPlayerDTO player : lastState.players.values()) {
-            System.out.println("[DEBUG CONTROLLER] Sprawdzam gracza: " + player.name);
-            System.out.println("[DEBUG CONTROLLER] - Hand: " + (player.hand != null ? player.hand.size() : "null"));
-            System.out.println("[DEBUG CONTROLLER] - CanAct: " + player.canAct);
-
-            if (player.hand != null &&
-                    !player.hand.isEmpty() &&
-                    (player.canAct || player.hand.size() == 2)) {
-                System.out.println("[DEBUG CONTROLLER] Znaleziono mojego gracza: " + player.name);
-                return player;
-            }
-        }
-        System.out.println("[DEBUG CONTROLLER] Nie znaleziono mojego gracza!");
-        return null;
+        return me;
     }
 
     public float getMyBalance() {

@@ -1,2 +1,13 @@
 [12:58:17] Thread-12: [DEBUG] Nawiązano połączenie
 [12:58:17] Thread-12: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[15:40:13] Thread-12: [DEBUG] Nawiązano połączenie
+[15:40:13] Thread-12: [DEBUG] Zaszyfrowano dane JSON{"data":"3Q3zxzn6Oe11ssghEzDMdy4CxgU+F5UCw+D+niZzzQWiaPVXkqX6B92bd1CTwphjGrF0"}
+[15:40:13] Thread-12: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":6000.0}
+[16:11:23] Thread-12: [DEBUG] Nawiązano połączenie
+[16:11:23] Thread-12: [DEBUG] Zaszyfrowano dane JSON{"data":"ihJM/ZMu3nhmXR6O5tpnMwO4xBFfpqKgm8zb8Yph4A4VR49Gdr5ImlNj3zIysbf3/1MZ"}
+[16:11:23] Thread-12: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5900.0}
+[16:55:06] Thread-12: [DEBUG] Nawiązano połączenie
+[16:55:06] Thread-12: [DEBUG] Zaszyfrowano dane JSON{"data":"YLzswZT3ofi7gaScEHYmXEPNuV4uEwZUmC/NhHIqJcUsfyt6I7E9a5YEas1U7ZYFsY2F"}
+[16:55:06] Thread-12: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5900.0}
+[17:30:49] Thread-12: [DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: {"roomId":"f09b505b-be42-401e-9ea5-7c41c2d6587e","type":"room_joined"}
+[17:30:49] Thread-12: [DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: Cannot invoke "com.google.gson.JsonElement.getAsString()" because the return value of "com.google.gson.JsonObject.get(String)" is null

@@ -123,6 +123,7 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
                     // Tworzymy gracza tylko jeśli nie istnieje
                     Player player = room.getPlayer(userId);
                     if (player == null) {
+                        System.out.println("DEBUG POKER HANDLER] Utworzono nowego gracza o id "+ userId);
                         player = new Player(userId);
                     }
                     room.onPlayerJoin(userId);
@@ -168,7 +169,6 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
     }
     @Override
     public void onGameStateChanged(String roomId) {
-        // Wysyłamy DTO do klienta po każdej zmianie stanu gry (np. co 30s)
         if (writer != null) {
             System.out.println("[DEBUG HANDLER] [ROOM " + roomId + "] Automatyczny broadcast DTO do klienta " + userId);
             sendPlayerDTO(writer, userId);
@@ -177,7 +177,6 @@ public class PokerTCPHandler implements Runnable ,Room.RoomEventListener{
 
     @Override
     public void onPlayerTurn(String playerId, String roomId) {
-        // Możesz dodać logikę, np. wysłać specjalny komunikat tylko do aktywnego gracza
         if (writer != null && userId.equals(playerId)) {
             System.out.println("[DEBUG HANDLER] [ROOM " + roomId + "] Twoja tura! (userId=" + userId + ")");
             sendPlayerDTO(writer, userId);

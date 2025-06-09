@@ -2,6 +2,7 @@ package com.casino.java_online_casino.Connection.Server.Rooms;
 
 import com.casino.java_online_casino.Connection.Games.Game;
 import com.casino.java_online_casino.Connection.Server.DTO.PokerDTO;
+import com.casino.java_online_casino.Database.GamerDAO;
 import com.casino.java_online_casino.games.poker.model.PokerGame;
 import com.casino.java_online_casino.games.poker.model.Player;
 
@@ -12,9 +13,7 @@ import java.util.concurrent.locks.*;
 public class Room implements Game {
     private final String roomId;
     private final int maxPlayers;
-    private final Map<String, Player> players = new ConcurrentHashMap<>();
-    private final List<String> playerOrder = new CopyOnWriteArrayList<>();
-    private int currentPlayerIndex = 0;
+    private final LinkedHashMap<String, Player> players = new LinkedHashMap<>();
     private final PokerGame pokerGame;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final ScheduledExecutorService periodicNotifier = Executors.newSingleThreadScheduledExecutor();
@@ -23,8 +22,10 @@ public class Room implements Game {
     private volatile boolean gameInProgress = false;
     private final Map<String, CompletableFuture<Player.playerAction>> actionFutures = new ConcurrentHashMap<>();
     private RoomEventListener eventListener;
-    private final Map<String, String> playerSessions = new ConcurrentHashMap<>();
     private volatile boolean notifierRunning = false;
+    private Iterator<String> turnIterator;
+    private String currentPlayerId;
+    private String dealerId;
 
     public Room(String roomId, int maxPlayers) {
         this.roomId = roomId;
@@ -36,25 +37,17 @@ public class Room implements Game {
     // --- Game interface ---
     @Override
     public void onPlayerJoin(String userId) {
-        onPlayerJoin(userId, null, null, 0);
-    }
-
-    public void onPlayerJoin(String userId, String sessionId, String name, int initialBalance) {
         lock.lock();
         try {
-            Player player = players.get(userId);
-
-            if (player != null) {
-                playerSessions.put(userId, sessionId);
-                player.setName(name != null ? name : player.getName());
-                System.out.println("[DEBUG ROOM " + roomId + "] Gracz RECONNECT id=" + userId + ", sesja=" + sessionId);
+            if (players.containsKey(userId)) {
+                System.out.println("[DEBUG ROOM " + roomId + "] Gracz RECONNECT id=" + userId);
+                // Można pobrać dane z GamerDAO i zaktualizować Player
             } else if (canJoin(userId)) {
-                player = new Player(userId);
+                // Pobierz dane gracza z GamerDAO jeśli potrzebujesz
+                Player player = new Player(userId);
                 players.put(userId, player);
-                playerOrder.add(userId);
-                playerSessions.put(userId, sessionId);
                 pokerGame.addPlayer(player);
-                System.out.println("[DEBUG ROOM " + roomId + "] Gracz DOŁĄCZYŁ id=" + userId + ", sesja=" + sessionId + ", obecnych=" + players.size());
+                System.out.println("[DEBUG ROOM " + roomId + "] Gracz DOŁĄCZYŁ id=" + userId + ", obecnych=" + players.size());
             } else {
                 System.out.println("[DEBUG ROOM " + roomId + "] NIE MOŻNA DOŁĄCZYĆ gracza id=" + userId + " (pełny pokój lub gra w toku)");
                 return;
@@ -62,12 +55,7 @@ public class Room implements Game {
 
             if (players.size() >= 2 && !gameInProgress) {
                 System.out.println("[DEBUG ROOM " + roomId + "] Wystarczająca liczba graczy, START gry.");
-                try {
-                    pokerGame.startNewHand();
-                } catch (Exception e) {
-                    System.out.println("[DEBUG ROOM " + roomId + "] Błąd przy uruchamianiu gry: " + e.getMessage());
-                    gameInProgress = false;
-                }
+                startGame();
             }
         } finally {
             lock.unlock();
@@ -123,20 +111,11 @@ public class Room implements Game {
                 System.out.println("[DEBUG ROOM " + roomId + "] NIE dodano gracza " + player.getId() + " - już w pokoju.");
                 return false;
             }
-
-            // Dodaj gracza bez sessionId - nie będziemy używać mapy playerSessions
             players.put(player.getId(), player);
-            playerOrder.add(player.getId());
             pokerGame.addPlayer(player);
-
+            System.out.println("[DEBUG ROOM " + roomId + "] Dodano gracza " + player.getId() + ", obecnych=" + players.size());
             if (players.size() >= 2 && !gameInProgress) {
-                System.out.println("[DEBUG ROOM " + roomId + "] Wystarczająca liczba graczy, START gry.");
                 startGame();
-            }
-
-            System.out.println("[DEBUG ROOM " + roomId + "] Dodano gracza " + player.getId() + " przez addPlayer");
-            if (gameInProgress) {
-                broadcastGameState();
             }
             return true;
         } finally {
@@ -148,16 +127,15 @@ public class Room implements Game {
         lock.lock();
         try {
             players.remove(playerId);
-            playerOrder.remove(playerId);
             pokerGame.removePlayer(playerId);
-            playerSessions.remove(playerId);
             System.out.println("[DEBUG ROOM " + roomId + "] Usunięto gracza " + playerId + ", obecnych=" + players.size());
-            if (playerOrder.isEmpty()) {
+            if (players.isEmpty()) {
                 active = false;
                 gameInProgress = false;
                 System.out.println("[DEBUG ROOM " + roomId + "] Pokój pusty, dezaktywacja.");
-            } else if (currentPlayerIndex >= playerOrder.size()) {
-                currentPlayerIndex = 0;
+            }
+            if (Objects.equals(currentPlayerId, playerId)) {
+                nextTurn();
             }
         } finally {
             lock.unlock();
@@ -173,20 +151,11 @@ public class Room implements Game {
     }
 
     public String getCurrentPlayerId() {
-        lock.lock();
-        try {
-            if (playerOrder.isEmpty()) return null;
-            String id = playerOrder.get(currentPlayerIndex);
-            System.out.println("[DEBUG ROOM " + roomId + "] Aktywny gracz: " + id + " (index=" + currentPlayerIndex + ")");
-            return id;
-        } finally {
-            lock.unlock();
-        }
+        return currentPlayerId;
     }
 
     public Player getCurrentPlayer() {
-        String id = getCurrentPlayerId();
-        return id != null ? getPlayer(id) : null;
+        return currentPlayerId != null ? getPlayer(currentPlayerId) : null;
     }
 
     public boolean isPlayerTurn(String playerId) {
@@ -195,15 +164,25 @@ public class Room implements Game {
         return turn;
     }
 
-    public void advanceTurn() {
+    public void nextTurn() {
         lock.lock();
         try {
-            if (!playerOrder.isEmpty()) {
-                currentPlayerIndex = (currentPlayerIndex + 1) % playerOrder.size();
-                System.out.println("[DEBUG ROOM " + roomId + "] Przekazuję turę. Nowy aktywny: " + getCurrentPlayerId() + " (index=" + currentPlayerIndex + ")");
-                scheduleNextTurn();
-                notifyPlayerTurn();
+            if (players.isEmpty()) {
+                currentPlayerId = null;
+                return;
             }
+            if (turnIterator == null || !turnIterator.hasNext()) {
+                turnIterator = players.keySet().iterator();
+            }
+            if (turnIterator.hasNext()) {
+                currentPlayerId = turnIterator.next();
+            } else {
+                turnIterator = players.keySet().iterator();
+                currentPlayerId = turnIterator.hasNext() ? turnIterator.next() : null;
+            }
+            System.out.println("[DEBUG ROOM " + roomId + "] Nowy aktywny gracz: " + currentPlayerId);
+            scheduleNextTurn();
+            notifyPlayerTurn();
         } finally {
             lock.unlock();
         }
@@ -216,6 +195,9 @@ public class Room implements Game {
                 gameInProgress = true;
                 pokerGame.startNewHand();
                 System.out.println("[DEBUG ROOM " + roomId + "] Gra rozpoczęta!");
+                dealerId = players.keySet().iterator().next(); // pierwszy gracz jako dealer
+                currentPlayerId = dealerId;
+                turnIterator = players.keySet().iterator();
                 broadcastGameState();
                 scheduleNextTurn();
                 startPeriodicBroadcast();
@@ -256,16 +238,6 @@ public class Room implements Game {
             }, 30, 30, TimeUnit.SECONDS);
         }
     }
-    // Room.java
-
-    public PokerDTO createPokerDTOByUserId(String userId) {
-        return PokerDTO.fromRoomForPlayer(this, userId);
-    }
-
-    public PokerDTO createPokerDTOAll() {
-        return PokerDTO.fromRoomForAdmin(this);
-    }
-
 
     private void scheduleNextTurn() {
         Player current = getCurrentPlayer();
@@ -296,7 +268,7 @@ public class Room implements Game {
                     boolean success = processPlayerAction(current.getId(), action, 0);
                     broadcastGameState();
                     if (success) {
-                        advanceTurn();
+                        nextTurn();
                     }
                 }
             } finally {
@@ -342,7 +314,7 @@ public class Room implements Game {
             boolean result = pokerGame.processPlayerAction(playerId, action, amount);
             System.out.println("[DEBUG ROOM " + roomId + "] Wykonano akcję " + action + " dla gracza " + playerId + ", result=" + result);
             if (result) {
-                advanceTurn();
+                nextTurn();
             }
             return result;
         } finally {
@@ -371,6 +343,19 @@ public class Room implements Game {
     public void setEventListener(RoomEventListener listener) {
         this.eventListener = listener;
     }
+    public PokerDTO createPokerDTOByUserId(String userId) {
+        PokerDTO dto = PokerDTO.fromRoomForPlayer(this, userId);
+        dto.yourUserId = userId; // Ustawiamy jawnie pole yourUserId (jeśli nie robi tego już fromRoomForPlayer)
+        System.out.println("[DEBUG ROOM " + roomId + "] [DTO] Wygenerowano PokerDTO dla userId=" + userId);
+        return dto;
+    }
+
+    public PokerDTO createPokerDTOAll() {
+        PokerDTO dto = PokerDTO.fromRoomForAdmin(this);
+        dto.yourUserId = null; // lub ustaw na admina, jeśli chcesz
+        System.out.println("[DEBUG ROOM " + roomId + "] [DTO] Wygenerowano PokerDTO dla ADMIN/SHOWDOWN");
+        return dto;
+    }
 
     public void notifyPlayerTurn() {
         if (eventListener != null) {
@@ -394,11 +379,7 @@ public class Room implements Game {
         return roomId;
     }
 
-    public List<String> getPlayerOrder() {
-        return playerOrder;
-    }
-
-    public int getCurrentPlayerIndex() {
-        return currentPlayerIndex;
+    public String getDealerId() {
+        return dealerId;
     }
 }

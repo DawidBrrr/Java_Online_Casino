@@ -24,10 +24,18 @@ public class PokerTcpClient {
     private String playerId;
     private String playerName;
     private int initialBalance;
+    private Thread listenerThread;
+    private volatile boolean running = false;
 
     public PokerTcpClient() {
         this.token = Service.getToken();
         this.keyManager = Service.getKeyManager();
+    }
+
+    private GameStateListener gameStateListener;
+
+    public void setGameStateListener(GameStateListener listener) {
+        this.gameStateListener = listener;
     }
 
     public void connect() throws IOException {
@@ -35,6 +43,7 @@ public class PokerTcpClient {
         this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
 
+        startListenerThread();
         InitRequest initRequest = new InitRequest(token, "poker");
         String initJson = gson.toJson(initRequest);
         writer.println(initJson);
@@ -68,8 +77,12 @@ public class PokerTcpClient {
         String jsonResp = keyManager.decryptAes(encryptedResp);
         System.out.println("[DEBUG POKER CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
         LogManager.logToFile("[DEBUG POKER CLIENT] Odszyfrowana odpowiedź: " + jsonResp);
+        JsonObject allData = gson.fromJson(jsonResp, JsonObject.class);
+        String playerData = allData.get("data").getAsString();
+        System.out.println("[DEBUG POKER CLIENY - DATA]" + playerData);
 
-        return gson.fromJson(jsonResp, PokerDTO.class);
+
+        return gson.fromJson(playerData, PokerDTO.class);
     }
 
     public PokerDTO join() throws Exception {
@@ -123,6 +136,7 @@ public class PokerTcpClient {
     }
 
     public void close() {
+        running = false;
         try {
             if (writer != null) {
                 PokerCommand cmd = new PokerCommand("leave", playerId, playerName, initialBalance, 0);
@@ -134,6 +148,9 @@ public class PokerTcpClient {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
             }
+            if (listenerThread != null && listenerThread.isAlive()) {
+                listenerThread.interrupt();
+            }
             System.out.println("[DEBUG POKER CLIENT] Zamknięto połączenie.");
             LogManager.logToFile("[DEBUG POKER CLIENT] Zamknięto połączenie.");
         } catch (Exception e) {
@@ -141,6 +158,48 @@ public class PokerTcpClient {
             LogManager.logToFile("[DEBUG POKER CLIENT] Błąd przy zamykaniu połączenia: " + e.getMessage());
         }
     }
+
+    private void startListenerThread() {
+        running = true;
+        listenerThread = new Thread(() -> {
+            try {
+                while (running && socket != null && !socket.isClosed()) {
+                    String encryptedResp = reader.readLine();
+                    if (encryptedResp == null) {
+                        System.out.println("[DEBUG POKER CLIENT] Połączenie zamknięte przez serwer (listener).");
+                        break;
+                    }
+                    if (encryptedResp.strip().startsWith("{")) {
+                        JsonObject errorObj = JsonParser.parseString(encryptedResp).getAsJsonObject();
+                        if (errorObj.has("error")) {
+                            System.out.println("[DEBUG POKER CLIENT] Błąd z serwera: " + errorObj.get("error").getAsString());
+                            continue;
+                        }
+                    }
+                    String jsonResp = keyManager.decryptAes(encryptedResp);
+                    System.out.println("[DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: " + jsonResp);
+                    LogManager.logToFile("[DEBUG POKER CLIENT] [LISTENER] Odszyfrowana odpowiedź: " + jsonResp);
+
+                    JsonObject allData = gson.fromJson(jsonResp, JsonObject.class);
+                    String playerData = allData.get("data").getAsString();
+                    PokerDTO dto = gson.fromJson(playerData, PokerDTO.class);
+
+                    // Powiadom GUI przez listener
+                    if (gameStateListener != null && dto != null) {
+                        gameStateListener.onGameStateReceived(dto);
+                    }
+                }
+            } catch (Exception e) {
+                if (running) {
+                    System.out.println("[DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: " + e.getMessage());
+                    LogManager.logToFile("[DEBUG POKER CLIENT] [LISTENER] Błąd wątku nasłuchującego: " + e.getMessage());
+                }
+            }
+        });
+        listenerThread.setDaemon(true);
+        listenerThread.start();
+    }
+
 
     // --- Pomocnicze klasy do komunikacji ---
     private static class InitRequest {

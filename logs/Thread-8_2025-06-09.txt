@@ -6,3 +6,9 @@
 [12:58:10] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"admin","lastName":"admin","nickName":"admin","email":"a@gmail.com","credits":1600.0}
 [13:16:07] Thread-8: [DEBUG] Nawiązano połączenie
 [13:16:07] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"a2","lastName":"a2","nickName":"a2","email":"a2@gmail.com","credits":2000.0}
+[15:38:13] Thread-8: [DEBUG] Nawiązano połączenie
+[15:38:13] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5500.0}
+[16:10:07] Thread-8: [DEBUG] Nawiązano połączenie
+[16:10:07] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}
+[16:54:22] Thread-8: [DEBUG] Nawiązano połączenie
+[16:54:22] Thread-8: [DEBUG] odszyfrowana wiadomośc {"name":"Maciej","lastName":"Jankoś","nickName":"Jankos","email":"java@j.mj","credits":5400.0}

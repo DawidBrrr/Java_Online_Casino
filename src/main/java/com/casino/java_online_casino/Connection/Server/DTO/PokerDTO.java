@@ -28,6 +28,8 @@ public class PokerDTO {
     public String dealerId;
     public String smallBlindId;
     public String bigBlindId;
+    public String yourUserId;
+
 
     // DTO pojedynczej karty
     public static class CardDTO {
@@ -142,6 +144,7 @@ public class PokerDTO {
         dto.isGameOver = dto.gameState == PokerGame.GameState.GAME_OVER;
         dto.isStarted = dto.gameState != PokerGame.GameState.WAITING_FOR_PLAYERS;
         dto.isInProgress = room.isInProgress();
+        dto.yourUserId = playerId;
 
         Player winner = game.getWinner();
         dto.winnerId = winner != null ? winner.getId() : null;
